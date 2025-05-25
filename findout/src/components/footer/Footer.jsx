@@ -1,8 +1,12 @@
-import React from 'react'
+import React from 'react';
+import styles from "./footer.module.css";
 
 const Footer = () => {
   return (
-    <div>Footer</div>
+    <div>
+        <div className={styles.container}>©2025 FindOut. All rights reserved.</div>
+        <div></div>
+    </div>
   )
 }
 

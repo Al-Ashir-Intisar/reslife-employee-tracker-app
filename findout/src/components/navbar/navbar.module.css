@@ -1,0 +1,20 @@
+.container{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.links{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    align-items: center;
+}
+
+.logout{
+    padding: 5px;
+    border: none;
+    background-color:aqua;
+    cursor: pointer;
+    border-radius: 3px;
+}
