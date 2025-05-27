@@ -166,3 +166,31 @@ a.secondary {
     filter: invert();
   }
 }
+
+.homePageLogo{
+  width: 20vw;
+  height: 40vh;
+  justify-content: center;
+  position: relative;
+  opacity: 0.6;
+}
+
+.HomeTexts{
+  width: 80vw;
+  height: 25vh;
+  justify-content: center;
+  position: inherit;
+}
+
+.title{
+  font-size: 80;
+  background: linear-gradient(to right, orange, rgb(48, 47, 47));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.description{
+  font-size: 22;
+  background: linear-gradient(to right, rgb(131, 194, 223), rgb(100, 135, 248));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

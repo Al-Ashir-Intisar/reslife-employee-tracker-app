@@ -5,6 +5,8 @@
 }
 
 .links{
+    color: black;
+    font-size: 20;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -17,4 +19,9 @@
     background-color:aqua;
     cursor: pointer;
     border-radius: 3px;
+}
+
+.texts{
+    color: black;
+    font-size: 20;
 }

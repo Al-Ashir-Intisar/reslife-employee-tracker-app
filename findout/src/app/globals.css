@@ -33,8 +33,9 @@ a{
   min-height: 80vh;
   margin: 0 auto;
   padding: 10px;
+  gap: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
