@@ -9,7 +9,7 @@ export default function Contact() {
             <form className={styles.form}>
             <input type="text" placeholder="name" className={styles.input} />
             <input type="text" placeholder="email" className={styles.input} />
-            <textarea placeholder="message" className={styles.textarea} cols={30} rows={10}></textarea>
+            <textarea placeholder="message" className={styles.textarea} cols={40} rows={20}></textarea>
         </form>
         <button 
         className={styles.send}

@@ -167,14 +167,24 @@ a.secondary {
   }
 }
 
-.homePageLogo{
+.homePageLogo {
   width: 20vw;
   height: 40vh;
-  justify-content: center;
   position: relative;
-  opacity: 0.6;
   cursor: pointer;
+
+  /* Base opacity */
+  opacity: 1;
+
+  /* Mask gradient for opacity effect */
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  mask-size: cover;
 }
+
 
 .HomeTexts{
   width: 80vw;
@@ -197,3 +207,22 @@ a.secondary {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.image {
+  object-fit: contain;
+  border-radius: 50%;
+  animation: flip 3s ease-in-out 1 alternate;
+}
+
+@keyframes flip {
+  0% {
+    transform: translateX(0px) rotateY(0deg) scale(.5);
+  }
+  50% {
+    transform: translateX(100px) rotateY(360deg) scale(.75);
+  }
+  100% {
+    transform: translateX(0px) rotateY(0deg) scale(1);
+  }
+}
+

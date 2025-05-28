@@ -11,6 +11,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background-color: orange;
+    padding: 10px;
 }
 
 .contactDev{
@@ -18,4 +20,12 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
+}
+
+.input, .textarea{
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    border: none;
+    outline: none;
+    font-weight: bold;
 }
