@@ -21,7 +21,7 @@ export default function Home() {
           </p>
       </div>
       <div className={styles.homePageLogo}>
-        <Image src="/findoutLogo.png" fill={true} alt="FindOut app logo."/>
+        <Image src="/findoutLogo.png" width={300} height={300} layout="responsive" alt="FindOut app logo."/>
       </div>
     </div>
   );

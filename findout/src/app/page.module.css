@@ -173,6 +173,7 @@ a.secondary {
   justify-content: center;
   position: relative;
   opacity: 0.6;
+  cursor: pointer;
 }
 
 .HomeTexts{
@@ -184,12 +185,14 @@ a.secondary {
 
 .title{
   font-size: 80;
+  font-weight: 600;
   background: linear-gradient(to right, orange, rgb(48, 47, 47));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .description{
   font-size: 22;
+  font-weight: 500;
   background: linear-gradient(to right, rgb(131, 194, 223), rgb(100, 135, 248));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
