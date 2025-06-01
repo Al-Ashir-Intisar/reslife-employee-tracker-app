@@ -5,3 +5,36 @@
 .groupContent{
     background-color: aqua;
 }
+
+.groups{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.group{
+    font-size: 20;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.group:hover{
+    color: lightgreen;
+    cursor: pointer;
+}
+
+.title{
+    font-size: 40;
+    font-weight: bold;
+}
+
+.mainTitle{
+    font-size: 50;
+    font-weight: bold;
+    text-align: left;
+}
+
+.mainTitle:hover{
+    color: lightgreen;
+    cursor: pointer;
+}

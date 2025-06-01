@@ -4,7 +4,10 @@ import styles from "./page.module.css";
 
 const member = () => {
   return (
-    <div>Member</div>
+    <div className='pageContent'>
+      <h1 className={styles.title}>Member Details</h1>
+    
+    </div>
   )
 }
 

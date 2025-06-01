@@ -29,3 +29,8 @@
     outline: none;
     font-weight: bold;
 }
+
+.send:hover{
+    color: rgb(9, 35, 9);
+    background-color: rgb(21, 253, 176);
+}
