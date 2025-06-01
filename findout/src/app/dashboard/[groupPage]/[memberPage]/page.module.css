@@ -3,11 +3,16 @@
     font-weight: bold;
 }
 
-.mainTitle{
-    font-size: 40;
-    font-weight: bold;
-    text-align: left;
+.mainTitle {
+  font-size: 45px;
+  font-weight: bold;
+  text-align: left;
+  padding: 0px;
+  background: linear-gradient(to right, black 0%, orange 50%, black 100%);
+  color: white;
+  padding: 0.5rem 1rem;
 }
+
 
 .mainTitle:hover{
     color: lightgreen;

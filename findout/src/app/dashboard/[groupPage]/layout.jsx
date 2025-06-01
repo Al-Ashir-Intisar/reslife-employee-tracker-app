@@ -9,7 +9,7 @@ const groupLayout = ({ children }) => {
     const groupId = params.groupPage;
 
     return (
-        <div>
+        <div className="layoutContainer">
             <Link href={`/dashboard/${groupId}`}>
                 <span className={styles.mainTitle}>
                     Your {groupId}

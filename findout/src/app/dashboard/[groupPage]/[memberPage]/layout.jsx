@@ -10,7 +10,7 @@ const memberLayout = ({ children }) => {
     const memberId = params.memberPage;
 
     return (
-        <div>
+        <div className="layoutContainer">
             <Link href={`/dashboard/${groupId}/${memberId}`}>
                 <span className={styles.mainTitle}>
                     Your {groupId} {memberId}

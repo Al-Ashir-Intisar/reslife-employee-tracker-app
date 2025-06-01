@@ -25,7 +25,7 @@ const group = () => {
             className={styles.member}
           >
             <span className={styles.title}>
-              {groupId} - {member.name}
+              {member.name}
             </span>
           </Link>
         ))}

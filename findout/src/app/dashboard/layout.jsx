@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const DashboardLayout = ({ children }) => {
     return (
-        <div>
+        <div className="layoutContainer">
              <Link href="/dashboard">
                     <span className={styles.mainTitle}>Your DashBoard</span>
             </Link>
