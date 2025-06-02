@@ -14,15 +14,15 @@ const dashboard = () => {
 
     return (
         <div className="pageContent">
-        <div className={styles.groups}>
-            {groups.map(group => (
-                <Link key={group.id} href={`/dashboard/${group.id}`} className={styles.group}>
-                    <span className={styles.title}>{group.name}</span>
-                </Link>
-            ))}
-        </div>
+            <div className={styles.groups}>
+                {groups.map(group => (
+                    <Link key={group.id} href={`/dashboard/${group.id}`} className={styles.group}>
+                        <span className={styles.title}>{group.name}</span>
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 }
 
-export default dashboard
+export default dashboard;

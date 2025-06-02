@@ -11,6 +11,7 @@
   background: linear-gradient(to right, black 0%, orange 50%, black 100%);
   color: white;
   padding: 0.5rem 1rem;
+  display: inline-block;
 }
 
 
