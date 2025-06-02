@@ -1,15 +1,24 @@
 .container{
-    height: 100%;
-    display: flex;
-    justify-content: center;
+  background-color: orange;
+  width: 100vw;
+  min-height: 8vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 15px;
+  align-items: center;
+  border-radius: 2%;
 }
 
 .links{
     color: black;
     font-size: 20;
     display: flex;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .link{
