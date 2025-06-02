@@ -4,10 +4,10 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import useSWR from "swr";
 
-const SUPABASE_URL = "https://gbchlhkkknasrcfqymiz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdiY2hsaGtra25hc3JjZnF5bWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NDQ5NDEsImV4cCI6MjA2NDQyMDk0MX0.SW2c__7JGQenWuFh4m8_3WdFVze7gnNgbjMIkDCTsdw";
-// Replace with actual Supabase Auth or hardcoded user id
-const userId = "7b1b1d5c-e79d-4f09-960f-df89fbfa07d4"; // e.g., 'd45ef2b2-1234-456a-9988-b9c4eaad7391'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Ensure userId is defined in your environment variables
+const userId = process.env.NEXT_PUBLIC_USER_ID;
 
 
 const fetcher = (url) =>
@@ -19,29 +19,34 @@ const fetcher = (url) =>
   }).then((res) => res.json());
 
 const Dashboard = () => {
-  const { data, error, isLoading } =  useSWR(
+  const { data, error, isLoading } = useSWR(
     `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
     fetcher
   );
-  console.log("Data:", data);
-  console.log("Error:", error);
-  console.log("Is Loading:", isLoading);
-//   if (error) return <div>Error loading groups</div>;
-//   if (isLoading || !data) return <div>Loading...</div>;
+
+  if (error) return <div className="pageContent">Error loading groups</div>;
+  if (isLoading) return <div className="pageContent">Loading...</div>;
+
+  // If data is not an array, show fallback
+  if (!Array.isArray(data)) return <div className="pageContent">No Groups Found!</div>;
 
   return (
     <div className="pageContent">
       <div className={styles.groups}>
-        {data && data.map((group) => (
-          <Link
-            key={group.group_id}
-            href={`/dashboard/${group.group_id}`}
-            className={styles.group}
-          >
-            <span className={styles.title}>{group.group_name}</span>
-            <span className={styles.description}>{group.group_desc}</span>
-          </Link>
-        ))}
+        {data.length === 0 ? (
+          <div>No groups assigned to you.</div>
+        ) : (
+          data.map((group) => (
+            <Link
+              key={group.group_id}
+              href={`/dashboard/${group.group_id}`}
+              className={styles.group}
+            >
+              <span className={styles.title}>{group.group_name}</span>
+              <span className={styles.description}>{group.group_desc}</span>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );

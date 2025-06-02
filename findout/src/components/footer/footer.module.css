@@ -1,8 +1,15 @@
 .container{
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+  background-color: orange;
+  width: 100vw;
+  min-height: 8vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 auto;
+  padding: 15px;
+  border-radius: 2%;
 }
 
 .logo{
