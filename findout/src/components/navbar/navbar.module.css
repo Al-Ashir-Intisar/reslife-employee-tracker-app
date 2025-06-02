@@ -10,15 +10,31 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    align-items: center;
+}
+
+.link{
+    color: black;
+    font-size: 28;
+    font-weight: bold;
+}
+
+.link:hover{
+    color: white;
 }
 
 .logout{
     padding: 5px;
     border: none;
-    background-color:aqua;
+    background-color: rgb(65, 255, 151);
     cursor: pointer;
     border-radius: 3px;
+    font-size: 20;
+    font-weight: bold;
+}
+
+.logout:hover{
+    background-color: rgb(236, 0, 0);
+    color: white;
 }
 
 .texts{

@@ -219,7 +219,7 @@ a.secondary {
     transform: translateX(0px) rotateY(0deg) scale(.5);
   }
   50% {
-    transform: translateX(100px) rotateY(360deg) scale(.75);
+    transform: translateX(20%) rotateY(360deg) scale(.75);
   }
   100% {
     transform: translateX(0px) rotateY(0deg) scale(1);
