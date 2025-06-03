@@ -1,7 +1,24 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import supabase from "@/utils/supabaseClient";
 
 export default function Home() {
+
+  const setNewView = async () => {
+    const {data, error} = await supabase
+    .from("views")
+    .insert({
+      name: 'random name',
+    })
+
+    if (data) console.log(data);
+    if (error) console.error("Error inserting view:", error);
+
+  };
+
+  setNewView();
+
+
   return (
     <div className="pageContent">
       <div className={styles.homeTexts}>
