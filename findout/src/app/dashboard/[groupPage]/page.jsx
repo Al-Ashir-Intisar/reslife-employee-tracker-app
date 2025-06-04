@@ -1,8 +1,8 @@
-"use client"
-import React from 'react';
+"use client";
+import React from "react";
 import styles from "./page.module.css";
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const group = () => {
   const params = useParams();
@@ -10,9 +10,9 @@ const group = () => {
 
   // Simulated list of member data (could be fetched from DB or API)
   const members = [
-    { id: 'member1', name: 'Alice' },
-    { id: 'member2', name: 'Bob' },
-    { id: 'member3', name: 'Charlie' },
+    { id: "member1", name: "Alice" },
+    { id: "member2", name: "Bob" },
+    { id: "member3", name: "Charlie" },
   ];
 
   return (
@@ -24,9 +24,7 @@ const group = () => {
             href={`/dashboard/${groupId}/${member.id}`}
             className={styles.member}
           >
-            <span className={styles.title}>
-              {member.name}
-            </span>
+            <span className={styles.title}>{member.name}</span>
           </Link>
         ))}
       </div>

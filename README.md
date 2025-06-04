@@ -5,6 +5,7 @@ This repository contains the codebase for a web application designed to track em
 ## Purpose
 
 The app enables teams to quickly reference and manage data about employees such as:
+
 - Certifications
 - Skills and expertise
 - Project history
@@ -43,3 +44,4 @@ npm install
 
 # Start development server
 npm run dev
+```

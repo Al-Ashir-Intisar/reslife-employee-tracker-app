@@ -1,6 +1,6 @@
-.title{
-    font-size: 40;
-    font-weight: bold;
+.title {
+  font-size: 40;
+  font-weight: bold;
 }
 
 .mainTitle {
@@ -14,24 +14,24 @@
   display: inline-block;
 }
 
-.mainTitle:hover{
-    color: lightgreen;
-    cursor: pointer;
+.mainTitle:hover {
+  color: lightgreen;
+  cursor: pointer;
 }
 
-.members{
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.member{
-    font-size: 20;
-    font-weight: bold;
-    padding: 10px;
+.member {
+  font-size: 20;
+  font-weight: bold;
+  padding: 10px;
 }
 
-.member:hover{
-    color: lightgreen;
-    cursor: pointer;
+.member:hover {
+  color: lightgreen;
+  cursor: pointer;
 }

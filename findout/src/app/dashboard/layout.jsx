@@ -4,13 +4,13 @@ import styles from "./page.module.css";
 import Link from "next/link";
 
 const DashboardLayout = ({ children }) => {
-    return (
-        <div className="layoutContainer">
-             <Link href="/dashboard">
-                    <span className={styles.mainTitle}>Your DashBoard</span>
-            </Link>
-            {children}
-        </div>
-    );
-}
+  return (
+    <div className="layoutContainer">
+      <Link href="/dashboard">
+        <span className={styles.mainTitle}>Your DashBoard</span>
+      </Link>
+      {children}
+    </div>
+  );
+};
 export default DashboardLayout;

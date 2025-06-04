@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "swr": "^2.3.3",
+    "mongoose": "6.11.1"
+  }
+}

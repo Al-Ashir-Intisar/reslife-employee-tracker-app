@@ -1,4 +1,4 @@
-.container{
+.container {
   background-color: orange;
   width: 100vw;
   min-height: 8vh;
@@ -11,12 +11,12 @@
   align-items: center;
 }
 
-.logo{
-    border-radius: 50%;
-    cursor: pointer;
+.logo {
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.texts{
-    color: black;
-    font-size: 20;
+.texts {
+  color: black;
+  font-size: 20;
 }

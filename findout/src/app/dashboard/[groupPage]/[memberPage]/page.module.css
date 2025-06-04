@@ -1,6 +1,6 @@
-.title{
-    font-size: 40;
-    font-weight: bold;
+.title {
+  font-size: 40;
+  font-weight: bold;
 }
 
 .mainTitle {
@@ -14,8 +14,7 @@
   display: inline-block;
 }
 
-
-.mainTitle:hover{
-    color: lightgreen;
-    cursor: pointer;
+.mainTitle:hover {
+  color: lightgreen;
+  cursor: pointer;
 }

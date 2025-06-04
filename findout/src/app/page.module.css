@@ -68,10 +68,7 @@
   padding: 0 20px;
   border: none;
   border: 1px solid transparent;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -177,30 +174,37 @@ a.secondary {
   opacity: 1;
 
   /* Mask gradient for opacity effect */
-  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: cover;
   mask-size: cover;
 }
 
-
-.HomeTexts{
+.HomeTexts {
   width: 80vw;
   height: 25vh;
   justify-content: center;
   position: inherit;
 }
 
-.title{
+.title {
   font-size: 80;
   font-weight: 600;
   background: linear-gradient(to right, orange, rgb(48, 47, 47));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.description{
+.description {
   font-size: 22;
   font-weight: 500;
   background: linear-gradient(to right, rgb(131, 194, 223), rgb(100, 135, 248));
@@ -216,13 +220,12 @@ a.secondary {
 
 @keyframes flip {
   0% {
-    transform: translateX(0px) rotateY(0deg) scale(.5);
+    transform: translateX(0px) rotateY(0deg) scale(0.5);
   }
   50% {
-    transform: translateX(20%) rotateY(360deg) scale(.75);
+    transform: translateX(20%) rotateY(360deg) scale(0.75);
   }
   100% {
     transform: translateX(0px) rotateY(0deg) scale(1);
   }
 }
-

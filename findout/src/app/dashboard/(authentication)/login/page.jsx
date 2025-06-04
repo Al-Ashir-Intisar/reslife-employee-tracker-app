@@ -1,25 +1,30 @@
-"use client"
+"use client";
 import React from "react";
 import styles from "./page.module.css";
 
 const login = () => {
-    return (
+  return (
     <div className="pageContent">
-        <div className={styles.logInDev}>
-            <form className={styles.form}>
-            <input type="text" placeholder="email" className={styles.input} />
-            <input type="passwors" placeholder="password" className={styles.input} />
+      <div className={styles.logInDev}>
+        <form className={styles.form}>
+          <input type="text" placeholder="email" className={styles.input} />
+          <input
+            type="passwors"
+            placeholder="password"
+            className={styles.input}
+          />
         </form>
-        <button 
-        className={styles.login}
-        onClick={() => {
+        <button
+          className={styles.login}
+          onClick={() => {
             console.log("Logged In");
-        }} >
-        LogIn
+          }}
+        >
+          LogIn
         </button>
-        </div>
+      </div>
     </div>
-    )
-}
+  );
+};
 
-export default login 
+export default login;

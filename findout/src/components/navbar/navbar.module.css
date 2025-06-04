@@ -1,4 +1,4 @@
-.container{
+.container {
   background-color: orange;
   width: 100vw;
   min-height: 8vh;
@@ -9,43 +9,43 @@
   align-items: center;
 }
 
-.links{
-    color: black;
-    font-size: 20;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 20px;
+.links {
+  color: black;
+  font-size: 20;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
 }
 
-.link{
-    color: black;
-    font-size: 28;
-    font-weight: bold;
+.link {
+  color: black;
+  font-size: 28;
+  font-weight: bold;
 }
 
-.link:hover{
-    color: white;
+.link:hover {
+  color: white;
 }
 
-.logout{
-    padding: 5px;
-    border: none;
-    background-color: rgb(65, 255, 151);
-    cursor: pointer;
-    border-radius: 3px;
-    font-size: 20;
-    font-weight: bold;
+.logout {
+  padding: 5px;
+  border: none;
+  background-color: rgb(65, 255, 151);
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 20;
+  font-weight: bold;
 }
 
-.logout:hover{
-    background-color: rgb(236, 0, 0);
-    color: white;
+.logout:hover {
+  background-color: rgb(236, 0, 0);
+  color: white;
 }
 
-.texts{
-    color: black;
-    font-size: 20;
+.texts {
+  color: black;
+  font-size: 20;
 }
