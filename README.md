@@ -11,6 +11,7 @@ The app enables teams to quickly reference and manage data about employees such 
 - Project history
 - Availability
 - Any custom metadata relevant to internal team workflows
+- Time keeping for work hours instead of Sling that does not require location tracking but requires duration and recording time required. 
 
 This system is especially useful in dynamic environments where quick access to detailed employee info helps optimize task delegation and project planning.
 
