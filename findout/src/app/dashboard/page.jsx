@@ -44,31 +44,31 @@ const Dashboard = () => {
     };
     fetchGroups();
   }, []);
-  console.log("MongoDB Groups:", groups[0]._id);
+  // console.log("MongoDB Groups:", groups[0]);
 
   // Fetch groups from Supabase using SWR
   const { data, error, isLoading } = useSWR(
     `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
     fetcher
   );
-  console.log("Data:", data);
-  console.log("Error:", error);
-  console.log("Is Loading:", isLoading);
+  // console.log("Data:", data);
+  // console.log("Error:", error);
+  // console.log("Is Loading:", isLoading);
   //   if (error) return <div>Error loading groups</div>;
   //   if (isLoading || !data) return <div>Loading...</div>;
 
   return (
     <div className="pageContent">
       <div className={styles.groups}>
-        {data &&
-          data.map((group) => (
+        {groups &&
+          groups.map((group) => (
             <Link
-              key={group.group_id}
-              href={`/dashboard/${group.group_id}`}
+              key={group.name}
+              href={`/dashboard/${group._id}`}
               className={styles.group}
             >
-              <span className={styles.title}>{group.group_name}</span>
-              <span className={styles.description}>{group.group_desc}</span>
+              <span className={styles.title}>{group.name}</span>
+              <span className={styles.description}>{group.description}</span>
             </Link>
           ))}
       </div>
