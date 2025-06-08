@@ -2,6 +2,7 @@
 import React from "react";
 import styles from "./page.module.css";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 const login = () => {
   return (
@@ -10,7 +11,7 @@ const login = () => {
         <form className={styles.form}>
           <input type="text" placeholder="email" className={styles.input} />
           <input
-            type="passwors"
+            type="password"
             placeholder="password"
             className={styles.input}
           />
@@ -34,6 +35,9 @@ const login = () => {
         >
           Log In With Google
         </button>
+        <Link href="/dashboard/register" className={styles.link}>
+          Create a new account
+        </Link>
       </div>
     </div>
   );
