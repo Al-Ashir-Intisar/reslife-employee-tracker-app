@@ -31,6 +31,11 @@ const fetcher = (url) =>
   }).then((res) => res.json());
 
 const Dashboard = () => {
+  // Set the document title when the component mounts
+  useEffect(() => {
+    document.title = "Dashboard";
+  }, []);
+
   // Fetch groups from MongoDB (if needed)
   const [groups, setGroups] = useState([]);
   useEffect(() => {

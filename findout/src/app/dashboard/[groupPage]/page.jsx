@@ -18,6 +18,11 @@ async function getGroups() {
 }
 
 const group = () => {
+  // Set the document title when the component mounts
+  useEffect(() => {
+    document.title = "Group Members";
+  }, []);
+
   // Simulated list of member data
   // This is just a placeholder; replace with actual member data fetching logic
   // const members = [
