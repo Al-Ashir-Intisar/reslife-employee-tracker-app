@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import useSWR from "swr";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -61,6 +62,9 @@ const Dashboard = () => {
   // console.log("Is Loading:", isLoading);
   //   if (error) return <div>Error loading groups</div>;
   //   if (isLoading || !data) return <div>Loading...</div>;
+
+  const session =  useSession();
+  console.log("Session:", session); 
 
   return (
     <div className="pageContent">
