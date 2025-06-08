@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import styles from "./page.module.css";
+import { signIn } from "next-auth/react";
 
 const login = () => {
   return (
@@ -21,6 +22,17 @@ const login = () => {
           }}
         >
           LogIn
+        </button>
+        <button
+          className={styles.login}
+          onClick={() => {
+            signIn("google", {
+              callbackUrl: "/dashboard",
+            });
+            console.log("Google Log In");
+          }}
+        >
+          Log In With Google
         </button>
       </div>
     </div>

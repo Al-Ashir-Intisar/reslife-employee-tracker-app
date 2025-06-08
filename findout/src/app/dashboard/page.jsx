@@ -12,7 +12,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const userId = process.env.NEXT_PUBLIC_SUPABASE_USER_ID; // e.g., 'd45ef2b2-1234-456a-9988-b9c4eaad7391'
 
 async function getGroups() {
-  const res = await fetch("http://172.30.64.1:3000/api/groups", {
+  const res = await fetch("http://localhost:3000/api/groups", {
     cache: "no-store",
   });
 

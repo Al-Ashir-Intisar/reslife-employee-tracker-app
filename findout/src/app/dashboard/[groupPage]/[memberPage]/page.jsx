@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 async function getUsers() {
-  const res = await fetch("http://172.30.64.1:3000/api/users", {
+  const res = await fetch("http://localhost:3000/api/users", {
     cache: "no-store",
   });
 

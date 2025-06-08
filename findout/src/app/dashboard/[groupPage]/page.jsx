@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 async function getGroups() {
-  const res = await fetch("http://172.30.64.1:3000/api/groups", {
+  const res = await fetch("http://localhost:3000/api/groups", {
     cache: "no-store",
   });
 
