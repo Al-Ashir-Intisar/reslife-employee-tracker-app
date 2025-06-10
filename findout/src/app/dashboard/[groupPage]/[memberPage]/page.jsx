@@ -3,6 +3,8 @@ import React from "react";
 import styles from "./page.module.css";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 async function getUsers() {
   const res = await fetch("http://localhost:3000/api/users", {
@@ -15,13 +17,25 @@ async function getUsers() {
   return res.json();
 }
 
-
 const member = () => {
+  const session = useSession();
+  const router = useRouter();
   // Get the member ID from the URL parameters
   const params = useParams();
   const memberId = params.memberPage; // e.g. "member1"
 
   const [selectedMember, setSelectedMember] = useState(null);
+
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/dashboard/login");
+    }
+  }, [session.status, router]);
+
+  useEffect(() => {
+    document.title = "Member Details";
+  }, []);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -38,12 +52,25 @@ const member = () => {
   }, [memberId]); // rerun when memberId changes
 
   // console.log("Selected Member:", selectedMember);
-
-  return (
-    <div className="pageContent">
-      <h1 className={styles.title}>{selectedMember?.name || "Member not found"}</h1>
-    </div>
-  );
+  if (session.status === "loading") {
+    return (
+      <div className="pageContent">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  if (session.status !== "authenticated") {
+    return null;
+  }
+  if (session.status === "authenticated") {
+    return (
+      <div className="pageContent">
+        <h1 className={styles.title}>
+          {selectedMember?.name || "Member not found"}
+        </h1>
+      </div>
+    );
+  }
 };
 
 export default member;

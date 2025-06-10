@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const register = () => {
   const [error, setError] = useState(false);
@@ -40,6 +41,21 @@ const register = () => {
     // such as sending the data to your backend or an API.
     console.log("Form submitted");
   };
+
+    const session = useSession();
+    console.log("Session:", session);
+  
+    if (session.status === "loading") {
+      return (
+        <div className="pageContent">
+          <p>Loading...</p>
+        </div>
+      );
+    }
+  
+    if (session.status === "authenticated") {
+      router?.push("/dashboard");
+    }
 
   return (
     <div className="pageContent">

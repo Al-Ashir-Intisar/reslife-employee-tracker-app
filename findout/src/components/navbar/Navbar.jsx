@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React from "react";
 import styles from "./navbar.module.css";
+import { signOut, useSession } from "next-auth/react";
 
 const links = [
   {
@@ -22,6 +23,7 @@ const links = [
 ];
 
 const Navbar = () => {
+  const session = useSession();
   return (
     <div className={styles.container}>
       <div className={styles.links}>
@@ -30,14 +32,24 @@ const Navbar = () => {
             {link.title}
           </Link>
         ))}
-        <button
-          className={styles.logout}
-          onClick={() => {
-            console.log("logged out");
-          }}
-        >
-          LogOut
-        </button>
+        {session.status === "authenticated" && (
+          <button
+            className={styles.logout}
+            onClick={() => {
+              console.log("logged out");
+              signOut({ callbackUrl: "/" });
+            }}
+          >
+            LogOut
+          </button>
+        )}
+        {session.status === "unauthenticated" && (
+          <button className={styles.login}>
+            <Link href="/dashboard/login">
+              LogIn
+            </Link>
+          </button>
+        )}
       </div>
     </div>
   );

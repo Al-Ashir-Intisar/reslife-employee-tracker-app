@@ -5,6 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -63,26 +64,47 @@ const Dashboard = () => {
   //   if (error) return <div>Error loading groups</div>;
   //   if (isLoading || !data) return <div>Loading...</div>;
 
-  const session =  useSession();
-  console.log("Session:", session); 
+  const session = useSession();
+  console.log("Session:", session);
 
-  return (
-    <div className="pageContent">
-      <div className={styles.groups}>
-        {groups &&
-          groups.map((group) => (
-            <Link
-              key={group.name}
-              href={`/dashboard/${group._id}`}
-              className={styles.group}
-            >
-              <span className={styles.title}>{group.name}</span>
-              <span className={styles.description}>{group.description}</span>
-            </Link>
-          ))}
+  const router = useRouter();
+
+  if (session.status === "loading") {
+    return (
+      <div className="pageContent">
+        <p>Loading...</p>
       </div>
-    </div>
-  );
+    );
+  }
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/dashboard/login");
+    }
+  }, [session.status]);
+
+  if (session.status !== "authenticated") {
+    return null;
+  }
+
+  if (session.status === "authenticated") {
+    return (
+      <div className="pageContent">
+        <div className={styles.groups}>
+          {groups &&
+            groups.map((group) => (
+              <Link
+                key={group.name}
+                href={`/dashboard/${group._id}`}
+                className={styles.group}
+              >
+                <span className={styles.title}>{group.name}</span>
+                <span className={styles.description}>{group.description}</span>
+              </Link>
+            ))}
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Dashboard;

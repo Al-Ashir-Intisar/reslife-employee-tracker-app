@@ -44,6 +44,20 @@
   background-color: rgb(236, 0, 0);
   color: white;
 }
+.login {
+  padding: 5px;
+  border: none;
+  background-color: rgb(65, 255, 151);
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 20;
+  font-weight: bold;
+}
+
+.login:hover {
+  background-color: rgb(0, 72, 32);
+  color: white;
+}
 
 .texts {
   color: black;

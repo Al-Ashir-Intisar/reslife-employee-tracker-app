@@ -19,7 +19,7 @@ const handler = NextAuth({
         await connect(); // Ensure the database connection is established
 
         try {
-          const user = User.findOne({
+          const user = await User.findOne({
             email: credentials.email,
           });
           if (user) {
@@ -42,6 +42,9 @@ const handler = NextAuth({
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    error: "/dashboard/login",
+  },
 });
 
 export { handler as GET, handler as POST };
