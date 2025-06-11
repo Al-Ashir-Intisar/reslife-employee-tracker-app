@@ -42,3 +42,9 @@
   color: rgb(21, 253, 176);
   cursor: pointer;
 }
+
+.error {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}

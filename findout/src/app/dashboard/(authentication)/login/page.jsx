@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 const Login = () => {
   const session = useSession();
   const router = useRouter();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (session.status === "authenticated") {
@@ -17,6 +18,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Reset error
+
     const email = e.target[0].value;
     const password = e.target[1].value;
 
@@ -29,7 +32,7 @@ const Login = () => {
     if (result?.ok) {
       router.push(result.url ?? "/dashboard");
     } else {
-      console.error("Login failed");
+      setError("Invalid credentials. Please try again.");
     }
   };
 
@@ -40,9 +43,7 @@ const Login = () => {
       </div>
     );
   }
-  if (session.status !== "unauthenticated") {
-    return null;
-  }
+
   if (session.status === "unauthenticated") {
     return (
       <div className="pageContent">
@@ -56,12 +57,14 @@ const Login = () => {
             />
             <button className={styles.login}>LogIn</button>
           </form>
+
+          {/* Show error message if present */}
+          {error && <p className={styles.error}>{error}</p>}
+
           <button
             className={styles.login}
             onClick={() => {
-              signIn("google", {
-                callbackUrl: "/dashboard",
-              });
+              signIn("google", { callbackUrl: "/dashboard" });
             }}
           >
             Log In With Google
@@ -73,6 +76,8 @@ const Login = () => {
       </div>
     );
   }
+
+  return null;
 };
 
 export default Login;

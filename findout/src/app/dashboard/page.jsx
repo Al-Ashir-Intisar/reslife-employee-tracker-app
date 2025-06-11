@@ -33,13 +33,30 @@ const fetcher = (url) =>
   }).then((res) => res.json());
 
 const Dashboard = () => {
+  const session = useSession();
+  console.log("Session:", session);
+  const router = useRouter();
+
+  // Fetch groups from MongoDB (if needed)
+  const [groups, setGroups] = useState([]);
+
+  // Fetch groups from Supabase using SWR
+  const { data, error, isLoading } = useSWR(
+    `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
+    fetcher
+  );
+  // console.log("Data:", data);
+  // console.log("Error:", error);
+  // console.log("Is Loading:", isLoading);
+  //   if (error) return <div>Error loading groups</div>;
+  //   if (isLoading || !data) return <div>Loading...</div>;
+
   // Set the document title when the component mounts
   useEffect(() => {
     document.title = "Dashboard";
   }, []);
 
   // Fetch groups from MongoDB (if needed)
-  const [groups, setGroups] = useState([]);
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -53,21 +70,11 @@ const Dashboard = () => {
   }, []);
   // console.log("MongoDB Groups:", groups[0]);
 
-  // Fetch groups from Supabase using SWR
-  const { data, error, isLoading } = useSWR(
-    `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
-    fetcher
-  );
-  // console.log("Data:", data);
-  // console.log("Error:", error);
-  // console.log("Is Loading:", isLoading);
-  //   if (error) return <div>Error loading groups</div>;
-  //   if (isLoading || !data) return <div>Loading...</div>;
-
-  const session = useSession();
-  console.log("Session:", session);
-
-  const router = useRouter();
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/dashboard/login");
+    }
+  }, [session.status]);
 
   if (session.status === "loading") {
     return (
@@ -76,11 +83,6 @@ const Dashboard = () => {
       </div>
     );
   }
-  useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/dashboard/login");
-    }
-  }, [session.status]);
 
   if (session.status !== "authenticated") {
     return null;
