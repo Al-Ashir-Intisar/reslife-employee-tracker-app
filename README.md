@@ -9,9 +9,9 @@ The app enables teams to quickly reference and manage data about employees such 
 - Certifications
 - Skills and expertise
 - Project history
-- Availability
+- Task assignments
 - Any custom metadata relevant to internal team workflows
-- Time keeping for work hours instead of Sling that does not require location tracking but requires duration and recording time required. 
+- Time keeping for work hours instead of Sling that does not require location tracking but requires duration and recording time. 
 
 This system is especially useful in dynamic environments where quick access to detailed employee info helps optimize task delegation and project planning.
 
@@ -21,28 +21,12 @@ This system is especially useful in dynamic environments where quick access to d
 - ✅ Secure login and user authentication
 - 🛠️ Admin and team-level views
 - 🛠️ Role-based access control
-- 🛠️ CSV/Excel import for bulk employee data
-- 🛠️ Custom tags and categories for filtering
+- 🛠️ Custom group overview dashboard
 
 ## Tech Stack
 
 - **Frontend**: Next.js (React)
 - **Backend**: Node.js / API Routes
-- **Database**: TBD (PostgreSQL or Firebase)
-- **Deployment**: Vercel / Docker (Planned)
+- **Database**: MongoDB
+- **Deployment**: TBD (Vercel / Docker)
 
-## Getting Started
-
-To run the app locally:
-
-```bash
-# Clone the repo
-git clone https://github.com/your-username/employee-info-tracker.git
-cd employee-info-tracker
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
