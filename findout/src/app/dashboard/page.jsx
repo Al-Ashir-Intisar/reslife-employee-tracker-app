@@ -2,19 +2,16 @@
 import React from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
-import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-// Replace with actual Supabase Auth or hardcoded user id
-const userId = process.env.NEXT_PUBLIC_SUPABASE_USER_ID; // e.g., 'd45ef2b2-1234-456a-9988-b9c4eaad7391'
-
-async function getGroups() {
-  const res = await fetch("http://localhost:3000/api/groups", {
+async function getGroups(ids) {
+  const res = await fetch("http://localhost:3000/api/groups/byids", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
+    body: JSON.stringify({ ids }),
   });
 
   if (!res.ok) {
@@ -24,51 +21,48 @@ async function getGroups() {
   return res.json();
 }
 
-// const fetcher = (url) =>
-//   fetch(url, {
-//     headers: {
-//       apikey: SUPABASE_ANON_KEY,
-//       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-//     },
-//   }).then((res) => res.json());
-
 const Dashboard = () => {
   const session = useSession();
   console.log("Session:", session);
   const router = useRouter();
 
-  // Fetch groups from MongoDB (if needed)
+  // Fetch groups from MongoDB
   const [groups, setGroups] = useState([]);
-
-  // Fetch groups from Supabase using SWR
-  // const { data, error, isLoading } = useSWR(
-  //   `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
-  //   fetcher
-  // );
-  // console.log("Data:", data);
-  // console.log("Error:", error);
-  // console.log("Is Loading:", isLoading);
-  //   if (error) return <div>Error loading groups</div>;
-  //   if (isLoading || !data) return <div>Loading...</div>;
 
   // Set the document title when the component mounts
   useEffect(() => {
     document.title = "Dashboard";
   }, []);
 
-  // Fetch groups from MongoDB (if needed)
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchUserGroups = async () => {
+      if (session.status !== "authenticated") return;
+
       try {
-        const data = await getGroups();
-        setGroups(data);
+        // 1. Get user info by email
+        const userRes = await fetch(
+          `/api/users?email=${session.data.user.email}`
+        );
+        const user = await userRes.json();
+        // console.log("User fetched:", user);
+
+        // 2. Fetch groups based on groupIds
+        if (user?.groupIds?.length) {
+          // console.log("User groupIds:", user.groupIds);
+          const groups = await getGroups(user.groupIds);
+          setGroups(groups);
+        } else {
+          setGroups([]);
+        }
       } catch (error) {
-        console.error("Error fetching groups from MongoDB:", error);
+        console.error("Failed to fetch user groups:", error);
       }
     };
-    fetchGroups();
-  }, []);
-  // console.log("MongoDB Groups:", groups[0]);
+
+    fetchUserGroups();
+  }, [session.status]);
+  // console.log("✅ Groups fetched:", groups);
+
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -92,7 +86,7 @@ const Dashboard = () => {
     return (
       <>
         <div className={styles.dashButtons}>
-            <button className={styles.createGroup}>Create a new group</button>
+          <button className={styles.createGroup}>Create a new group</button>
         </div>
         <div className="pageContent">
           <div className={styles.groups}>
@@ -104,7 +98,9 @@ const Dashboard = () => {
                   className={styles.group}
                 >
                   <span className={styles.title}>{group.name}</span>
-                  <span className={styles.description}>{group.description}</span>
+                  <span className={styles.description}>
+                    {group.description}
+                  </span>
                 </Link>
               ))}
           </div>
