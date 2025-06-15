@@ -17,6 +17,14 @@ const groupSchema = new Schema(
       type: String,
       required: false,
     },
+    ownerId: {
+      type: String,
+      required: true,
+    },
+    adminIds: {
+      type: Array,
+      required: false,
+    },
   },
   { timestamps: true }
 );

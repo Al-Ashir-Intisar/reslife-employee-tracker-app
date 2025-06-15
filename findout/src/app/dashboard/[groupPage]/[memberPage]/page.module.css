@@ -18,3 +18,25 @@
   color: lightgreen;
   cursor: pointer;
 }
+
+.dashButtons {
+  display: flex;
+  justify-content: flex-start; /* ensures left alignment */
+  align-items: flex-start;
+  width: 100%; /* optional: ensures full-width container */
+  margin-bottom: 20px;
+  margin: 10px ;
+}
+
+.editMember{
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.editMember:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}

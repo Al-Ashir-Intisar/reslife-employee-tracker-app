@@ -60,19 +60,25 @@ const GroupPage = () => {
   }
   if (session.status === "authenticated") {
     return (
-      <div className="pageContent">
-        <div className={styles.members}>
-          {memberIds.map((memberId) => (
-            <Link
-              key={memberId}
-              href={`/dashboard/${groupId}/${memberId}`}
-              className={styles.member}
-            >
-              <span className={styles.title}>{memberId}</span>
-            </Link>
-          ))}
+      <>
+        <div className={styles.dashButtons}>
+          <button className={styles.createMember}>Add a new Member</button>
+          <button className={styles.sendInvite}>Invite a new user</button>
         </div>
-      </div>
+        <div className="pageContent">
+          <div className={styles.members}>
+            {memberIds.map((memberId) => (
+              <Link
+                key={memberId}
+                href={`/dashboard/${groupId}/${memberId}`}
+                className={styles.member}
+              >
+                <span className={styles.title}>{memberId}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </>
     );
   }
 };

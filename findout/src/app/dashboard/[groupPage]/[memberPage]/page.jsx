@@ -64,11 +64,16 @@ const member = () => {
   }
   if (session.status === "authenticated") {
     return (
-      <div className="pageContent">
-        <h1 className={styles.title}>
-          {selectedMember?.name || "Member not found"}
-        </h1>
-      </div>
+      <>
+        <div className={styles.dashButtons}>
+          <button className={styles.editMember}>Edit Member Details</button>
+        </div>
+        <div className="pageContent">
+          <h1 className={styles.title}>
+            {selectedMember?.name || "Member not found"}
+          </h1>
+        </div>
+      </>
     );
   }
 };

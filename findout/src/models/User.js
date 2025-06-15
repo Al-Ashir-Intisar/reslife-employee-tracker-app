@@ -18,6 +18,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    groupsIds: {
+       type: Array,
+        required: false,
+    },
   },
   { timestamps: true }
 );

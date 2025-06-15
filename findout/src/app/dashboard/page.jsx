@@ -24,13 +24,13 @@ async function getGroups() {
   return res.json();
 }
 
-const fetcher = (url) =>
-  fetch(url, {
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-  }).then((res) => res.json());
+// const fetcher = (url) =>
+//   fetch(url, {
+//     headers: {
+//       apikey: SUPABASE_ANON_KEY,
+//       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+//     },
+//   }).then((res) => res.json());
 
 const Dashboard = () => {
   const session = useSession();
@@ -41,10 +41,10 @@ const Dashboard = () => {
   const [groups, setGroups] = useState([]);
 
   // Fetch groups from Supabase using SWR
-  const { data, error, isLoading } = useSWR(
-    `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
-    fetcher
-  );
+  // const { data, error, isLoading } = useSWR(
+  //   `${SUPABASE_URL}/rest/v1/groups?user_id=eq.${userId}&select=group_id,group_name,group_desc`,
+  //   fetcher
+  // );
   // console.log("Data:", data);
   // console.log("Error:", error);
   // console.log("Is Loading:", isLoading);
@@ -90,21 +90,26 @@ const Dashboard = () => {
 
   if (session.status === "authenticated") {
     return (
-      <div className="pageContent">
-        <div className={styles.groups}>
-          {groups &&
-            groups.map((group) => (
-              <Link
-                key={group.name}
-                href={`/dashboard/${group._id}`}
-                className={styles.group}
-              >
-                <span className={styles.title}>{group.name}</span>
-                <span className={styles.description}>{group.description}</span>
-              </Link>
-            ))}
+      <>
+        <div className={styles.dashButtons}>
+            <button className={styles.createGroup}>Create a new group</button>
         </div>
-      </div>
+        <div className="pageContent">
+          <div className={styles.groups}>
+            {groups &&
+              groups.map((group) => (
+                <Link
+                  key={group.name}
+                  href={`/dashboard/${group._id}`}
+                  className={styles.group}
+                >
+                  <span className={styles.title}>{group.name}</span>
+                  <span className={styles.description}>{group.description}</span>
+                </Link>
+              ))}
+          </div>
+        </div>
+      </>
     );
   }
 };
