@@ -36,6 +36,40 @@ export const authOptions = {
   pages: {
     error: "/dashboard/login",
   },
+
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      try {
+        // console.log("🔐 signIn callback hit");
+        // console.log("🧑 user:", user);
+        // console.log("🔗 account:", account);
+
+        if (account.provider === "google") {
+          await connect();
+          const existingUser = await User.findOne({ email: user.email });
+
+          if (!existingUser) {
+            // console.log("🆕 Creating new Google user:", user.email);
+
+            const randomPassword = Math.random().toString(36).slice(-8); // 8+ chars
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+            await User.create({
+              name: user.name ?? "GoogleUser",
+              email: user.email,
+              password: hashedPassword, // ✅ satisfies schema
+              groupsIds: [],
+            });
+          }
+        }
+
+        return true;
+      } catch (err) {
+        console.error("❌ Error in signIn callback:");
+        return false;
+      }
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
