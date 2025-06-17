@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-async function getUsers() {
-  const res = await fetch("http://localhost:3000/api/users", {
+// const userRes = await fetch(`/api/users?id=${memberId}`);
+// const user = await userRes.json();
+
+
+async function getUsers(memberId) {
+  const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
     cache: "no-store",
   });
 
@@ -40,10 +44,11 @@ const member = () => {
     const fetchUsers = async () => {
       try {
         // Fetch users from MongoDB
-        const data = await getUsers();
+        const data = await getUsers(memberId);
+        console.log("Fetched Users:", data);
         // Find the user that matches the ID from the URL
-        const member = data.find((u) => u._id === memberId);
-        setSelectedMember(member);
+        // const member = data.find((u) => u._id === memberId);
+        setSelectedMember(data);
       } catch (error) {
         console.error("Error fetching users from MongoDB:", error);
       }
