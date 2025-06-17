@@ -150,75 +150,79 @@ const Dashboard = () => {
           </button>
         </div>
         {showCreateGroupForm && (
-          <div className={styles.formDiv}>
-            <form
-              className={styles.createGroupForm}
-              onSubmit={handleCreateGroup}
-            >
-              <button type="submit">Create</button>
-              <button type="button" onClick={handleCancel}>
-                Cancel
-              </button>
-              <input
-                type="text"
-                placeholder="Group Name"
-                value={newGroupName}
-                onChange={(e) => setGroupName(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                value={newDescription}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-
-              <div className={styles.emailInputContainer}>
-                <input
-                  type="email"
-                  placeholder="Enter member email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
-                <button type="button" onClick={handleAddEmail}>
-                  Add
+          <div className="pageContent">
+            <div className={styles.formDiv}>
+              <form
+                className={styles.createGroupForm}
+                onSubmit={handleCreateGroup}
+              >
+                <button type="submit">Create</button>
+                <button type="button" onClick={handleCancel}>
+                  Cancel
                 </button>
-              </div>
+                <input
+                  type="text"
+                  placeholder="Group Name"
+                  value={newGroupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={newDescription}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
 
-              <ul className={styles.emailList}>
-                {memberEmails.map((email, index) => (
-                  <li key={index}>
-                    {email}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveEmail(email)}
-                    >
-                      x
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </form>
+                <div className={styles.emailInputContainer}>
+                  <input
+                    type="email"
+                    placeholder="Enter member email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                  />
+                  <button type="button" onClick={handleAddEmail}>
+                    Add
+                  </button>
+                </div>
+
+                <ul className={styles.emailList}>
+                  {memberEmails.map((email, index) => (
+                    <li key={index}>
+                      {email}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEmail(email)}
+                      >
+                        x
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </form>
+            </div>
           </div>
         )}
-        <div className="pageContent">
-          <div className={styles.groups}>
-            {groups &&
-              groups.map((group) => (
-                <Link
-                  key={group.name}
-                  href={`/dashboard/${group._id}`}
-                  className={styles.group}
-                >
-                  <span className={styles.title}>{group.name}</span>
-                  <span className={styles.description}>
-                    {group.description}
-                  </span>
-                </Link>
-              ))}
+        {!showCreateGroupForm && (
+          <div className="pageContent">
+            <div className={styles.groups}>
+              {groups &&
+                groups.map((group) => (
+                  <Link
+                    key={group.name}
+                    href={`/dashboard/${group._id}`}
+                    className={styles.group}
+                  >
+                    <span className={styles.title}>{group.name}</span>
+                    <span className={styles.description}>
+                      {group.description}
+                    </span>
+                  </Link>
+                ))}
+            </div>
           </div>
-        </div>
+        )}
       </>
     );
   }
