@@ -74,3 +74,47 @@
   background-color: lightgreen;
   cursor: pointer;
 }
+
+/* Create Group form styles */
+
+.formDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.createGroupForm {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  color: black;
+  border-radius: 8px;
+  width: 80%;
+}
+
+.emailInputContainer {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.emailList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.emailList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0;
+}

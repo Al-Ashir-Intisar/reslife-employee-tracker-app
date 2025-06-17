@@ -26,8 +26,65 @@ const Dashboard = () => {
   console.log("Session:", session);
   const router = useRouter();
 
-  // Fetch groups from MongoDB
+  // State to hold the groups fetched from the API route
   const [groups, setGroups] = useState([]);
+
+  // State to control the visibility of the create group form
+  const [showCreateGroupForm, setShowCreateGroupForm] = useState(false);
+  const toggleCreateGroupForm = () => {
+    setShowCreateGroupForm(!showCreateGroupForm);
+  };
+
+  // State to hold new group name and description
+  const [newGroupName, setGroupName] = useState("");
+  const [newDescription, setDescription] = useState("");
+
+  // State to hold member emails and new email input
+  const [memberEmails, setMemberEmails] = useState([]);
+  const [newEmail, setNewEmail] = useState("");
+
+  // Handler for adding a new email to the member list
+  const handleAddEmail = () => {
+    const trimmed = newEmail.trim();
+    if (trimmed && !memberEmails.includes(trimmed)) {
+      setMemberEmails([...memberEmails, trimmed]);
+      setNewEmail("");
+    }
+  };
+  // Handler for removing an email from the member list
+  const handleRemoveEmail = (emailToRemove) => {
+    setMemberEmails(memberEmails.filter((email) => email !== emailToRemove));
+  };
+
+  // Handler for creating a new group
+  const handleCreateGroup = (e) => {
+    e.preventDefault();
+
+    console.log("Group Name:", newGroupName);
+    console.log("Description:", newDescription);
+    console.log("Member Emails:", memberEmails);
+
+    // Call the API to create a new group later
+
+    // Reset form values
+    setGroupName("");
+    setDescription("");
+    setMemberEmails([]);
+    setNewEmail(""); // optional, in case something is typed in the input
+
+    // Hide the form
+    toggleCreateGroupForm();
+  };
+
+  // handler for the cancel button
+
+  const handleCancel = () => {
+    setGroupName("");
+    setDescription("");
+    setMemberEmails([]);
+    setNewEmail("");
+    toggleCreateGroupForm();
+  };
 
   // Set the document title when the component mounts
   useEffect(() => {
@@ -63,7 +120,6 @@ const Dashboard = () => {
   }, [session.status]);
   // console.log("✅ Groups fetched:", groups);
 
-
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/dashboard/login");
@@ -86,8 +142,66 @@ const Dashboard = () => {
     return (
       <>
         <div className={styles.dashButtons}>
-          <button className={styles.createGroup}>Create a new group</button>
+          <button
+            className={styles.createGroup}
+            onClick={toggleCreateGroupForm}
+          >
+            Create a new group
+          </button>
         </div>
+        {showCreateGroupForm && (
+          <div className={styles.formDiv}>
+            <form
+              className={styles.createGroupForm}
+              onSubmit={handleCreateGroup}
+            >
+              <button type="submit">Create</button>
+              <button type="button" onClick={handleCancel}>
+                Cancel
+              </button>
+              <input
+                type="text"
+                placeholder="Group Name"
+                value={newGroupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={newDescription}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+
+              <div className={styles.emailInputContainer}>
+                <input
+                  type="email"
+                  placeholder="Enter member email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <button type="button" onClick={handleAddEmail}>
+                  Add
+                </button>
+              </div>
+
+              <ul className={styles.emailList}>
+                {memberEmails.map((email, index) => (
+                  <li key={index}>
+                    {email}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEmail(email)}
+                    >
+                      x
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </form>
+          </div>
+        )}
         <div className="pageContent">
           <div className={styles.groups}>
             {groups &&
