@@ -46,7 +46,7 @@ const Dashboard = () => {
       const user = await res.json();
       // console.log("Current user:", user);
       setCurrentUser(user);
-    }
+    };
     fetchUserId();
   }, [sessionEmail]);
 
@@ -80,8 +80,8 @@ const Dashboard = () => {
       }
 
       // Setting the new email, user ID, and updating owner/admin/member lists
-      setOwnerId((prev) => (prev ? prev : currentUser._id)); 
-      setAdminIds((prev) => [...prev, currentUser._id]); 
+      setOwnerId((prev) => (prev ? prev : currentUser._id));
+      setAdminIds((prev) => [...prev, currentUser._id]);
       setMemberEmails((prev) => [...prev, trimmed]);
       setMembersIds((prev) => [...prev, user._id]);
       setNewEmail("");
@@ -102,8 +102,32 @@ const Dashboard = () => {
   };
 
   // Handler for creating a new group
-  const handleCreateGroup = (e) => {
+  const handleCreateGroup = async (e) => {
     e.preventDefault();
+
+    try {
+      const res = await fetch("/api/groups/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newGroupName,
+          description: newDescription,
+          membersId: membersIds,
+          ownerId,
+          adminIds,
+        }),
+      });
+
+      if (res.status === 201) {
+        console.log("Group created successfully");
+      } else {
+        const text = await res.text();
+        alert("Failed to create group: " + text);
+      }
+    } catch (err) {
+      console.error("Error creating group:", err);
+      alert("Something went wrong.");
+    }
 
     console.log("Group Name:", newGroupName);
     console.log("Description:", newDescription);
@@ -112,18 +136,14 @@ const Dashboard = () => {
     console.log("Admin IDs:", adminIds);
     console.log("Owner ID:", ownerId);
 
-    // Call the API to create a new group later
-
-    // Reset form values
+    // Reset
     setGroupName("");
     setDescription("");
     setMemberEmails([]);
-    setNewEmail(""); 
+    setNewEmail("");
     setMembersIds([]);
     setAdminIds([]);
     setOwnerId("");
-
-    // Hide the form
     toggleCreateGroupForm();
   };
 
@@ -133,7 +153,7 @@ const Dashboard = () => {
     setGroupName("");
     setDescription("");
     setMemberEmails([]);
-    setNewEmail(""); 
+    setNewEmail("");
     setMembersIds([]);
     setAdminIds([]);
     setOwnerId("");
