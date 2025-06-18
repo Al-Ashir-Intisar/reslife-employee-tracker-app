@@ -50,13 +50,10 @@ const Dashboard = () => {
     fetchUserId();
   }, [sessionEmail]);
 
-  // State to hold new group name and description
-  // and member IDs and admin IDs and owner ID
+  // State to hold new group name and description and member IDs
   const [newGroupName, setGroupName] = useState("");
   const [newDescription, setDescription] = useState("");
   const [membersIds, setMembersIds] = useState([]);
-  const [adminIds, setAdminIds] = useState([]);
-  const [ownerId, setOwnerId] = useState("");
 
   // State to hold member emails and new email input
   const [memberEmails, setMemberEmails] = useState([]);
@@ -79,9 +76,7 @@ const Dashboard = () => {
         return;
       }
 
-      // Setting the new email, user ID, and updating owner/admin/member lists
-      setOwnerId((prev) => (prev ? prev : currentUser._id));
-      setAdminIds((prev) => [...prev, currentUser._id]);
+      // Setting the new email, user ID, and updating member lists
       setMemberEmails((prev) => [...prev, trimmed]);
       setMembersIds((prev) => [...prev, user._id]);
       setNewEmail("");
@@ -105,6 +100,12 @@ const Dashboard = () => {
   const handleCreateGroup = async (e) => {
     e.preventDefault();
 
+    // Ensure currentUser is loaded in member ids and owner id and admin ids
+    const groupOwnerId = currentUser?._id;
+    const uniqueAdminIds = [groupOwnerId];
+    const uniqueMembersIds = [...membersIds, groupOwnerId];
+    const uniqueMemberEmails = [...memberEmails, currentUser?.email];
+
     try {
       const res = await fetch("/api/groups/create", {
         method: "POST",
@@ -112,14 +113,16 @@ const Dashboard = () => {
         body: JSON.stringify({
           name: newGroupName,
           description: newDescription,
-          membersId: membersIds,
-          ownerId,
-          adminIds,
+          membersId: uniqueMembersIds,
+          ownerId: groupOwnerId,
+          adminIds: uniqueAdminIds,
         }),
       });
 
       if (res.status === 201) {
+        window.location.reload();
         console.log("Group created successfully");
+
       } else {
         const text = await res.text();
         alert("Failed to create group: " + text);
@@ -131,10 +134,10 @@ const Dashboard = () => {
 
     console.log("Group Name:", newGroupName);
     console.log("Description:", newDescription);
-    console.log("Member Emails:", memberEmails);
-    console.log("Members IDs:", membersIds);
-    console.log("Admin IDs:", adminIds);
-    console.log("Owner ID:", ownerId);
+    console.log("Member Emails:", uniqueMemberEmails);
+    console.log("Members IDs:", uniqueMembersIds);
+    console.log("Admin IDs:", uniqueAdminIds);
+    console.log("Owner ID:", groupOwnerId);
 
     // Reset
     setGroupName("");
@@ -142,8 +145,6 @@ const Dashboard = () => {
     setMemberEmails([]);
     setNewEmail("");
     setMembersIds([]);
-    setAdminIds([]);
-    setOwnerId("");
     toggleCreateGroupForm();
   };
 
@@ -155,8 +156,6 @@ const Dashboard = () => {
     setMemberEmails([]);
     setNewEmail("");
     setMembersIds([]);
-    setAdminIds([]);
-    setOwnerId("");
     toggleCreateGroupForm();
   };
 
@@ -192,7 +191,7 @@ const Dashboard = () => {
 
     fetchUserGroups();
   }, [session.status]);
-  // console.log("✅ Groups fetched:", groups);
+  // console.log("Groups fetched:", groups);
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -229,6 +228,11 @@ const Dashboard = () => {
               <form
                 className={styles.createGroupForm}
                 onSubmit={handleCreateGroup}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                  }
+                }}
               >
                 <button type="submit">Create</button>
                 <button type="button" onClick={handleCancel}>
@@ -255,7 +259,6 @@ const Dashboard = () => {
                     placeholder="Enter member email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
                   />
                   <button type="button" onClick={handleAddEmail}>
                     Add

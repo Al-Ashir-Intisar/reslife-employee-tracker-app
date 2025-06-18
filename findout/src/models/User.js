@@ -1,5 +1,3 @@
-// /models/User.js
-
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
@@ -18,9 +16,9 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: false, // 👈 make sure this is false!
+      required: false, 
     },
-    groupsIds: {
+    groupIds: {
       type: Array,
       required: false,
     },
@@ -29,4 +27,5 @@ const userSchema = new Schema(
 );
 
 // This will prevent overwrite errors AND ensure fresh schema on reloads
-export default mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+export default User;

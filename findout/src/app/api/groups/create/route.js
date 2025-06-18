@@ -3,6 +3,7 @@ import connect from "@/utils/db";
 import Group from "@/models/Group";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import User from "@/models/User";
 
 export const POST = async (req) => {
   const session = await getServerSession(authOptions);
@@ -27,6 +28,16 @@ export const POST = async (req) => {
     });
 
     await newGroup.save();
+
+    // Update each user's groupIds
+    await Promise.all(
+      membersId.map(async (userId) => {
+        const res = await User.findByIdAndUpdate(userId, {
+          $addToSet: { groupIds: newGroup._id },
+        });
+        console.log(`Updated user ${userId} =>`, res);
+      })
+    );
 
     return new NextResponse("Group created successfully", { status: 201 });
   } catch (err) {
