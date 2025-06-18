@@ -23,11 +23,15 @@ async function getGroups(ids) {
 
 const Dashboard = () => {
   const session = useSession();
-  console.log("Session:", session);
+  // console.log("Session:", session);
+  // console.log("Session email:", session.data?.user?.email);
+  const sessionEmail = session.data?.user?.email;
   const router = useRouter();
 
   // State to hold the groups fetched from the API route
   const [groups, setGroups] = useState([]);
+
+  const [currentUser, setCurrentUser] = useState(null);
 
   // State to control the visibility of the create group form
   const [showCreateGroupForm, setShowCreateGroupForm] = useState(false);
@@ -35,25 +39,66 @@ const Dashboard = () => {
     setShowCreateGroupForm(!showCreateGroupForm);
   };
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!sessionEmail) return;
+      const res = await fetch(`/api/users?email=${sessionEmail}`);
+      const user = await res.json();
+      // console.log("Current user:", user);
+      setCurrentUser(user);
+    }
+    fetchUserId();
+  }, [sessionEmail]);
+
   // State to hold new group name and description
+  // and member IDs and admin IDs and owner ID
   const [newGroupName, setGroupName] = useState("");
   const [newDescription, setDescription] = useState("");
+  const [membersIds, setMembersIds] = useState([]);
+  const [adminIds, setAdminIds] = useState([]);
+  const [ownerId, setOwnerId] = useState("");
 
   // State to hold member emails and new email input
   const [memberEmails, setMemberEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
 
-  // Handler for adding a new email to the member list
-  const handleAddEmail = () => {
+  // Handler for adding a new email and id to the member lists
+  const handleAddEmail = async () => {
     const trimmed = newEmail.trim();
-    if (trimmed && !memberEmails.includes(trimmed)) {
-      setMemberEmails([...memberEmails, trimmed]);
+
+    if (!trimmed || memberEmails.includes(trimmed)) return;
+
+    try {
+      const res = await fetch(`/api/users?email=${trimmed}`);
+      if (!res.ok) throw new Error("Request failed");
+
+      const user = await res.json();
+
+      if (!user || !user._id) {
+        alert("User with this email does not exist.");
+        return;
+      }
+
+      // Setting the new email, user ID, and updating owner/admin/member lists
+      setOwnerId((prev) => (prev ? prev : currentUser._id)); 
+      setAdminIds((prev) => [...prev, currentUser._id]); 
+      setMemberEmails((prev) => [...prev, trimmed]);
+      setMembersIds((prev) => [...prev, user._id]);
       setNewEmail("");
+    } catch (err) {
+      console.error("Error checking user:", err);
+      alert("Failed to verify user. Please try again.");
     }
   };
+
   // Handler for removing an email from the member list
   const handleRemoveEmail = (emailToRemove) => {
-    setMemberEmails(memberEmails.filter((email) => email !== emailToRemove));
+    const index = memberEmails.indexOf(emailToRemove);
+
+    if (index === -1) return; // Email not found
+
+    setMemberEmails((prev) => prev.filter((_, i) => i !== index));
+    setMembersIds((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Handler for creating a new group
@@ -63,6 +108,9 @@ const Dashboard = () => {
     console.log("Group Name:", newGroupName);
     console.log("Description:", newDescription);
     console.log("Member Emails:", memberEmails);
+    console.log("Members IDs:", membersIds);
+    console.log("Admin IDs:", adminIds);
+    console.log("Owner ID:", ownerId);
 
     // Call the API to create a new group later
 
@@ -70,7 +118,10 @@ const Dashboard = () => {
     setGroupName("");
     setDescription("");
     setMemberEmails([]);
-    setNewEmail(""); // optional, in case something is typed in the input
+    setNewEmail(""); 
+    setMembersIds([]);
+    setAdminIds([]);
+    setOwnerId("");
 
     // Hide the form
     toggleCreateGroupForm();
@@ -82,7 +133,10 @@ const Dashboard = () => {
     setGroupName("");
     setDescription("");
     setMemberEmails([]);
-    setNewEmail("");
+    setNewEmail(""); 
+    setMembersIds([]);
+    setAdminIds([]);
+    setOwnerId("");
     toggleCreateGroupForm();
   };
 
@@ -181,6 +235,7 @@ const Dashboard = () => {
                     placeholder="Enter member email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddEmail()}
                   />
                   <button type="button" onClick={handleAddEmail}>
                     Add

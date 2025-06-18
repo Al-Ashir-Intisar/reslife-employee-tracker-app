@@ -12,11 +12,13 @@ const register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the form submission,
+
     const name = e.target[0].value;
     const email = e.target[1].value;
     const password = e.target[2].value;
     const confirmPassword = e.target[3].value;
+
+    setError(""); // reset
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -32,30 +34,32 @@ const register = () => {
         }),
       });
 
-      response.status === 201 && router.push("/dashboard/login?success=Account created successfully");
-    } catch (error) {
-      setError(true);
-      console.error("Error during registration:", error);
+      if (response.status === 201) {
+        router.push("/dashboard/login?success=Account created successfully");
+      } else {
+        const message = await response.text();
+        setError(message);
+      }
+    } catch (err) {
+      console.error("Error during registration:", err);
+      setError("Something went wrong. Please try again.");
     }
-
-    // such as sending the data to your backend or an API.
-    console.log("Form submitted");
   };
 
-    const session = useSession();
-    console.log("Session:", session);
-  
-    if (session.status === "loading") {
-      return (
-        <div className="pageContent">
-          <p>Loading...</p>
-        </div>
-      );
-    }
-  
-    if (session.status === "authenticated") {
-      router?.push("/dashboard");
-    }
+  const session = useSession();
+  // console.log("Session:", session);
+
+  if (session.status === "loading") {
+    return (
+      <div className="pageContent">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (session.status === "authenticated") {
+    router?.push("/dashboard");
+  }
 
   return (
     <div className="pageContent">
@@ -85,16 +89,9 @@ const register = () => {
             className={styles.input}
             required
           />
-          <button
-            className={styles.register}
-            onClick={() => {
-              console.log("Registered Successfully");
-            }}
-          >
-            Register
-          </button>
+          <button className={styles.register}>Register</button>
         </form>
-        {error && "Something went wrong!"}
+        {error && <p className={styles.error}>{error}</p>}
         <Link href="/dashboard/login" className={styles.link}>
           Login with an existing account
         </Link>

@@ -11,10 +11,16 @@ export const POST = async (request) => {
       return new NextResponse("Passwords do not match", { status: 400 });
     }
 
-    await connect().catch((err) => {
-      console.error("DB connect error:", err);
-      throw err;
-    });
+    await connect();
+
+    // Check for existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return new NextResponse(
+        "User with this email already exists. Try a different email OR",
+        { status: 409 }
+      );
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -28,7 +34,7 @@ export const POST = async (request) => {
 
     return new NextResponse("User created successfully", { status: 201 });
   } catch (error) {
-    console.error("Registration route error:", error); // <-- SEE THIS IN TERMINAL
+    console.error("Registration route error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
