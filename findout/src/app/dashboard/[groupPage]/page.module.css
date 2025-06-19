@@ -42,16 +42,37 @@
   align-items: flex-start;
   width: 100%; /* optional: ensures full-width container */
   margin-bottom: 20px;
-  margin: 10px ;
+  margin: 10px;
   gap: 10px;
 }
 
-.createMember, .sendInvite {
+.createMember,
+.sendInvite,
+.deleteGroup,
+.addToListButton,
+.submitButton,
+.cancelButton,
+.removeEmailButton {
   background-color: lightblue;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 5px;
+}
+
+.addToListButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: orange;
+  cursor: pointer;
 }
 
 .createMember:hover {
@@ -62,4 +83,49 @@
 .sendInvite:hover {
   background-color: lightgreen;
   cursor: pointer;
+}
+
+.deleteGroup:hover {
+  background-color: orange;
+  cursor: pointer;
+}
+
+.removeEmailButton:hover {
+  background-color: orange;
+  cursor: pointer;
+}
+
+.formDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  gap: 10px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.addMemberForm {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 20px;
+  background-color: lightslategrey;
+  color: black;
+  border-radius: 8px;
+  width: 80%;
+}
+
+.formButtonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.input {
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  font-weight: bold;
 }

@@ -58,11 +58,12 @@
   align-items: flex-start;
   width: 100%; /* optional: ensures full-width container */
   margin-bottom: 20px;
-  margin: 10px ;
+  margin: 10px;
+  gap: 10px;
 }
 
-
-.createGroup{
+.createGroup,
+.sendInvite {
   background-color: lightblue;
   border: none;
   padding: 10px 20px;
@@ -71,6 +72,11 @@
 }
 
 .createGroup:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.sendInvite:hover {
   background-color: lightgreen;
   cursor: pointer;
 }
@@ -92,7 +98,7 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 20px;
-  background-color: #f0f0f0;
+  background-color: lightslategrey;
   color: black;
   border-radius: 8px;
   width: 80%;
@@ -117,4 +123,49 @@
   align-items: center;
   justify-content: space-between;
   margin: 4px 0;
+}
+
+.input {
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  font-weight: bold;
+}
+
+.formButtonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.addEmailButton,
+.cancleCreateGroupButton,
+.createGroupButton,
+.removeEmailButton {
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.addEmailButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.cancleCreateGroupButton:hover {
+  background-color: orange;
+  cursor: pointer;
+}
+
+.createGroupButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.removeEmailButton:hover {
+  background-color: orange;
+  cursor: pointer;
 }

@@ -122,7 +122,6 @@ const Dashboard = () => {
       if (res.status === 201) {
         window.location.reload();
         console.log("Group created successfully");
-
       } else {
         const text = await res.text();
         alert("Failed to create group: " + text);
@@ -221,6 +220,7 @@ const Dashboard = () => {
           >
             Create a new group
           </button>
+          <button className={styles.sendInvite}>Invite a new user</button>
         </div>
         {showCreateGroupForm && (
           <div className="pageContent">
@@ -234,11 +234,8 @@ const Dashboard = () => {
                   }
                 }}
               >
-                <button type="submit">Create</button>
-                <button type="button" onClick={handleCancel}>
-                  Cancel
-                </button>
                 <input
+                  className={styles.input}
                   type="text"
                   placeholder="Group Name"
                   value={newGroupName}
@@ -246,6 +243,7 @@ const Dashboard = () => {
                   required
                 />
                 <input
+                  className={styles.input}
                   type="text"
                   placeholder="Description"
                   value={newDescription}
@@ -255,13 +253,30 @@ const Dashboard = () => {
 
                 <div className={styles.emailInputContainer}>
                   <input
+                    className={styles.input}
                     type="email"
                     placeholder="Enter member email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                   />
-                  <button type="button" onClick={handleAddEmail}>
+                  <button
+                    className={styles.addEmailButton}
+                    type="button"
+                    onClick={handleAddEmail}
+                  >
                     Add
+                  </button>
+                </div>
+                <div className={styles.formButtonGroup}>
+                  <button className={styles.createGroupButton} type="submit">
+                    Create
+                  </button>
+                  <button
+                    className={styles.cancleCreateGroupButton}
+                    type="button"
+                    onClick={handleCancel}
+                  >
+                    Cancel
                   </button>
                 </div>
 
@@ -270,6 +285,7 @@ const Dashboard = () => {
                     <li key={index}>
                       {email}
                       <button
+                        className={styles.removeEmailButton}
                         type="button"
                         onClick={() => handleRemoveEmail(email)}
                       >
