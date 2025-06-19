@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import styles from "./page.module.css";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
@@ -12,6 +11,11 @@ const groupLayout = ({ children }) => {
   const router = useRouter();
   const params = useParams();
   const groupId = params.groupPage;
+
+  const handleRefresh = () => {
+    router.push(`/dashboard/${groupId}`); // Navigate to dashboard
+    router.refresh(); // Force a reload of the route
+  };
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -33,9 +37,9 @@ const groupLayout = ({ children }) => {
   if (session.status === "authenticated") {
     return (
       <div className="layoutContainer">
-        <Link href={`/dashboard/${groupId}`}>
-          <span className={styles.mainTitle}>Your {groupId}</span>
-        </Link>
+        <span className={styles.mainTitle} onClick={handleRefresh}>
+          Your {groupId} <span style={{ marginLeft: "0.5rem" }}>🔄</span>
+        </span>
         {children}
       </div>
     );

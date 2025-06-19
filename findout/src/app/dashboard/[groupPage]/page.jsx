@@ -33,6 +33,30 @@ const GroupPage = () => {
   const [memberEmails, setMemberEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
 
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/dashboard/login");
+    }
+  }, [session.status, router]);
+
+  useEffect(() => {
+    document.title = "Group Members";
+  }, []);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const data = await getGroups();
+        const group = data.find((g) => g._id === groupId);
+        setSelectedGroup(group);
+      } catch (error) {
+        console.error("Error fetching groups from MongoDB:", error);
+      }
+    };
+
+    if (groupId) fetchGroups();
+  }, [groupId]);
+
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
     const trimmed = newEmail.trim();
@@ -47,6 +71,11 @@ const GroupPage = () => {
 
       if (!user || !user._id) {
         alert("User with this email does not exist.");
+        return;
+      }
+      // Check if already in the group
+      if (selectedGroup?.membersId.includes(user._id)) {
+        alert("This user is already a member of the group.");
         return;
       }
 
@@ -120,30 +149,6 @@ const GroupPage = () => {
     toggleAddMemberForm();
   };
 
-  useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/dashboard/login");
-    }
-  }, [session.status, router]);
-
-  useEffect(() => {
-    document.title = "Group Members";
-  }, []);
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const data = await getGroups();
-        const group = data.find((g) => g._id === groupId);
-        setSelectedGroup(group);
-      } catch (error) {
-        console.error("Error fetching groups from MongoDB:", error);
-      }
-    };
-
-    if (groupId) fetchGroups();
-  }, [groupId]);
-
   const memberIds = selectedGroup?.membersId || [];
 
   if (session.status === "loading") {
@@ -164,7 +169,7 @@ const GroupPage = () => {
           <button className={styles.createMember} onClick={toggleAddMemberForm}>
             Add new Members
           </button>
-          <button className={styles.sendInvite}>Invite a new user</button>
+          {/* <button className={styles.sendInvite}>Invite a new user</button> */}
           <button className={styles.deleteGroup}>Delete this Group</button>
         </div>
         {showAddMemberForm && (

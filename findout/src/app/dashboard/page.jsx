@@ -59,11 +59,23 @@ const Dashboard = () => {
   const [memberEmails, setMemberEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
 
+
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
     const trimmed = newEmail.trim();
 
-    if (!trimmed || memberEmails.includes(trimmed)) return;
+    if (!trimmed) {
+      alert("Email cannot be empty.");
+      return;
+    }
+    if (memberEmails.includes(trimmed)) {
+      alert("This email is already in the list.");
+      return;
+    }
+    if (trimmed === sessionEmail) {
+      alert("You are already a member.");
+      return;
+    }
 
     try {
       const res = await fetch(`/api/users?email=${trimmed}`);
@@ -105,6 +117,11 @@ const Dashboard = () => {
     const uniqueAdminIds = [groupOwnerId];
     const uniqueMembersIds = [...membersIds, groupOwnerId];
     const uniqueMemberEmails = [...memberEmails, currentUser?.email];
+
+    if (!groupOwnerId || uniqueMembersIds.length - 1 === 0) {
+      alert("Please add at least one valid member email.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/groups/create", {
@@ -220,7 +237,7 @@ const Dashboard = () => {
           >
             Create a new group
           </button>
-          <button className={styles.sendInvite}>Invite a new user</button>
+          {/* <button className={styles.sendInvite}>Invite a new user</button> */}
         </div>
         {showCreateGroupForm && (
           <div className="pageContent">
@@ -263,6 +280,7 @@ const Dashboard = () => {
                     className={styles.addEmailButton}
                     type="button"
                     onClick={handleAddEmail}
+                    disabled={!newEmail.trim()}
                   >
                     Add
                   </button>

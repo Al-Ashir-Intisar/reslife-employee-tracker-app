@@ -1,16 +1,24 @@
 "use client";
 import React from "react";
 import styles from "./page.module.css";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const DashboardLayout = ({ children }) => {
+  const router = useRouter();
+
+  const handleRefresh = () => {
+    router.push("/dashboard"); // Navigate to dashboard
+    router.refresh(); // Force a reload of the route
+  };
+
   return (
     <div className="layoutContainer">
-      <Link href="/dashboard">
-        <span className={styles.mainTitle}>Your DashBoard</span>
-      </Link>
+      <span className={styles.mainTitle} onClick={handleRefresh}>
+        Your DashBoard <span style={{ marginLeft: "0.5rem" }}>🔄</span>
+      </span>
       {children}
     </div>
   );
 };
+
 export default DashboardLayout;

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const { Schema } = mongoose;
+const { Schema, Types } = mongoose;
 
 const groupSchema = new Schema(
   {
@@ -10,7 +10,7 @@ const groupSchema = new Schema(
       unique: true,
     },
     membersId: {
-      type: Array,
+      type: [Types.ObjectId],
       required: true,
     },
     description: {
@@ -18,11 +18,11 @@ const groupSchema = new Schema(
       required: false,
     },
     ownerId: {
-      type: String,
+      type: Types.ObjectId,
       required: true,
     },
     adminIds: {
-      type: Array,
+      type: [Types.ObjectId],
       required: false,
     },
   },
