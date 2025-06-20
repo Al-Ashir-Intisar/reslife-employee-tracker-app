@@ -5,6 +5,22 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+async function getGroups(ids) {
+  const res = await fetch("http://localhost:3000/api/groups/byids", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ ids }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch groups from MongoDB");
+  }
+
+  return res.json();
+}
 
 const groupLayout = ({ children }) => {
   const session = useSession();
@@ -23,6 +39,22 @@ const groupLayout = ({ children }) => {
     }
   }, [session.status, router]);
 
+  const [groupName, setGroupName] = useState(null);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (session.status !== "authenticated") return;
+      try {
+        const data = await getGroups([groupId]);
+        setGroupName(data[0].name);
+        // console.log("Fetched Groups:", data);
+      } catch (error) {
+        console.error("Error fetching groups from MongoDB:", error);
+      }
+    };
+    fetchGroups();
+  }, [groupId, session.status]);
+
   if (session.status === "loading") {
     return (
       <div className="pageContent">
@@ -38,7 +70,7 @@ const groupLayout = ({ children }) => {
     return (
       <div className="layoutContainer">
         <span className={styles.mainTitle} onClick={handleRefresh}>
-          Your {groupId} <span style={{ marginLeft: "0.5rem" }}>🔄</span>
+          Group: {groupName} <span style={{ marginLeft: "0.5rem" }}>🔄</span>
         </span>
         {children}
       </div>

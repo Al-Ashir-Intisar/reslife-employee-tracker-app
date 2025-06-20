@@ -4,12 +4,24 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { set } from "mongoose";
 
 async function getGroups() {
   const res = await fetch("http://localhost:3000/api/groups", {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch groups from MongoDB");
+  return res.json();
+}
+
+async function getUsers(memberId) {
+  const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch users from MongoDB");
+  }
   return res.json();
 }
 
@@ -56,6 +68,26 @@ const GroupPage = () => {
 
     if (groupId) fetchGroups();
   }, [groupId]);
+
+  const [selectedMembers, setSelectedMembers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!groupId || !selectedGroup?.membersId?.length) return;
+
+      try {
+        const users = await Promise.all(
+          selectedGroup.membersId.map((id) => getUsers(id))
+        );
+        console.log("Fetched Users:", users);
+        setSelectedMembers(users);
+      } catch (error) {
+        console.error("Error fetching users from MongoDB:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [selectedGroup, groupId]);
 
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
@@ -230,13 +262,13 @@ const GroupPage = () => {
 
         <div className="pageContent">
           <div className={styles.members}>
-            {memberIds.map((memberId) => (
+            {selectedMembers.map((member) => (
               <Link
-                key={memberId}
-                href={`/dashboard/${groupId}/${memberId}`}
+                key={member._id}
+                href={`/dashboard/${groupId}/${member._id}`}
                 className={styles.member}
               >
-                <span className={styles.title}>{memberId}</span>
+                <span className={styles.title}>{member.name}</span>
               </Link>
             ))}
           </div>
