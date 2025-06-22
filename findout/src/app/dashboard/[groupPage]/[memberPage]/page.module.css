@@ -25,10 +25,10 @@
   align-items: flex-start;
   width: 100%; /* optional: ensures full-width container */
   margin-bottom: 20px;
-  margin: 10px ;
+  margin: 10px;
 }
 
-.editMember{
+.editMember {
   background-color: lightblue;
   border: none;
   padding: 10px 20px;
@@ -39,4 +39,36 @@
 .editMember:hover {
   background-color: lightgreen;
   cursor: pointer;
+}
+
+.memberTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.memberTable th,
+.memberTable td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.memberTable th {
+  background-color: orange;
+  color: black;
+  font-weight: bold;
+}
+
+.memberDetails {
+  background-color: black;
+  width: 90vw;
+  min-height: 80vh;
+  margin: 0 auto;
+  padding: 15px;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: top;
+  align-items: center;
 }

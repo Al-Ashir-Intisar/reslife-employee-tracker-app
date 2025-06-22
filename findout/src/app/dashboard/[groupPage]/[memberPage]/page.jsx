@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 // const userRes = await fetch(`/api/users?id=${memberId}`);
 // const user = await userRes.json();
 
-
 async function getUsers(memberId) {
   const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
     cache: "no-store",
@@ -73,10 +72,28 @@ const member = () => {
         <div className={styles.dashButtons}>
           <button className={styles.editMember}>Edit Member Details</button>
         </div>
-        <div className="pageContent">
-          <h1 className={styles.title}>
-            {selectedMember?.name || "Member not found"}
-          </h1>
+        <div className={styles.memberDetails}>
+          {selectedMember ? (
+            <table className={styles.memberTable}>
+              <tbody>
+                <tr>
+                  <th>Name</th>
+                  <td>{selectedMember.name}</td>
+                </tr>
+                <tr>
+                  <th>Email</th>
+                  <td>{selectedMember.email}</td>
+                </tr>
+                <tr>
+                  <th>ID</th>
+                  <td>{selectedMember._id}</td>
+                </tr>
+                {/* Add more rows as needed */}
+              </tbody>
+            </table>
+          ) : (
+            <h1 className={styles.title}>Member not found</h1>
+          )}
         </div>
       </>
     );
