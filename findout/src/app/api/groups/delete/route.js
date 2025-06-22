@@ -28,10 +28,17 @@ export const DELETE = async (req) => {
 
     await Group.findByIdAndDelete(groupId);
 
-    // Remove groupId from all members
+    // Remove groupId from all members of the group and their memberships details
     await User.updateMany(
-      { groupIds: new mongoose.Types.ObjectId(groupId) },
-      { $pull: { groupIds: new mongoose.Types.ObjectId(groupId) } }
+      {
+        groupIds: new mongoose.Types.ObjectId(groupId),
+      },
+      {
+        $pull: {
+          groupIds: new mongoose.Types.ObjectId(groupId),
+          groupMemberships: { groupId: new mongoose.Types.ObjectId(groupId) },
+        },
+      }
     );
 
     return new NextResponse("Group deleted successfully", { status: 200 });
