@@ -25,7 +25,12 @@ export const authOptions = {
             credentials.password,
             user.password
           );
-          if (isPasswordValid) return user;
+          if (isPasswordValid)
+            return {
+              id: user._id,
+              name: user.name,
+              email: user.email,
+            };
           throw new Error("Invalid credentials");
         }
         throw new Error("No user found with this email");
@@ -68,6 +73,15 @@ export const authOptions = {
         console.error("❌ Error in signIn callback:");
         return false;
       }
+    },
+
+    async session({ session }) {
+      await connect();
+      const dbUser = await User.findOne({ email: session.user.email });
+      if (dbUser) {
+        session.user._id = dbUser._id.toString();
+      }
+      return session;
     },
   },
 };

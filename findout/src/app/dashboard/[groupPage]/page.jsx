@@ -79,7 +79,7 @@ const GroupPage = () => {
         const users = await Promise.all(
           selectedGroup.membersId.map((id) => getUsers(id))
         );
-        console.log("Fetched Users:", users);
+        // console.log("Fetched Users:", users);
         setSelectedMembers(users);
       } catch (error) {
         console.error("Error fetching users from MongoDB:", error);
@@ -88,6 +88,35 @@ const GroupPage = () => {
 
     fetchUsers();
   }, [selectedGroup, groupId]);
+
+  // Handler for deleting the group
+  const handleDeleteGroup = async () => {
+    if (!selectedGroup || !groupId) return;
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this group?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch("/api/groups/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId }),
+      });
+
+      if (res.ok) {
+        alert("Group deleted successfully.");
+        router.push("/dashboard");
+      } else {
+        const msg = await res.text();
+        alert("Delete failed: " + msg);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("An unexpected error occurred.");
+    }
+  };
 
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
@@ -181,8 +210,6 @@ const GroupPage = () => {
     toggleAddMemberForm();
   };
 
-  const memberIds = selectedGroup?.membersId || [];
-
   if (session.status === "loading") {
     return (
       <div className="pageContent">
@@ -190,6 +217,10 @@ const GroupPage = () => {
       </div>
     );
   }
+
+  // console.log("Session user id:", session?.data?.user?._id);
+  // console.log("Selected group owner ID:", selectedGroup?.ownerId);
+  // console.log(session?.data?.user?._id === selectedGroup?.ownerId);
 
   if (session.status !== "authenticated") {
     return null;
@@ -202,7 +233,13 @@ const GroupPage = () => {
             Add new Members
           </button>
           {/* <button className={styles.sendInvite}>Invite a new user</button> */}
-          <button className={styles.deleteGroup}>Delete this Group</button>
+          <button
+            className={styles.deleteGroup}
+            onClick={handleDeleteGroup}
+            disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
+          >
+            Delete this Group
+          </button>
         </div>
         {showAddMemberForm && (
           <div className={styles.formDiv}>
