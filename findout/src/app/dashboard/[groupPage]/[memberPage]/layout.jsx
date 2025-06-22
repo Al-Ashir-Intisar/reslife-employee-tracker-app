@@ -43,7 +43,7 @@ const memberLayout = ({ children }) => {
       try {
         // Fetch users from MongoDB
         const data = await getUsers(memberId);
-        console.log("Fetched Users:", data);
+        // console.log("Fetched Users:", data);
         // Find the user that matches the ID from the URL
         // const member = data.find((u) => u._id === memberId);
         setSelectedMember(data);
