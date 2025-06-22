@@ -218,18 +218,25 @@ const GroupPage = () => {
     );
   }
 
-  // console.log("Session user id:", session?.data?.user?._id);
-  // console.log("Selected group owner ID:", selectedGroup?.ownerId);
-  // console.log(session?.data?.user?._id === selectedGroup?.ownerId);
-
   if (session.status !== "authenticated") {
     return null;
   }
+
+  // variable to check if the user is an admin of the group
+  const isAdmin = selectedGroup?.adminIds?.includes(session?.data?.user?._id);
+  console.log("Session user id:", session?.data?.user?._id);
+  console.log("Selected group member IDs:", selectedGroup?.adminIds);
+  console.log(isAdmin);
+
   if (session.status === "authenticated") {
     return (
       <>
         <div className={styles.dashButtons}>
-          <button className={styles.createMember} onClick={toggleAddMemberForm}>
+          <button
+            className={styles.createMember}
+            onClick={toggleAddMemberForm}
+            disabled={!isAdmin}
+          >
             Add new Members
           </button>
           {/* <button className={styles.sendInvite}>Invite a new user</button> */}
