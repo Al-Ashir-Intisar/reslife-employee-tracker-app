@@ -42,6 +42,11 @@ const member = () => {
 
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showEditDetailsForm, setEditDetailsForm] = useState(false);
+
+  const toggleEditDetailsForm = () => {
+    setEditDetailsForm(!showEditDetailsForm);
+  };
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -76,8 +81,7 @@ const member = () => {
         const data = await getGroups([groupId]);
         console.log("Fetched Group:", data[0]);
         setSelectedGroup(data[0]);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching groups from MongoDB:", error);
       }
     };
@@ -85,7 +89,6 @@ const member = () => {
       fetchGroups();
     }
   }, [groupId]); // rerun when groupId changes
-
 
   // console.log("Selected Member:", selectedMember);
   if (session.status === "loading") {
@@ -108,12 +111,88 @@ const member = () => {
     return (
       <>
         <div className={styles.dashButtons}>
-          <button className={styles.editMember} 
-          disabled={!isAdmin}
-          >Edit Member Details</button>
+          <button
+            className={styles.editMember}
+            disabled={!isAdmin}
+            onClick={toggleEditDetailsForm}
+          >
+            Edit Member Details
+          </button>
+        </div>
+        <div className={styles.formDiv}>
+          {showEditDetailsForm && (
+            <form className={styles.editDetailsForm}>
+              <div>
+                <h3>Role:</h3>
+                <input
+                  type="text"
+                  placeholder="Assign a custom role"
+                  className={styles.input}
+                />
+              </div>
+
+              <h3>Certifications</h3>
+              {[1].map((_, i) => (
+                <div key={i}>
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    className={styles.input}
+                  />
+                  <label>Expiration</label>
+                  <input type="date" className={styles.input} />
+                  <button
+                    type="button"
+                    className={styles.removeCertificationsButton}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button type="button" className={styles.addCertificationsButton}>
+                Add Certification
+              </button>
+
+              <h3>Custom Attributes</h3>
+              {[1].map((_, i) => (
+                <div key={i}>
+                  <input
+                    type="text"
+                    placeholder="Key"
+                    className={styles.input}
+                  />
+                  <select>
+                    <option value="string">String</option>
+                    <option value="number">Number</option>
+                    <option value="boolean">Boolean</option>
+                    <option value="date">Date</option>
+                    <option value="duration">Duration</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Value"
+                    className={styles.input}
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeAttributesButton}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button type="button" className={styles.addAttributesButton}>
+                Add Attribute
+              </button>
+
+              <button type="submit" className={styles.submitFormButton}>
+                Save Changes
+              </button>
+            </form>
+          )}
         </div>
         <div className={styles.memberDetails}>
-          {selectedMember ? (
+          {selectedMember && (
             <table className={styles.memberTable}>
               <tbody>
                 <tr>
@@ -131,8 +210,6 @@ const member = () => {
                 {/* Add more rows as needed */}
               </tbody>
             </table>
-          ) : (
-            <h1 className={styles.title}>Member not found</h1>
           )}
         </div>
       </>

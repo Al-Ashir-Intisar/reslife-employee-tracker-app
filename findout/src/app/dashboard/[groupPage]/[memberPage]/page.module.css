@@ -72,3 +72,72 @@
   justify-content: top;
   align-items: center;
 }
+
+.formDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.editDetailsForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: left;
+  gap: 10px;
+  padding: 20px;
+  background-color: lightslategrey;
+  color: black;
+  border-radius: 8px;
+  width: 80%;
+}
+
+.input {
+  padding: 5px;
+  margin: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  font-weight: bold;
+}
+
+
+.removeCertificationsButton,
+.addCertificationsButton,
+.removeAttributesButton,
+.addAttributesButton,
+.submitFormButton {
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.submitFormButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.addAttributesButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.addCertificationsButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.removeCertificationsButton:hover {
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.removeAttributesButton:hover {
+  background-color: orangered;
+  cursor: pointer;
+}
