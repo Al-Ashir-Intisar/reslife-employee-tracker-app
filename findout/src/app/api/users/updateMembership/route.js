@@ -105,22 +105,47 @@ export const PUT = async (req) => {
         membership.role = role;
       }
 
+      // Update or add certifications
       if (processedCerts.length > 0) {
-        const existingNames = new Set(
-          membership.certifications.map((c) => c.name)
-        );
-        const newCerts = processedCerts.filter(
-          (c) => !existingNames.has(c.name)
-        );
-        membership.certifications.push(...newCerts);
+        processedCerts.forEach((newCert) => {
+          const existing = membership.certifications.find(
+            (c) => c.name === newCert.name
+          );
+          if (existing) {
+            existing.expiresAt = newCert.expiresAt;
+            existing.addedBy = newCert.addedBy;
+            existing.addedAt = newCert.addedAt;
+          } else {
+            membership.certifications.push(newCert);
+          }
+        });
       }
 
+      // Update or add custom attributes
       if (processedAttrs.length > 0) {
-        const existingKeys = new Set(
-          membership.customAttributes.map((a) => a.key)
-        );
-        const newAttrs = processedAttrs.filter((a) => !existingKeys.has(a.key));
-        membership.customAttributes.push(...newAttrs);
+        processedAttrs.forEach((newAttr) => {
+          const existing = membership.customAttributes.find(
+            (a) => a.key === newAttr.key
+          );
+          if (existing) {
+            existing.type = newAttr.type;
+            existing.addedBy = newAttr.addedBy;
+            existing.addedAt = newAttr.addedAt;
+
+            // Update only the value that matches the type
+            if ("valueString" in newAttr)
+              existing.valueString = newAttr.valueString;
+            if ("valueNumber" in newAttr)
+              existing.valueNumber = newAttr.valueNumber;
+            if ("valueBoolean" in newAttr)
+              existing.valueBoolean = newAttr.valueBoolean;
+            if ("valueDate" in newAttr) existing.valueDate = newAttr.valueDate;
+            if ("valueDurationMinutes" in newAttr)
+              existing.valueDurationMinutes = newAttr.valueDurationMinutes;
+          } else {
+            membership.customAttributes.push(newAttr);
+          }
+        });
       }
 
       membership.addedBy = new mongoose.Types.ObjectId(session.user._id);

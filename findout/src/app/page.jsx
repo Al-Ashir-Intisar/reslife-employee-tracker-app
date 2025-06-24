@@ -6,23 +6,40 @@ export default function Home() {
     <div className="pageContent">
       <div className={styles.homeTexts}>
         <h1 className={styles.title}>
-          FindOut: A non-essential temporary employee information tracker.
+          FindOut:{" "}
+          <span className={styles.subtitle}>
+            Effortless info tracker for dynamic teams.
+          </span>
         </h1>
         <p className={styles.description}>
-          The app enables teams to quickly reference and manage data about
-          employees such as:
+          Instantly reference and manage team data, so you can focus on what
+          matters.
         </p>
-        <ul className={styles.description}>
-          <li>Certifications</li>
-          <li>Skills and expertise</li>
-          <li>Project history</li>
-          <li>Availability</li>
-          <li>Any custom metadata relevant to internal team workflows</li>
+        <ul className={styles.featureList}>
+          <li>
+            <span className={styles.featureIcon}>🎓</span> Certifications
+          </li>
+          <li>
+            <span className={styles.featureIcon}>🧑‍💼</span> Skills and expertise
+          </li>
+          <li>
+            <span className={styles.featureIcon}>📝</span> Project history
+          </li>
+          <li>
+            <span className={styles.featureIcon}>✅</span> Task assignments
+          </li>
+          <li>
+            <span className={styles.featureIcon}>🔗</span> Custom team metadata
+          </li>
+          <li>
+            <span className={styles.featureIcon}>⏱️</span> Time keeping for work
+            hours
+          </li>
         </ul>
+
         <p className={styles.description}>
-          This system is especially useful in dynamic environments where quick
-          access to detailed employee info helps optimize task delegation and
-          project planning.
+          Perfect for environments where fast access to employee info powers
+          smarter project planning.
         </p>
       </div>
       <div className={styles.homePageLogo}>

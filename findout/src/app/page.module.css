@@ -164,6 +164,8 @@ a.secondary {
   }
 }
 
+/* Styles for homepage */
+
 .homePageLogo {
   width: 20vw;
   height: 40vh;
@@ -198,18 +200,58 @@ a.secondary {
 }
 
 .title {
-  font-size: 80;
-  font-weight: 600;
-  background: linear-gradient(to right, orange, rgb(48, 47, 47));
+  font-size: 2.6rem;
+  font-weight: 700;
+  background: linear-gradient(to right, orange, rgb(245, 73, 0));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin-bottom: 0.7rem;
 }
+
+.subtitle {
+  font-size: 1.3rem;
+  display: block;
+  font-weight: 400;
+  background: none;
+  color: #e0e0e0;
+  -webkit-text-fill-color: unset;
+  margin-top: 0.4rem;
+  margin-bottom: -0.4rem;
+}
+
 .description {
   font-size: 22;
   font-weight: 500;
   background: linear-gradient(to right, rgb(131, 194, 223), rgb(100, 135, 248));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.featureList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.3rem;
+  margin: 0.5rem 0 0.8rem 0;
+  padding-left: 0;
+  list-style: none;
+  width: 100%;
+  font-size: 1.08rem;
+}
+
+.featureList li {
+  display: flex;
+  align-items: center;
+  padding: 0.36rem 1.05rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.featureIcon {
+  font-size: 1.35em;
+  margin-right: 0.48em;
+  vertical-align: -0.18em;
 }
 
 .image {

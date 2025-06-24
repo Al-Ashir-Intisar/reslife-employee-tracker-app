@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { set } from "mongoose";
+import { Salsa } from "next/font/google";
 
 // const userRes = await fetch(`/api/users?id=${memberId}`);
 // const user = await userRes.json();
@@ -48,6 +49,9 @@ const member = () => {
   const [role, setRole] = useState("");
   const [certifications, setCertifications] = useState([]);
   const [customAttributes, setCustomAttributes] = useState([]);
+
+  // variable to track edit mode for user info table
+  const [editMode, setEditMode] = useState(false);
 
   const toggleEditDetailsForm = () => {
     setEditDetailsForm(!showEditDetailsForm);
