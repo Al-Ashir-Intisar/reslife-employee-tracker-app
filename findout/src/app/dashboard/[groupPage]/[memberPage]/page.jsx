@@ -630,7 +630,7 @@ const member = () => {
               </table>
               <div className={styles.rowWiseElementDiv}>
                 <h2>Certifications</h2>
-                {isAdmin && (
+                {isAdmin && !editCertsMode && (
                   <button
                     type="button"
                     className={styles.editButton}
@@ -749,7 +749,7 @@ const member = () => {
               {/* Custom Attributes */}
               <div className={styles.rowWiseElementDiv}>
                 <h2>Custom Attributes</h2>
-                {isAdmin && (
+                {isAdmin && !editAttrsMode && (
                   <button
                     type="button"
                     className={styles.editButton}
