@@ -50,8 +50,124 @@ const member = () => {
   const [certifications, setCertifications] = useState([]);
   const [customAttributes, setCustomAttributes] = useState([]);
 
-  // variable to track edit mode for user info table
-  const [editMode, setEditMode] = useState(false);
+  // variable to track edit mode for user info tables
+  const [editRoleMode, setEditRoleMode] = useState(false);
+  const [editCertsMode, setEditCertsMode] = useState(false);
+  const [editAttrsMode, setEditAttrsMode] = useState(false);
+
+  // Form data mirrors
+  const [editedRole, setEditedRole] = useState("");
+  const [editedCerts, setEditedCerts] = useState([]);
+  const [editedAttrs, setEditedAttrs] = useState([]);
+
+  const updateMemberField = async (payload) => {
+    const errors = [];
+
+    // --- Validate certifications if present ---
+    if (payload.certifications) {
+      payload.certifications.forEach((c, i) => {
+        const nameOk = c.name?.trim() !== "";
+        const dateOk =
+          c.expiresAt?.trim() !== "" && !isNaN(Date.parse(c.expiresAt));
+
+        if (!nameOk || !dateOk) {
+          errors.push(
+            `Certification ${
+              i + 1
+            } is invalid (missing name or valid expiration).`
+          );
+        }
+      });
+    }
+
+    // --- Validate custom attributes if present ---
+    if (payload.customAttributes) {
+      payload.customAttributes.forEach((attr, i) => {
+        const key = attr.key?.trim();
+        const type = attr.type;
+        const value = attr.value;
+
+        if (!key) {
+          errors.push(`Custom Attribute ${i + 1} key is empty.`);
+          return;
+        }
+
+        if (
+          value === undefined ||
+          value === null ||
+          value.toString().trim() === ""
+        ) {
+          errors.push(`Custom Attribute ${i + 1} value is empty.`);
+          return;
+        }
+
+        switch (type) {
+          case "number":
+            if (isNaN(Number(value))) {
+              errors.push(`Custom Attribute ${i + 1} must be a number.`);
+            }
+            break;
+          case "boolean":
+            if (!["true", "false"].includes(value.toString().toLowerCase())) {
+              errors.push(`Custom Attribute ${i + 1} must be true or false.`);
+            }
+            break;
+          case "date":
+            const mmddyyyyRegex =
+              /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
+            if (!mmddyyyyRegex.test(value)) {
+              errors.push(
+                `Custom Attribute ${
+                  i + 1
+                } must be a valid date in "mm/dd/yyyy" format.`
+              );
+            }
+            break;
+          case "duration":
+            if (isNaN(Number(value)) || Number(value) < 0) {
+              errors.push(
+                `Custom Attribute ${
+                  i + 1
+                } duration must be a non-negative number.`
+              );
+            }
+            break;
+          case "string":
+            if (typeof value !== "string") {
+              errors.push(`Custom Attribute ${i + 1} must be a string.`);
+            }
+            break;
+          default:
+            errors.push(`Custom Attribute ${i + 1} has unknown type.`);
+        }
+      });
+    }
+
+    // --- Error handling ---
+    if (errors.length > 0) {
+      alert("Validation Errors:\n\n" + errors.join("\n"));
+      return;
+    }
+
+    // --- API call ---
+    const res = await fetch("/api/users/updateMembership", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId, memberId, ...payload }),
+    });
+
+    if (!res.ok) {
+      const result = await res.json();
+      throw new Error(result.message || "Update failed");
+    }
+
+    window.location.reload();
+    // Reset edit states after update
+    setEditedCerts([]);
+    setEditedAttrs([]);
+    setEditCertsMode(false);
+    setEditAttrsMode(false);
+  };
 
   const toggleEditDetailsForm = () => {
     setEditDetailsForm(!showEditDetailsForm);
@@ -203,8 +319,6 @@ const member = () => {
     setCertifications([]);
     setCustomAttributes([]);
     setEditDetailsForm(false);
-
-    
   };
 
   const cancelEditting = () => {
@@ -255,6 +369,19 @@ const member = () => {
       fetchGroups();
     }
   }, [groupId]); // rerun when groupId changes
+
+  useEffect(() => {
+    if (selectedMember) {
+      const membership = selectedMember.groupMemberships.find(
+        (m) => m.groupId === groupId || m.groupId?._id === groupId
+      );
+      if (membership) {
+        setEditedRole(membership.role || "");
+        setEditedCerts(membership.certifications || []);
+        setEditedAttrs(membership.customAttributes || []);
+      }
+    }
+  }, [selectedMember, groupId]);
 
   // console.log("Selected Member:", selectedMember);
   if (session.status === "loading") {
@@ -458,86 +585,320 @@ const member = () => {
                   <tr>
                     <th>Role</th>
                     <td>
-                      {selectedMember.groupMemberships.find(
-                        (m) =>
-                          m.groupId === groupId || m.groupId?._id === groupId
-                      )?.role || "N/A"}
+                      {editRoleMode ? (
+                        <>
+                          <input
+                            type="text"
+                            value={editedRole}
+                            onChange={(e) => setEditedRole(e.target.value)}
+                          />
+                          <button
+                            className={styles.saveButton}
+                            onClick={async () => {
+                              try {
+                                await updateMemberField({ role: editedRole });
+                              } catch (err) {
+                                alert(err.message);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className={styles.cancelEditButton}
+                            onClick={() => setEditRoleMode(false)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {editedRole || "N/A"}
+                          {isAdmin && (
+                            <button
+                              className={styles.editButton}
+                              onClick={() => setEditRoleMode(true)}
+                            >
+                              🖊️ Edit Field
+                            </button>
+                          )}
+                        </>
+                      )}
                     </td>
                   </tr>
                 </tbody>
               </table>
+              <div className={styles.rowWiseElementDiv}>
+                <h2>Certifications</h2>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={() => {
+                      const found = selectedMember.groupMemberships.find(
+                        (m) =>
+                          m.groupId === groupId || m.groupId?._id === groupId
+                      );
+                      setEditedCerts(found?.certifications || []);
+                      setEditCertsMode(true);
+                    }}
+                  >
+                    🖊️ Edit Table
+                  </button>
+                )}
+              </div>
 
-              {/* Certifications */}
-              <h2>Certifications</h2>
-              <table className={styles.memberTable}>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Expires At</th>
-                    <th>Added By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedMember.groupMemberships
-                    .find(
-                      (m) => m.groupId === groupId || m.groupId?._id === groupId
-                    )
-                    ?.certifications?.map((cert, i) => (
-                      <tr key={i}>
-                        <td>{cert.name}</td>
-                        <td>
-                          {cert.expiresAt
-                            ? new Date(cert.expiresAt).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td>{cert.addedBy}</td>
+              {editCertsMode ? (
+                <>
+                  {editedCerts.map((cert, i) => (
+                    <div key={i} className={styles.editRow}>
+                      <input
+                        className={styles.input}
+                        value={cert.name}
+                        onChange={(e) => {
+                          const copy = [...editedCerts];
+                          copy[i].name = e.target.value;
+                          setEditedCerts(copy);
+                        }}
+                      />
+                      <input
+                        type="date"
+                        className={styles.input}
+                        value={cert.expiresAt?.split("T")[0] || ""}
+                        onChange={(e) => {
+                          const copy = [...editedCerts];
+                          copy[i].expiresAt = e.target.value;
+                          setEditedCerts(copy);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className={styles.removeFieldButton}
+                        onClick={() =>
+                          setEditedCerts(
+                            editedCerts.filter((_, idx) => idx !== i)
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <div className={styles.rowWiseElementDiv}>
+                    <button
+                      type="button"
+                      className={styles.saveButton}
+                      onClick={async () => {
+                        try {
+                          await updateMemberField({
+                            certifications: editedCerts,
+                          });
+                          setEditCertsMode(false);
+                        } catch (err) {
+                          alert(err.message);
+                        }
+                      }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.cancelEditButton}
+                      onClick={() => setEditCertsMode(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <table className={styles.memberTable}>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Expires At</th>
+                        <th>Added By</th>
                       </tr>
-                    )) || (
-                    <tr>
-                      <td colSpan="3">No certifications found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {selectedMember.groupMemberships
+                        .find(
+                          (m) =>
+                            m.groupId === groupId || m.groupId?._id === groupId
+                        )
+                        ?.certifications?.map((cert, i) => (
+                          <tr key={i}>
+                            <td>{cert.name}</td>
+                            <td>
+                              {cert.expiresAt
+                                ? new Date(cert.expiresAt).toLocaleDateString()
+                                : "N/A"}
+                            </td>
+                            <td>{cert.addedBy}</td>
+                          </tr>
+                        )) ?? (
+                        <tr>
+                          <td colSpan="3">No certifications found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
+              )}
 
               {/* Custom Attributes */}
-              <h2>Custom Attributes</h2>
-              <table className={styles.memberTable}>
-                <thead>
-                  <tr>
-                    <th>Key</th>
-                    <th>Type</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedMember.groupMemberships
-                    .find(
-                      (m) => m.groupId === groupId || m.groupId?._id === groupId
-                    )
-                    ?.customAttributes?.map((attr, i) => {
-                      const value =
-                        attr.valueString ??
-                        attr.valueNumber ??
-                        attr.valueBoolean?.toString() ??
-                        (attr.valueDate &&
-                          new Date(attr.valueDate).toLocaleDateString()) ??
-                        attr.valueDurationMinutes?.toString() + " min" ??
-                        "N/A";
-                      return (
-                        <tr key={i}>
-                          <td>{attr.key}</td>
-                          <td>{attr.type}</td>
-                          <td>{value}</td>
-                        </tr>
+              <div className={styles.rowWiseElementDiv}>
+                <h2>Custom Attributes</h2>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={() => {
+                      const found = selectedMember.groupMemberships.find(
+                        (m) =>
+                          m.groupId === groupId || m.groupId?._id === groupId
                       );
-                    }) || (
-                    <tr>
-                      <td colSpan="3">No attributes found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      const formatted =
+                        found?.customAttributes?.map((attr) => {
+                          const val =
+                            attr.valueString ??
+                            attr.valueNumber ??
+                            attr.valueBoolean?.toString() ??
+                            attr.valueDate?.split("T")[0] ??
+                            attr.valueDurationMinutes?.toString() ??
+                            "";
+                          return {
+                            key: attr.key,
+                            type: attr.type,
+                            value: val,
+                          };
+                        }) || [];
+                      setEditedAttrs(formatted);
+                      setEditAttrsMode(true);
+                    }}
+                  >
+                    🖊️ Edit Table
+                  </button>
+                )}
+              </div>
+              {editAttrsMode ? (
+                <>
+                  {editedAttrs.map((attr, i) => (
+                    <div key={i} className={styles.editRow}>
+                      <input
+                        className={styles.input}
+                        value={attr.key}
+                        onChange={(e) => {
+                          const copy = [...editedAttrs];
+                          copy[i].key = e.target.value;
+                          setEditedAttrs(copy);
+                        }}
+                        placeholder="Key"
+                      />
+                      <select
+                        className={styles.input}
+                        value={attr.type}
+                        onChange={(e) => {
+                          const copy = [...editedAttrs];
+                          copy[i].type = e.target.value;
+                          setEditedAttrs(copy);
+                        }}
+                      >
+                        <option value="string">String</option>
+                        <option value="number">Number</option>
+                        <option value="boolean">Boolean</option>
+                        <option value="date">Date</option>
+                        <option value="duration">Duration</option>
+                      </select>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        value={attr.value || ""}
+                        placeholder="Value"
+                        onChange={(e) => {
+                          const copy = [...editedAttrs];
+                          copy[i].value = e.target.value;
+                          setEditedAttrs(copy);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className={styles.removeFieldButton}
+                        onClick={() =>
+                          setEditedAttrs(
+                            editedAttrs.filter((_, idx) => idx !== i)
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className={styles.saveButton}
+                    onClick={async () => {
+                      try {
+                        await updateMemberField({
+                          customAttributes: editedAttrs,
+                        });
+                        setEditAttrsMode(false);
+                      } catch (err) {
+                        alert(err.message);
+                      }
+                    }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.cancelEditButton}
+                    onClick={() => setEditAttrsMode(false)}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <table className={styles.memberTable}>
+                    <thead>
+                      <tr>
+                        <th>Key</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedMember.groupMemberships
+                        .find(
+                          (m) =>
+                            m.groupId === groupId || m.groupId?._id === groupId
+                        )
+                        ?.customAttributes?.map((attr, i) => {
+                          const value =
+                            attr.valueString ??
+                            attr.valueNumber ??
+                            attr.valueBoolean?.toString() ??
+                            (attr.valueDate &&
+                              new Date(attr.valueDate).toLocaleDateString()) ??
+                            attr.valueDurationMinutes?.toString() + " min" ??
+                            "N/A";
+                          return (
+                            <tr key={i}>
+                              <td>{attr.key}</td>
+                              <td>{attr.type}</td>
+                              <td>{value}</td>
+                            </tr>
+                          );
+                        }) ?? (
+                        <tr>
+                          <td colSpan="3">No attributes found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
+              )}
             </>
           )}
         </div>

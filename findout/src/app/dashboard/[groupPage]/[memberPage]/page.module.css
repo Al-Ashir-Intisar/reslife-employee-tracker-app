@@ -155,3 +155,43 @@
   padding: 10px 20px;
   width: 100%;
 }
+
+.editButton,
+.saveButton, 
+.cancelEditButton, 
+.removeFieldButton {
+  background-color: black;
+  color: orange;
+  margin: 2px;
+}
+
+.editButton:hover {
+  color: black;
+  background-color: orange;
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  color: black;
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.cancelEditButton:hover {
+  color: black;
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.removeFieldButton:hover {
+  color: black;
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.rowWiseElementDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+}
