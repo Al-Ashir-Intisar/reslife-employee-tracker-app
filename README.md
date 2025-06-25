@@ -39,9 +39,13 @@ This system is especially useful in dynamic environments where quick access to d
     - Allow a window select for checking hour stats for a user
     - This view is only for admin and user itself
 3. Add profile page for each users and delete option
+    - Think if it's better to just enable edit option for user if it's their own memberPage 
 4. Add variable based group stats on each group page
 5. Add project option in the group page (create, modify, delete functionality)
+    - Add event dates in the project details 
+    - Hall furniture inventory option
 6. Group page will have two tables projects and members
 7. Add project detail page similar to member page
 8. Add group level stats on the dashboard page for each group
+9. Ultimately could allow a floor plan page to be able to record which room is used for what in the log run plan
 
