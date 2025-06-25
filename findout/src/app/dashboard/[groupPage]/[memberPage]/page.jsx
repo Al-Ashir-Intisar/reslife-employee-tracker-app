@@ -834,29 +834,31 @@ const member = () => {
                       </button>
                     </div>
                   ))}
-                  <button
-                    type="button"
-                    className={styles.saveButton}
-                    onClick={async () => {
-                      try {
-                        await updateMemberField({
-                          customAttributes: editedAttrs,
-                        });
-                        setEditAttrsMode(false);
-                      } catch (err) {
-                        alert(err.message);
-                      }
-                    }}
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.cancelEditButton}
-                    onClick={() => setEditAttrsMode(false)}
-                  >
-                    Cancel
-                  </button>
+                  <div className={styles.rowWiseElementDiv}>
+                    <button
+                      type="button"
+                      className={styles.saveButton}
+                      onClick={async () => {
+                        try {
+                          await updateMemberField({
+                            customAttributes: editedAttrs,
+                          });
+                          setEditAttrsMode(false);
+                        } catch (err) {
+                          alert(err.message);
+                        }
+                      }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.cancelEditButton}
+                      onClick={() => setEditAttrsMode(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>
