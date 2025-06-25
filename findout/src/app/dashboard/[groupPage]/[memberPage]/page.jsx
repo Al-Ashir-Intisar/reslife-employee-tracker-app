@@ -59,6 +59,8 @@ const member = () => {
   const [editedRole, setEditedRole] = useState("");
   const [editedCerts, setEditedCerts] = useState([]);
   const [editedAttrs, setEditedAttrs] = useState([]);
+  const [removedCertIds, setRemovedCertIds] = useState([]);
+  const [removedAttrIds, setRemovedAttrIds] = useState([]);
 
   const updateMemberField = async (payload) => {
     const errors = [];
@@ -170,6 +172,48 @@ const member = () => {
     setEditAttrsMode(false);
   };
 
+  // handler for removing certifications
+  const removeMarkedCertifications = async (ids) => {
+    if (!ids.length) return;
+
+    const res = await fetch("/api/users/deleteMembershipItem", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        groupId,
+        memberId,
+        type: "certification",
+        itemIds: ids, // send array
+      }),
+    });
+
+    if (!res.ok) {
+      const result = await res.json();
+      throw new Error(result.message || "Delete failed");
+    }
+  };
+
+  // handler for removing custom attributes
+  const removeMarkedAttributes = async (ids) => {
+    if (!ids.length) return;
+
+    const res = await fetch("/api/users/deleteMembershipItem", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        groupId,
+        memberId,
+        type: "customAttribute", // important: matches route logic
+        itemIds: ids, // array of _id strings
+      }),
+    });
+
+    if (!res.ok) {
+      const result = await res.json();
+      throw new Error(result.message || "Failed to delete attributes");
+    }
+  };
+
   const toggleEditDetailsForm = () => {
     setEditDetailsForm(!showEditDetailsForm);
   };
@@ -178,33 +222,53 @@ const member = () => {
     e.preventDefault();
     const errors = [];
 
-    // --- Field-by-field validation (none mandatory individually) ---
     const hasValidRole = role.trim() !== "";
 
-    const hasValidCerts = certifications.some((c, i) => {
+    // --- Validate Certifications ---
+    let hasValidCerts = false;
+    const certNames = new Set();
+    certifications.forEach((c, i) => {
       const nameOk = c.name?.trim() !== "";
       const dateOk =
         c.expiresAt?.trim() !== "" && !isNaN(Date.parse(c.expiresAt));
+
       if (!nameOk || !dateOk) {
         errors.push(
           `Certification ${
             i + 1
           } is invalid (missing name or valid expiration).`
         );
-        return false;
+        return;
       }
-      return true;
+
+      const lowerName = c.name.trim().toLowerCase();
+      if (certNames.has(lowerName)) {
+        errors.push(`Duplicate certification name found: "${c.name}"`);
+        return;
+      }
+      certNames.add(lowerName);
+      hasValidCerts = true;
     });
 
-    const hasValidAttrs = customAttributes.some((attr, i) => {
+    // --- Validate Custom Attributes ---
+    let hasValidAttrs = false;
+    const attrKeys = new Set();
+    customAttributes.forEach((attr, i) => {
       const key = attr.key?.trim();
       const type = attr.type;
       const value = attr.value;
 
       if (!key) {
         errors.push(`Custom Attribute ${i + 1} key is empty.`);
-        return false;
+        return;
       }
+
+      const lowerKey = key.toLowerCase();
+      if (attrKeys.has(lowerKey)) {
+        errors.push(`Duplicate attribute key found: "${key}"`);
+        return;
+      }
+      attrKeys.add(lowerKey);
 
       if (
         value === undefined ||
@@ -212,24 +276,21 @@ const member = () => {
         value.toString().trim() === ""
       ) {
         errors.push(`Custom Attribute ${i + 1} value is empty.`);
-        return false;
+        return;
       }
 
       switch (type) {
         case "number":
           if (isNaN(Number(value))) {
             errors.push(`Custom Attribute ${i + 1} must be a number.`);
-            return false;
           }
           break;
         case "boolean":
           if (!["true", "false"].includes(value.toString().toLowerCase())) {
             errors.push(`Custom Attribute ${i + 1} must be true or false.`);
-            return false;
           }
           break;
         case "date":
-          // Match mm/dd/yyyy with leading zeros allowed (e.g. 01/09/2025)
           const mmddyyyyRegex =
             /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
           if (!mmddyyyyRegex.test(value)) {
@@ -238,10 +299,8 @@ const member = () => {
                 i + 1
               } must be a valid date in "mm/dd/yyyy" format.`
             );
-            return false;
           }
           break;
-
         case "duration":
           if (isNaN(Number(value)) || Number(value) < 0) {
             errors.push(
@@ -249,24 +308,24 @@ const member = () => {
                 i + 1
               } duration must be a non-negative number.`
             );
-            return false;
           }
           break;
         case "string":
           if (typeof value !== "string") {
             errors.push(`Custom Attribute ${i + 1} must be a string.`);
-            return false;
           }
           break;
+        default:
+          errors.push(`Unknown attribute type: "${type}"`);
       }
 
-      return true;
+      hasValidAttrs = true;
     });
 
     // --- At least one field must be valid ---
     if (!hasValidRole && !hasValidCerts && !hasValidAttrs) {
       alert(
-        "Please enter at least one valid field to save changes. \n Fix the following issues:\n\n" +
+        "Please enter at least one valid field to save changes.\n\n" +
           errors.join("\n")
       );
       return;
@@ -277,22 +336,16 @@ const member = () => {
       return;
     }
 
-    // All good: submit
     const data = {
       ...(hasValidRole && { role }),
       ...(hasValidCerts && { certifications }),
       ...(hasValidAttrs && { customAttributes }),
     };
 
-    console.log("Submitted Membership Data:", data);
-
-    // --- API call ---
     const body = {
       groupId,
       memberId,
-      ...(hasValidRole && { role }),
-      ...(hasValidCerts && { certifications }),
-      ...(hasValidAttrs && { customAttributes }),
+      ...data,
     };
 
     try {
@@ -309,13 +362,12 @@ const member = () => {
       }
 
       console.log("Member details updated successfully!");
-      window.location.reload(); // refresh to show updated member details
+      window.location.reload();
     } catch (err) {
       console.error("Submit error:", err);
       alert("An error occurred while updating membership.");
     }
 
-    // Reset
     setRole("");
     setCertifications([]);
     setCustomAttributes([]);
@@ -410,9 +462,11 @@ const member = () => {
             disabled={!isAdmin}
             onClick={toggleEditDetailsForm}
           >
-            Add Member Details
+            Add/Edit Member Details
           </button>
         </div>
+
+        {/* Add member details form */}
         <div className={styles.formDiv}>
           {showEditDetailsForm && (
             <form className={styles.editDetailsForm} onSubmit={handleSubmit}>
@@ -564,6 +618,8 @@ const member = () => {
             </form>
           )}
         </div>
+
+        {/* Member Info Tables */}
         <div className={styles.memberDetails}>
           {selectedMember && (
             <>
@@ -645,6 +701,7 @@ const member = () => {
                       );
                       setEditedCerts(
                         (found?.certifications || []).map((c) => ({
+                          _id: c._id,
                           name: c.name,
                           expiresAt: c.expiresAt,
                         }))
@@ -684,11 +741,16 @@ const member = () => {
                       <button
                         type="button"
                         className={styles.removeFieldButton}
-                        onClick={() =>
+                        onClick={() => {
+                          const toRemove = editedCerts[i]?._id;
+                          // console.log(editedCerts[i]);
+                          if (toRemove) {
+                            setRemovedCertIds((prev) => [...prev, toRemove]);
+                          }
                           setEditedCerts(
                             editedCerts.filter((_, idx) => idx !== i)
-                          )
-                        }
+                          );
+                        }}
                       >
                         Remove
                       </button>
@@ -700,10 +762,14 @@ const member = () => {
                       className={styles.saveButton}
                       onClick={async () => {
                         try {
+                          await removeMarkedCertifications(removedCertIds);
+                          console.log(removedCertIds);
                           await updateMemberField({
                             certifications: editedCerts,
                           });
                           setEditCertsMode(false);
+                          setEditedCerts([]);
+                          setRemovedCertIds([]);
                         } catch (err) {
                           alert(err.message);
                         }
@@ -717,6 +783,7 @@ const member = () => {
                       onClick={() => {
                         setEditCertsMode(false);
                         setEditedCerts([]);
+                        setRemovedCertIds([]);
                       }}
                     >
                       Cancel
@@ -771,18 +838,41 @@ const member = () => {
                         (m) =>
                           m.groupId === groupId || m.groupId?._id === groupId
                       );
+
                       const formatted =
-                        found?.customAttributes?.map((attr) => ({
-                          key: attr.key,
-                          type: attr.type,
-                          value:
-                            attr.valueString ??
-                            attr.valueNumber ??
-                            attr.valueBoolean?.toString() ??
-                            attr.valueDate?.split("T")[0] ??
-                            attr.valueDurationMinutes?.toString() ??
-                            "",
-                        })) || [];
+                        found?.customAttributes?.map((attr) => {
+                          let value = "";
+                          switch (attr.type) {
+                            case "string":
+                              value = attr.valueString ?? "";
+                              break;
+                            case "number":
+                              value = attr.valueNumber?.toString() ?? "";
+                              break;
+                            case "boolean":
+                              value =
+                                typeof attr.valueBoolean === "boolean"
+                                  ? attr.valueBoolean.toString()
+                                  : "";
+                              break;
+                            case "date":
+                              value = attr.valueDate?.split("T")[0] ?? "";
+                              break;
+                            case "duration":
+                              value =
+                                attr.valueDurationMinutes?.toString() ?? "";
+                              break;
+                            default:
+                              value = "";
+                          }
+
+                          return {
+                            _id: attr._id,
+                            key: attr.key,
+                            type: attr.type,
+                            value,
+                          };
+                        }) || [];
 
                       setEditedAttrs(formatted);
                       setEditAttrsMode(true);
@@ -835,11 +925,19 @@ const member = () => {
                       <button
                         type="button"
                         className={styles.removeFieldButton}
-                        onClick={() =>
-                          setEditedAttrs(
-                            editedAttrs.filter((_, idx) => idx !== i)
-                          )
-                        }
+                        onClick={() => {
+                          const toRemoveAttr = editedAttrs[i]?._id;
+                          console.log(toRemoveAttr);
+                          if (toRemoveAttr) {
+                            setRemovedAttrIds((prev) => [
+                              ...prev,
+                              toRemoveAttr,
+                            ]);
+                          }
+                          setEditedAttrs((prev) =>
+                            prev.filter((_, idx) => idx !== i)
+                          );
+                        }}
                       >
                         Remove
                       </button>
@@ -851,10 +949,13 @@ const member = () => {
                       className={styles.saveButton}
                       onClick={async () => {
                         try {
+                          await removeMarkedAttributes(removedAttrIds);
                           await updateMemberField({
                             customAttributes: editedAttrs,
-                          });
+                          }); // update
                           setEditAttrsMode(false);
+                          setEditedAttrs([]);
+                          setRemovedAttrIds([]);
                         } catch (err) {
                           alert(err.message);
                         }
@@ -862,12 +963,14 @@ const member = () => {
                     >
                       Save
                     </button>
+
                     <button
                       type="button"
                       className={styles.cancelEditButton}
                       onClick={() => {
                         setEditAttrsMode(false);
                         setEditedAttrs([]);
+                        setRemovedAttrIds([]);
                       }}
                     >
                       Cancel
