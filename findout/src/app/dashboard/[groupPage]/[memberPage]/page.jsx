@@ -55,7 +55,7 @@ const member = () => {
   const [editCertsMode, setEditCertsMode] = useState(false);
   const [editAttrsMode, setEditAttrsMode] = useState(false);
 
-  // Form data mirrors
+  // Form data user input state variables
   const [editedRole, setEditedRole] = useState("");
   const [editedCerts, setEditedCerts] = useState([]);
   const [editedAttrs, setEditedAttrs] = useState([]);
@@ -149,6 +149,7 @@ const member = () => {
       return;
     }
 
+    console.log("Payload: ", payload);
     // --- API call ---
     const res = await fetch("/api/users/updateMembership", {
       method: "PUT",
@@ -606,7 +607,10 @@ const member = () => {
                           </button>
                           <button
                             className={styles.cancelEditButton}
-                            onClick={() => setEditRoleMode(false)}
+                            onClick={() => {
+                              setEditRoleMode(false);
+                              setEditedRole("");
+                            }}
                           >
                             Cancel
                           </button>
@@ -639,7 +643,13 @@ const member = () => {
                         (m) =>
                           m.groupId === groupId || m.groupId?._id === groupId
                       );
-                      setEditedCerts(found?.certifications || []);
+                      setEditedCerts(
+                        (found?.certifications || []).map((c) => ({
+                          name: c.name,
+                          expiresAt: c.expiresAt,
+                        }))
+                      );
+
                       setEditCertsMode(true);
                     }}
                   >
@@ -704,7 +714,10 @@ const member = () => {
                     <button
                       type="button"
                       className={styles.cancelEditButton}
-                      onClick={() => setEditCertsMode(false)}
+                      onClick={() => {
+                        setEditCertsMode(false);
+                        setEditedCerts([]);
+                      }}
                     >
                       Cancel
                     </button>
@@ -759,20 +772,18 @@ const member = () => {
                           m.groupId === groupId || m.groupId?._id === groupId
                       );
                       const formatted =
-                        found?.customAttributes?.map((attr) => {
-                          const val =
+                        found?.customAttributes?.map((attr) => ({
+                          key: attr.key,
+                          type: attr.type,
+                          value:
                             attr.valueString ??
                             attr.valueNumber ??
                             attr.valueBoolean?.toString() ??
                             attr.valueDate?.split("T")[0] ??
                             attr.valueDurationMinutes?.toString() ??
-                            "";
-                          return {
-                            key: attr.key,
-                            type: attr.type,
-                            value: val,
-                          };
-                        }) || [];
+                            "",
+                        })) || [];
+
                       setEditedAttrs(formatted);
                       setEditAttrsMode(true);
                     }}
@@ -854,7 +865,10 @@ const member = () => {
                     <button
                       type="button"
                       className={styles.cancelEditButton}
-                      onClick={() => setEditAttrsMode(false)}
+                      onClick={() => {
+                        setEditAttrsMode(false);
+                        setEditedAttrs([]);
+                      }}
                     >
                       Cancel
                     </button>
@@ -877,14 +891,35 @@ const member = () => {
                             m.groupId === groupId || m.groupId?._id === groupId
                         )
                         ?.customAttributes?.map((attr, i) => {
-                          const value =
-                            attr.valueString ??
-                            attr.valueNumber ??
-                            attr.valueBoolean?.toString() ??
-                            (attr.valueDate &&
-                              new Date(attr.valueDate).toLocaleDateString()) ??
-                            attr.valueDurationMinutes?.toString() + " min" ??
-                            "N/A";
+                          let value;
+                          switch (attr.type) {
+                            case "string":
+                              value = attr.valueString ?? "N/A";
+                              break;
+                            case "number":
+                              value = attr.valueNumber?.toString() ?? "N/A";
+                              break;
+                            case "boolean":
+                              value =
+                                typeof attr.valueBoolean === "boolean"
+                                  ? attr.valueBoolean.toString()
+                                  : "N/A";
+                              break;
+                            case "date":
+                              value = attr.valueDate
+                                ? new Date(attr.valueDate).toLocaleDateString()
+                                : "N/A";
+                              break;
+                            case "duration":
+                              value =
+                                attr.valueDurationMinutes != null
+                                  ? `${attr.valueDurationMinutes} min`
+                                  : "N/A";
+                              break;
+                            default:
+                              value = "N/A";
+                          }
+
                           return (
                             <tr key={i}>
                               <td>{attr.key}</td>
