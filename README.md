@@ -30,3 +30,18 @@ This system is especially useful in dynamic environments where quick access to d
 - **Database**: MongoDB
 - **Deployment**: TBD (Vercel / Docker)
 
+
+## ToDo
+1. Add Delete Member Button for admin of the group
+2. Add Track Hour with location record for each users
+    - Needs automatic limit when work starts and not recorded end time
+    - Last two weeks work stats bar chart
+    - Allow a window select for checking hour stats for a user
+    - This view is only for admin and user itself
+3. Add profile page for each users and delete option
+4. Add variable based group stats on each group page
+5. Add project option in the group page (create, modify, delete functionality)
+6. Group page will have two tables projects and members
+7. Add project detail page similar to member page
+8. Add group level stats on the dashboard page for each group
+
