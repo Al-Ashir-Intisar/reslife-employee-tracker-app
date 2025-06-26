@@ -236,12 +236,12 @@ const member = () => {
 
       const result = await res.json();
 
-      if (!res.ok) {
+      if (res.ok) {
+        alert("Member successfully removed from the group.");
+        router.push(`/dashboard/${groupId}`);
+      } else {
         throw new Error(result.message || "Failed to remove member.");
       }
-
-      alert("Member successfully removed from the group.");
-      router.push(`/dashboard/group/${groupId}`);
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
