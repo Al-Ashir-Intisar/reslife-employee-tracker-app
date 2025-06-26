@@ -55,6 +55,7 @@ const member = () => {
   const [customAttributes, setCustomAttributes] = useState([]);
 
   // variable to track edit mode for user info tables
+  const [editGroupAdminMode, setEditGroupAdminMode] = useState(false);
   const [editRoleMode, setEditRoleMode] = useState(false);
   const [editCertsMode, setEditCertsMode] = useState(false);
   const [editAttrsMode, setEditAttrsMode] = useState(false);
@@ -244,6 +245,27 @@ const member = () => {
       }
     } catch (err) {
       alert(`Error: ${err.message}`);
+    }
+  };
+
+  const handleToggleAdmin = async (userId, currentlyAdmin) => {
+    try {
+      const res = await fetch("/api/groups/toggleAdmin", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId: selectedGroup._id,
+          userId,
+          makeAdmin: !currentlyAdmin,
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed");
+
+      window.location.reload();
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -481,11 +503,16 @@ const member = () => {
   if (session.status !== "authenticated") {
     return null;
   }
-  // Check if the user is an admin
+  // Check if the user is an admin or an owner
+  const isOwner = selectedGroup?.ownerId === session?.data?.user?._id;
+  const memberIsOwner = selectedGroup?.ownerId === memberId;
   const isAdmin = selectedGroup?.adminIds?.includes(session?.data?.user?._id);
   console.log("Session User ID:", session?.data?.user?._id);
   console.log("Group Admin IDs:", selectedGroup?.adminIds);
+  console.log("Group Owner ID:", selectedGroup?.ownerId);
   console.log("Is Admin:", isAdmin);
+  console.log("Session user is the owner:", isOwner);
+  console.log("Member of this page is owner:", memberIsOwner);
 
   if (session.status === "authenticated") {
     return (
@@ -500,7 +527,7 @@ const member = () => {
           </button>
           <button
             className={styles.deleteMember}
-            disabled={!isAdmin}
+            disabled={!isAdmin || memberIsOwner}
             onClick={() => handleRemoveMember({ groupId, memberId })}
           >
             Remove member from this Group
@@ -671,17 +698,47 @@ const member = () => {
                   <tr>
                     <th>Name</th>
                     <td>{selectedMember.name}</td>
+                    <th>Group Owner</th>
+                    <td>
+                      {selectedGroup?.ownerId === selectedMember._id
+                        ? "Yes"
+                        : "No"}
+                    </td>
                   </tr>
                   <tr>
                     <th>Email</th>
                     <td>{selectedMember.email}</td>
+                    <th>Group Admin</th>
+                    <td>
+                      {selectedGroup?.adminIds?.includes(selectedMember._id)
+                        ? "Yes"
+                        : "No"}
+
+                      {isOwner &&
+                        selectedGroup?.ownerId !== selectedMember._id && (
+                          <button
+                            className={styles.editButton}
+                            onClick={() =>
+                              handleToggleAdmin(
+                                selectedMember._id,
+                                selectedGroup.adminIds.includes(
+                                  selectedMember._id
+                                )
+                              )
+                            }
+                          >
+                            🖊️{" "}
+                            {selectedGroup.adminIds.includes(selectedMember._id)
+                              ? "Remove Admin Access"
+                              : "Give Admin Access"}
+                          </button>
+                        )}
+                    </td>
                   </tr>
                   <tr>
                     <th>ID</th>
                     <td>{selectedMember._id}</td>
-                  </tr>
-                  <tr>
-                    <th>Role</th>
+                    <th>Group Role</th>
                     <td>
                       {editRoleMode ? (
                         <>
@@ -729,6 +786,7 @@ const member = () => {
                   </tr>
                 </tbody>
               </table>
+
               <div className={styles.rowWiseElementDiv}>
                 <h2>Certifications</h2>
                 {isAdmin && !editCertsMode && (
