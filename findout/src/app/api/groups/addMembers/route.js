@@ -15,7 +15,7 @@ export const PUT = async (req) => {
     await connect();
 
     const groupObjectId = new mongoose.Types.ObjectId(groupId);
-    const userId = new mongoose.Types.ObjectId(session.user.id);
+    const userId = new mongoose.Types.ObjectId(session.user._id);
 
     const group = await Group.findById(groupObjectId);
     if (!group) return new NextResponse("Group not found", { status: 404 });

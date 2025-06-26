@@ -23,12 +23,15 @@
   display: flex;
   justify-content: flex-start; /* ensures left alignment */
   align-items: flex-start;
+  flex-wrap: wrap;
   width: 100%; /* optional: ensures full-width container */
   margin-bottom: 20px;
   margin: 10px;
+  gap: 20px;
 }
 
-.editMember {
+.editMember, 
+.deleteMember {
   background-color: lightblue;
   border: none;
   padding: 10px 20px;
@@ -38,6 +41,11 @@
 
 .editMember:hover {
   background-color: lightgreen;
+  cursor: pointer;
+}
+
+.deleteMember:hover {
+  background-color: orangered;
   cursor: pointer;
 }
 

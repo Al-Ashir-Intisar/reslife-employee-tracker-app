@@ -23,13 +23,17 @@ async function getUsers(memberId) {
 }
 
 async function getGroups(groupIds) {
-  const res = await fetch(`http://localhost:3000/api/groups?id=${groupIds}`, {
+  const res = await fetch("http://localhost:3000/api/groups/byids", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
+    body: JSON.stringify({ ids: groupIds }),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch group from MongoDB");
+    throw new Error("Failed to fetch specific groups from MongoDB");
   }
+
   return res.json();
 }
 
@@ -211,6 +215,35 @@ const member = () => {
     if (!res.ok) {
       const result = await res.json();
       throw new Error(result.message || "Failed to delete attributes");
+    }
+  };
+
+  const handleRemoveMember = async ({ groupId, memberId }) => {
+    const confirmed = window.confirm(
+      "⚠️ This will permanently remove all information related to this member for this group.\n\n" +
+        "This includes role, certifications, and attributes.\n\n" +
+        "Are you sure you want to continue?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch("/api/users/removeFromGroup", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId, memberId }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to remove member.");
+      }
+
+      alert("Member successfully removed from the group.");
+      router.push(`/dashboard/group/${groupId}`);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
     }
   };
 
@@ -412,7 +445,8 @@ const member = () => {
       try {
         // Fetch groups from MongoDB
         const data = await getGroups([groupId]);
-        // console.log("Fetched Group:", data[0]);
+        console.log("Fetched Group:", data);
+        console.log("ID of group to fetch", groupId);
         setSelectedGroup(data[0]);
       } catch (error) {
         console.error("Error fetching groups from MongoDB:", error);
@@ -449,9 +483,9 @@ const member = () => {
   }
   // Check if the user is an admin
   const isAdmin = selectedGroup?.adminIds?.includes(session?.data?.user?._id);
-  // console.log("Session User ID:", session?.data?.user?._id);
-  // console.log("Group Admin IDs:", selectedGroup?.adminIds);
-  // console.log("Is Admin:", isAdmin);
+  console.log("Session User ID:", session?.data?.user?._id);
+  console.log("Group Admin IDs:", selectedGroup?.adminIds);
+  console.log("Is Admin:", isAdmin);
 
   if (session.status === "authenticated") {
     return (
@@ -463,6 +497,13 @@ const member = () => {
             onClick={toggleEditDetailsForm}
           >
             Add/Edit Member Details
+          </button>
+          <button
+            className={styles.deleteMember}
+            disabled={!isAdmin}
+            onClick={() => handleRemoveMember({ groupId, memberId })}
+          >
+            Remove member from this Group
           </button>
         </div>
 

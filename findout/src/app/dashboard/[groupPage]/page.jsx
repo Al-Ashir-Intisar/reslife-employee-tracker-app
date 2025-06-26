@@ -223,10 +223,13 @@ const GroupPage = () => {
   }
 
   // variable to check if the user is an admin of the group
-  const isAdmin = selectedGroup?.adminIds?.includes(session?.data?.user?._id);
-  // console.log("Session user id:", session?.data?.user?._id);
-  // console.log("Selected group member IDs:", selectedGroup?.adminIds);
-  // console.log(isAdmin);
+  const isAdmin = selectedGroup?.adminIds
+    ?.map((id) => id.toString())
+    .includes(session?.data?.user?._id);
+
+  console.log("Session user id:", session?.data?.user?._id);
+  console.log("Selected group member IDs:", selectedGroup?.adminIds);
+  console.log(isAdmin);
 
   if (session.status === "authenticated") {
     return (
