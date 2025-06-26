@@ -32,20 +32,25 @@ This system is especially useful in dynamic environments where quick access to d
 
 
 ## ToDo
-1. Add Delete Member Button for admin of the group
-2. Add Track Hour with location record for each users
+- Add Delete Member Button for admin of the group: Completed ✅: 6/25/2025
+- Add button to make the user an admin/give admin previlages: Completed ✅: 6/25/2025
+    - Only owner can give that previlages and take it away
+    - If the member is an admin then show remove admin previlages (only to owner) button if not then show opposite
+- Add button for admin to give certificates or attributes to all members of a group at once: Completed: 
+- Add Track Hour with location record for each users
     - Needs automatic limit when work starts and not recorded end time
     - Last two weeks work stats bar chart
     - Allow a window select for checking hour stats for a user
     - This view is only for admin and user itself
-3. Add profile page for each users and delete option
+- Add profile page for each users and delete option
     - Think if it's better to just enable edit option for user if it's their own memberPage 
-4. Add variable based group stats on each group page
-5. Add project option in the group page (create, modify, delete functionality)
+- Add variable based group stats on each group page
+- Add project option in the group page (create, modify, delete functionality)
     - Add event dates in the project details 
     - Hall furniture inventory option
-6. Group page will have two tables projects and members
-7. Add project detail page similar to member page
-8. Add group level stats on the dashboard page for each group
-9. Ultimately could allow a floor plan page to be able to record which room is used for what in the log run plan
+- Group page will have two tables projects and members
+- Add project detail page similar to member page
+- Add group level stats on the dashboard page for each group
+- Ultimately could allow a floor plan page to be able to record which room is used for what in the log run plan
+- Storage Management inventory
 
