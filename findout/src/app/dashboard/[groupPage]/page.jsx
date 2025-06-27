@@ -47,6 +47,103 @@ const GroupPage = () => {
   const [memberEmails, setMemberEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
 
+  // states for adding attribute to members in bulk
+  const [showAddAttributeForm, setShowAddAttributeForm] = useState(false);
+
+  const [attrFormUserIds, setAttrFormUserIds] = useState([]);
+  const [attrFormKey, setAttrFormKey] = useState("");
+  const [attrFormType, setAttrFormType] = useState("string");
+  const [attrFormValue, setAttrFormValue] = useState("");
+
+  // handle function for saving the add attribute changes
+  const handleBulkAddAttribute = async (e) => {
+    e.preventDefault();
+
+    if (!attrFormKey.trim()) {
+      alert("Attribute key is required.");
+      return;
+    }
+    if (attrFormUserIds.length === 0) {
+      alert("Select at least one user.");
+      return;
+    }
+
+    // Validate the value based on type
+    let attrValueObj = {};
+    switch (attrFormType) {
+      case "string":
+        attrValueObj = { valueString: attrFormValue };
+        break;
+      case "number":
+        if (isNaN(Number(attrFormValue))) {
+          alert("Value must be a valid number.");
+          return;
+        }
+        attrValueObj = { valueNumber: Number(attrFormValue) };
+        break;
+      case "boolean":
+        if (attrFormValue !== "true" && attrFormValue !== "false") {
+          alert("Select true or false for a boolean value.");
+          return;
+        }
+        attrValueObj = { valueBoolean: attrFormValue === "true" };
+        break;
+      case "date":
+        if (!attrFormValue) {
+          alert("Pick a date.");
+          return;
+        }
+        attrValueObj = { valueDate: attrFormValue };
+        break;
+      case "duration":
+        if (isNaN(Number(attrFormValue)) || Number(attrFormValue) < 0) {
+          alert("Enter a non-negative number for duration (minutes).");
+          return;
+        }
+        attrValueObj = { valueDurationMinutes: Number(attrFormValue) };
+        break;
+    }
+
+    // Prepare API payload: add this attribute to all selected users
+    const edited = attrFormUserIds.map((userId) => ({
+      userId,
+      attr: {
+        key: attrFormKey.trim(),
+        type: attrFormType,
+        ...attrValueObj,
+      },
+    }));
+
+    try {
+      const res = await fetch("/api/users/bulkAddAttribute", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          pendingAttrChanges: { edited, deleted: [] },
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add attribute");
+      // Reset form
+      setAttrFormUserIds([]);
+      setAttrFormKey("");
+      setAttrFormType("string");
+      setAttrFormValue("");
+      setShowAddAttributeForm(false);
+      window.location.reload(); // or refetch data
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // state variables for adding certification to members in bulk
+  const [showAddCertificationForm, setShowAddCertificationForm] =
+    useState(false);
+
+  const [certFormUserIds, setCertFormUserIds] = useState([]);
+  const [certFormName, setCertFormName] = useState("");
+  const [certFormExpiresAt, setCertFormExpiresAt] = useState("");
+
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/dashboard/login");
@@ -172,6 +269,54 @@ const GroupPage = () => {
     edited: [],
     deleted: [],
   });
+
+  // handle function for adding certification to members in bulk
+  const handleBulkAddCertification = async (e) => {
+    e.preventDefault();
+
+    if (!certFormName.trim()) {
+      alert("Certification name is required.");
+      return;
+    }
+    if (!certFormExpiresAt) {
+      alert("Expiration date is required.");
+      return;
+    }
+    if (certFormUserIds.length === 0) {
+      alert("Select at least one user.");
+      return;
+    }
+
+    // Prepare API payload: add this certification to all selected users
+    const edited = certFormUserIds.map((userId) => ({
+      userId,
+      cert: {
+        name: certFormName.trim(),
+        expiresAt: new Date(certFormExpiresAt).toISOString(),
+        // Optionally: issuedAt, issuedBy, notes, etc.
+      },
+    }));
+
+    try {
+      const res = await fetch("/api/users/bulkAddCerts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          pendingCertChanges: { edited, deleted: [] },
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add certification");
+      // Reset form
+      setCertFormUserIds([]);
+      setCertFormName("");
+      setCertFormExpiresAt("");
+      setShowAddCertificationForm(false);
+      window.location.reload(); // or refetch data
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
 
   // handle for certifications deleting and editting in bulk
   const handleSavePendingCertChanges = async (changes = pendingCertChanges) => {
@@ -390,12 +535,22 @@ const GroupPage = () => {
             Add new Members
           </button>
           {/* <button className={styles.sendInvite}>Invite a new user</button> */}
-          <button className={styles.createMember} disabled={!isAdmin}>
+          <button
+            className={styles.createMember}
+            disabled={!isAdmin}
+            onClick={() => setShowAddAttributeForm(true)}
+          >
             Add an Attribute
           </button>
-          <button className={styles.createMember} disabled={!isAdmin}>
+
+          <button
+            className={styles.createMember}
+            disabled={!isAdmin}
+            onClick={() => setShowAddCertificationForm(true)}
+          >
             Add a Certification
           </button>
+
           <button
             className={styles.deleteGroup}
             onClick={handleDeleteGroup}
@@ -404,6 +559,185 @@ const GroupPage = () => {
             Delete this Group
           </button>
         </div>
+        {showAddAttributeForm && (
+          <div className={styles.formDiv}>
+            <form
+              className={styles.addMemberForm}
+              onSubmit={handleBulkAddAttribute}
+            >
+              <h3>Add Attribute to Multiple Members</h3>
+
+              <label>Assign to:</label>
+              <Select
+                isMulti
+                options={selectedMembers.map((m) => ({
+                  value: m._id,
+                  label: m.name || m.email,
+                }))}
+                value={selectedMembers
+                  .filter((m) => attrFormUserIds.includes(m._id))
+                  .map((m) => ({
+                    value: m._id,
+                    label: m.name || m.email,
+                  }))}
+                onChange={(selected) =>
+                  setAttrFormUserIds(selected.map((opt) => opt.value))
+                }
+                placeholder="Select members..."
+                className="react-select-container"
+                classNamePrefix="react-select"
+                styles={customStyles}
+              />
+
+              <label>Key:</label>
+              <input
+                type="text"
+                value={attrFormKey}
+                onChange={(e) => setAttrFormKey(e.target.value)}
+                required
+              />
+
+              <label>Type:</label>
+              <select
+                value={attrFormType}
+                onChange={(e) => {
+                  setAttrFormType(e.target.value);
+                  setAttrFormValue(""); // reset value on type change
+                }}
+              >
+                <option value="string">String</option>
+                <option value="number">Number</option>
+                <option value="boolean">Boolean</option>
+                <option value="date">Date</option>
+                <option value="duration">Duration</option>
+              </select>
+
+              <label>Value:</label>
+              {/* Input depends on type */}
+              {attrFormType === "string" && (
+                <input
+                  type="text"
+                  value={attrFormValue}
+                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  required
+                />
+              )}
+              {attrFormType === "number" && (
+                <input
+                  type="number"
+                  value={attrFormValue}
+                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  required
+                />
+              )}
+              {attrFormType === "boolean" && (
+                <select
+                  value={attrFormValue}
+                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              )}
+              {attrFormType === "date" && (
+                <input
+                  type="date"
+                  value={attrFormValue}
+                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  required
+                />
+              )}
+              {attrFormType === "duration" && (
+                <input
+                  type="number"
+                  min="0"
+                  value={attrFormValue}
+                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  required
+                  placeholder="Minutes"
+                />
+              )}
+
+              <div className={styles.formButtonGroup}>
+                <button type="submit" className={styles.submitButton}>
+                  Add Attribute
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowAddAttributeForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {showAddCertificationForm && (
+          <div className={styles.formDiv}>
+            <form
+              className={styles.addMemberForm}
+              onSubmit={handleBulkAddCertification}
+            >
+              <h3>Add Certification to Multiple Members</h3>
+
+              <label>Assign to:</label>
+              <Select
+                isMulti
+                options={selectedMembers.map((m) => ({
+                  value: m._id,
+                  label: m.name || m.email,
+                }))}
+                value={selectedMembers
+                  .filter((m) => certFormUserIds.includes(m._id))
+                  .map((m) => ({
+                    value: m._id,
+                    label: m.name || m.email,
+                  }))}
+                onChange={(selected) =>
+                  setCertFormUserIds(selected.map((opt) => opt.value))
+                }
+                placeholder="Select members..."
+                className="react-select-container"
+                classNamePrefix="react-select"
+                styles={customStyles}
+              />
+
+              <label>Name:</label>
+              <input
+                type="text"
+                value={certFormName}
+                onChange={(e) => setCertFormName(e.target.value)}
+                required
+              />
+
+              <label>Expires At:</label>
+              <input
+                type="date"
+                value={certFormExpiresAt}
+                onChange={(e) => setCertFormExpiresAt(e.target.value)}
+                required
+              />
+
+              <div className={styles.formButtonGroup}>
+                <button type="submit" className={styles.submitButton}>
+                  Add Certification
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowAddCertificationForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {showAddMemberForm && (
           <div className={styles.formDiv}>
             <form className={styles.addMemberForm}>
