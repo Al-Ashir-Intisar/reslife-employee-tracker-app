@@ -415,8 +415,11 @@ const GroupPage = () => {
 
                   return (
                     <tr key={memberId}>
-                      <td>
-                        <Link href={`/dashboard/${groupId}/${memberId}`}>
+                      <td className={styles.memberPageLinkCell}>
+                        <Link
+                          href={`/dashboard/${groupId}/${memberId}`}
+                          className={styles.fullCellLink}
+                        >
                           {member.name}
                         </Link>
                       </td>
