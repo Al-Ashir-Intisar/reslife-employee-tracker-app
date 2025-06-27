@@ -203,6 +203,39 @@ const GroupPage = () => {
     }
   };
 
+  // state variable for attributes editting and deleting in group page in bulk
+  const [editingAttrs, setEditingAttrs] = useState({});
+  const [pendingAttrChanges, setPendingAttrChanges] = useState({
+    edited: [],
+    deleted: [],
+  });
+
+  // handle for attributes deleting and editing in bulk
+  const handleSavePendingAttrChanges = async (changes = pendingAttrChanges) => {
+    try {
+      const res = await fetch("/api/users/bulkUpdateAttrs", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId, // make sure groupId is in your component scope
+          pendingAttrChanges: changes,
+        }),
+      });
+
+      if (!res.ok) {
+        const result = await res.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to save attribute changes");
+      }
+
+      // Success: Reset states and optionally reload data/UI
+      setEditingAttrs({});
+      setPendingAttrChanges({ edited: [], deleted: [] });
+      window.location.reload(); // optional: for instant refresh, or you can refetch data instead
+    } catch (err) {
+      alert("Error saving attribute changes: " + err.message);
+    }
+  };
+
   // Handler for deleting the group
   const handleDeleteGroup = async () => {
     if (!selectedGroup || !groupId) return;
@@ -717,10 +750,26 @@ const GroupPage = () => {
                 />
               </div>
             </div>
-            <div>
-              {isAdmin && attrFilters.length != 0 && (
-                <button className={styles.saveChangesButton}>
+            <div className={styles.tableButtonsDiv}>
+              {isAdmin && attrFilters.length !== 0 && (
+                <button
+                  className={styles.saveChangesButton}
+                  onClick={() =>
+                    handleSavePendingAttrChanges(pendingAttrChanges)
+                  }
+                >
                   Save Changes
+                </button>
+              )}
+              {isAdmin && attrFilters.length !== 0 && (
+                <button
+                  className={styles.cancelChangesButton}
+                  onClick={() => {
+                    setPendingAttrChanges({ edited: [], deleted: [] });
+                    setEditingAttrs({});
+                  }}
+                >
+                  Cancel Changes
                 </button>
               )}
             </div>
@@ -730,13 +779,13 @@ const GroupPage = () => {
                   <th>Name</th>
                   <th>Attribute Key</th>
                   <th>Value</th>
+                  {isAdmin && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {selectedMembers
                   .filter((member) => {
                     if (attrFilters.length === 0) return true;
-
                     const membership = member.groupMemberships?.find(
                       (m) => m.groupId === groupId
                     );
@@ -752,13 +801,16 @@ const GroupPage = () => {
                     return (membership?.customAttributes || [])
                       .filter((attr) => attrFilters.includes(attr.key))
                       .map((attr, i) => {
+                        const attrKey = `${member._id}_${attr.key}`;
+
+                        // Get value for display
                         let value = "N/A";
                         switch (attr.type) {
                           case "string":
-                            value = attr.valueString;
+                            value = attr.valueString ?? "";
                             break;
                           case "number":
-                            value = attr.valueNumber?.toString();
+                            value = attr.valueNumber?.toString() ?? "";
                             break;
                           case "boolean":
                             value =
@@ -768,8 +820,10 @@ const GroupPage = () => {
                             break;
                           case "date":
                             value = attr.valueDate
-                              ? new Date(attr.valueDate).toLocaleDateString()
-                              : "N/A";
+                              ? new Date(attr.valueDate)
+                                  .toISOString()
+                                  .slice(0, 10)
+                              : "";
                             break;
                           case "duration":
                             value =
@@ -779,11 +833,346 @@ const GroupPage = () => {
                             break;
                         }
 
+                        const isEditing = editingAttrs[attrKey] !== undefined;
+                        const isDeleting = pendingAttrChanges.deleted.some(
+                          (item) =>
+                            item.attr.key === attr.key &&
+                            item.userId === member._id
+                        );
+
                         return (
-                          <tr key={`${member._id}-${attr.key}-${i}`}>
+                          <tr key={attrKey}>
                             <td>{member.name}</td>
                             <td>{attr.key}</td>
-                            <td>{value}</td>
+                            <td>
+                              {isEditing ? (
+                                <>
+                                  {/* String input */}
+                                  {attr.type === "string" && (
+                                    <input
+                                      type="text"
+                                      value={editingAttrs[attrKey] ?? ""}
+                                      onChange={(e) => {
+                                        setEditingAttrs((prev) => ({
+                                          ...prev,
+                                          [attrKey]: e.target.value,
+                                        }));
+                                        setPendingAttrChanges((prev) => {
+                                          const updated = {
+                                            ...attr,
+                                            valueString: e.target.value,
+                                          };
+                                          return {
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.attr.key !== attr.key ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                attr: updated,
+                                              },
+                                            ],
+                                          };
+                                        });
+                                      }}
+                                    />
+                                  )}
+
+                                  {/* Number input */}
+                                  {attr.type === "number" && (
+                                    <input
+                                      type="number"
+                                      value={editingAttrs[attrKey] ?? ""}
+                                      step="any"
+                                      onChange={(e) => {
+                                        setEditingAttrs((prev) => ({
+                                          ...prev,
+                                          [attrKey]: e.target.value,
+                                        }));
+                                        setPendingAttrChanges((prev) => {
+                                          const num =
+                                            e.target.value === ""
+                                              ? ""
+                                              : Number(e.target.value);
+                                          const updated = {
+                                            ...attr,
+                                            valueNumber: num,
+                                          };
+                                          return {
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.attr.key !== attr.key ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                attr: updated,
+                                              },
+                                            ],
+                                          };
+                                        });
+                                      }}
+                                    />
+                                  )}
+
+                                  {/* Boolean select */}
+                                  {attr.type === "boolean" && (
+                                    <select
+                                      value={
+                                        editingAttrs[attrKey] === undefined
+                                          ? attr.valueBoolean === true
+                                            ? "true"
+                                            : attr.valueBoolean === false
+                                            ? "false"
+                                            : ""
+                                          : editingAttrs[attrKey]
+                                      }
+                                      onChange={(e) => {
+                                        setEditingAttrs((prev) => ({
+                                          ...prev,
+                                          [attrKey]: e.target.value,
+                                        }));
+                                        setPendingAttrChanges((prev) => {
+                                          const updated = {
+                                            ...attr,
+                                            valueBoolean:
+                                              e.target.value === "true",
+                                          };
+                                          return {
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.attr.key !== attr.key ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                attr: updated,
+                                              },
+                                            ],
+                                          };
+                                        });
+                                      }}
+                                    >
+                                      <option value="">Select...</option>
+                                      <option value="true">true</option>
+                                      <option value="false">false</option>
+                                    </select>
+                                  )}
+
+                                  {/* Date input */}
+                                  {attr.type === "date" && (
+                                    <input
+                                      type="date"
+                                      value={editingAttrs[attrKey] ?? ""}
+                                      onChange={(e) => {
+                                        setEditingAttrs((prev) => ({
+                                          ...prev,
+                                          [attrKey]: e.target.value,
+                                        }));
+                                        setPendingAttrChanges((prev) => {
+                                          const updated = {
+                                            ...attr,
+                                            valueDate: e.target.value,
+                                          };
+                                          return {
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.attr.key !== attr.key ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                attr: updated,
+                                              },
+                                            ],
+                                          };
+                                        });
+                                      }}
+                                    />
+                                  )}
+
+                                  {/* Duration (minutes) */}
+                                  {attr.type === "duration" && (
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={
+                                          editingAttrs[attrKey]?.replace?.(
+                                            /\D/g,
+                                            ""
+                                          ) ?? ""
+                                        }
+                                        onChange={(e) => {
+                                          const val = e.target.value.replace(
+                                            /\D/g,
+                                            ""
+                                          );
+                                          setEditingAttrs((prev) => ({
+                                            ...prev,
+                                            [attrKey]: val,
+                                          }));
+                                          setPendingAttrChanges((prev) => {
+                                            const updated = {
+                                              ...attr,
+                                              valueDurationMinutes: Number(val),
+                                            };
+                                            return {
+                                              ...prev,
+                                              edited: [
+                                                ...prev.edited.filter(
+                                                  (item) =>
+                                                    item.attr.key !==
+                                                      attr.key ||
+                                                    item.userId !== member._id
+                                                ),
+                                                {
+                                                  userId: member._id,
+                                                  attr: updated,
+                                                },
+                                              ],
+                                            };
+                                          });
+                                        }}
+                                        style={{ width: "60px" }}
+                                      />
+                                      <span style={{ marginLeft: "0.25em" }}>
+                                        min
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                value
+                              )}
+                            </td>
+                            {isAdmin && (
+                              <td>
+                                <div className={styles.tableButtonsDiv}>
+                                  {/* Edit Button */}
+                                  {isEditing ? (
+                                    <button
+                                      className={styles.editButton}
+                                      onClick={() => {
+                                        setEditingAttrs((prev) => {
+                                          const updated = { ...prev };
+                                          delete updated[attrKey];
+                                          return updated;
+                                        });
+                                        setPendingAttrChanges((prev) => ({
+                                          ...prev,
+                                          edited: prev.edited.filter(
+                                            (item) =>
+                                              item.attr.key !== attr.key ||
+                                              item.userId !== member._id
+                                          ),
+                                        }));
+                                      }}
+                                    >
+                                      ❌
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className={styles.editButton}
+                                      disabled={isDeleting}
+                                      onClick={() => {
+                                        // Initial edit value per type
+                                        let initialEditValue = "";
+                                        switch (attr.type) {
+                                          case "string":
+                                            initialEditValue =
+                                              attr.valueString ?? "";
+                                            break;
+                                          case "number":
+                                            initialEditValue =
+                                              attr.valueNumber?.toString() ??
+                                              "";
+                                            break;
+                                          case "boolean":
+                                            initialEditValue =
+                                              attr.valueBoolean === true
+                                                ? "true"
+                                                : attr.valueBoolean === false
+                                                ? "false"
+                                                : "";
+                                            break;
+                                          case "date":
+                                            initialEditValue = attr.valueDate
+                                              ? new Date(attr.valueDate)
+                                                  .toISOString()
+                                                  .slice(0, 10)
+                                              : "";
+                                            break;
+                                          case "duration":
+                                            initialEditValue =
+                                              attr.valueDurationMinutes != null
+                                                ? attr.valueDurationMinutes.toString()
+                                                : "";
+                                            break;
+                                        }
+                                        setEditingAttrs((prev) => ({
+                                          ...prev,
+                                          [attrKey]: initialEditValue,
+                                        }));
+                                      }}
+                                    >
+                                      🖊️
+                                    </button>
+                                  )}
+
+                                  {/* Delete Button */}
+                                  {isDeleting ? (
+                                    <button
+                                      className={styles.deleteButton}
+                                      onClick={() => {
+                                        setPendingAttrChanges((prev) => ({
+                                          ...prev,
+                                          deleted: prev.deleted.filter(
+                                            (item) =>
+                                              !(
+                                                item.attr.key === attr.key &&
+                                                item.userId === member._id
+                                              )
+                                          ),
+                                        }));
+                                      }}
+                                    >
+                                      ❌
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className={styles.deleteButton}
+                                      disabled={isEditing}
+                                      onClick={() => {
+                                        setPendingAttrChanges((prev) => ({
+                                          ...prev,
+                                          deleted: [
+                                            ...prev.deleted,
+                                            { userId: member._id, attr },
+                                          ],
+                                        }));
+                                      }}
+                                    >
+                                      🗑️
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            )}
                           </tr>
                         );
                       });
