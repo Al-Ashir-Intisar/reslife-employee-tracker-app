@@ -48,3 +48,19 @@ a {
   justify-content: left;
   flex-direction: column;
 }
+
+
+.react-select__control {
+  background-color: #fff;
+  border-color: #ffa500;
+  color: #000;
+}
+
+.react-select__multi-value {
+  background-color: #ffa500;
+  color: #000;
+}
+
+.react-select__menu {
+  z-index: 100;
+}

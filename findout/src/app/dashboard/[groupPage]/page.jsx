@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Select from "react-select";
 import { set } from "mongoose";
 
 async function getGroups() {
@@ -31,6 +32,7 @@ const GroupPage = () => {
   const params = useParams();
   const groupId = params.groupPage;
 
+  // state for storing the info about current group of the page
   const [selectedGroup, setSelectedGroup] = useState(null);
 
   // State to control the visibility of the add member form
@@ -69,6 +71,7 @@ const GroupPage = () => {
     if (groupId) fetchGroups();
   }, [groupId]);
 
+  // state variable to store selected members
   const [selectedMembers, setSelectedMembers] = useState([]);
 
   useEffect(() => {
@@ -88,6 +91,80 @@ const GroupPage = () => {
 
     fetchUsers();
   }, [selectedGroup, groupId]);
+
+  // state to store filtered certifications
+  const [certFilters, setCertFilters] = useState([]);
+  const [allCertNames, setAllCertNames] = useState([]);
+
+  // function to extract all unique certifications names
+  useEffect(() => {
+    const allNames = new Set();
+    selectedMembers.forEach((member) => {
+      const membership = member.groupMemberships?.find(
+        (m) => m.groupId === groupId
+      );
+      membership?.certifications?.forEach((c) => {
+        if (c.name?.trim()) allNames.add(c.name.trim());
+      });
+    });
+    setAllCertNames([...allNames].sort());
+  }, [selectedMembers, groupId]);
+
+  // Convert your cert names into options
+  const certOptions = allCertNames.map((name) => ({
+    value: name,
+    label: name,
+  }));
+  console.log("certOptions: ", certOptions);
+
+  // Attribute filter state
+  const [attrFilters, setAttrFilters] = useState([]);
+  const [allAttrKeys, setAllAttrKeys] = useState([]);
+
+  // Extract unique attribute keys
+  useEffect(() => {
+    const attrKeys = new Set();
+    selectedMembers.forEach((member) => {
+      const membership = member.groupMemberships?.find(
+        (m) => m.groupId === groupId
+      );
+      membership?.customAttributes?.forEach((attr) => {
+        if (attr.key?.trim()) attrKeys.add(attr.key.trim());
+      });
+    });
+    setAllAttrKeys([...attrKeys].sort());
+  }, [selectedMembers, groupId]);
+
+  // Convert to Select options
+  const attrOptions = allAttrKeys.map((key) => ({
+    value: key,
+    label: key,
+  }));
+  console.log("attrOptions: ", attrOptions);
+
+  // custom styles for the select component
+  const customStyles = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: "#fff",
+      borderColor: "#ffa500",
+      color: "#000",
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: "#ffa500",
+      color: "#000",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 100,
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+      color: "#000",
+    }),
+  };
 
   // Handler for deleting the group
   const handleDeleteGroup = async () => {
@@ -308,16 +385,196 @@ const GroupPage = () => {
         )}
 
         <div className="pageContent">
-          <div className={styles.members}>
-            {selectedMembers.map((member) => (
-              <Link
-                key={member._id}
-                href={`/dashboard/${groupId}/${member._id}`}
-                className={styles.member}
-              >
-                <span className={styles.title}>{member.name}</span>
-              </Link>
-            ))}
+          <div className={styles.memberDetails}>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Group Role</th>
+                  <th>Team Role</th>
+                  <th>Count: Certifications</th>
+                  <th>Count: Attributes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedMembers.map((member) => {
+                  const memberId = member._id;
+                  const isAdmin = selectedGroup?.adminIds?.includes(memberId);
+                  const isOwner = selectedGroup?.ownerId === memberId;
+
+                  const groupRole = isOwner
+                    ? "Owner"
+                    : isAdmin
+                    ? "Admin"
+                    : "Member";
+
+                  const membership = member.groupMemberships?.find(
+                    (m) => m.groupId === groupId
+                  );
+                  const role = membership?.role || "N/A";
+
+                  return (
+                    <tr key={memberId}>
+                      <td>
+                        <Link href={`/dashboard/${groupId}/${memberId}`}>
+                          {member.name}
+                        </Link>
+                      </td>
+                      <td>{groupRole}</td>
+                      <td>{role}</td>
+                      <td>{(membership?.certifications || []).length}</td>
+                      <td>{(membership?.customAttributes || []).length}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <div className={styles.filtersDiv}>
+              <div>
+                {" "}
+                <label>Filter by Certifications:</label>
+                <Select
+                  isMulti
+                  options={certOptions}
+                  value={certOptions.filter((o) =>
+                    certFilters.includes(o.value)
+                  )}
+                  onChange={(selected) =>
+                    setCertFilters(selected.map((s) => s.value))
+                  }
+                  placeholder="Select certifications..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={customStyles}
+                />
+              </div>
+            </div>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Certification</th>
+                  <th>Expires At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedMembers
+                  .filter((member) => {
+                    if (certFilters.length === 0) return true;
+
+                    const membership = member.groupMemberships?.find(
+                      (m) => m.groupId === groupId
+                    );
+                    const certNames = (membership?.certifications || []).map(
+                      (c) => c.name
+                    );
+
+                    // Show member if they have at least one of the selected certs
+                    return certFilters.some((filter) =>
+                      certNames.includes(filter)
+                    );
+                  })
+                  .flatMap((member) => {
+                    const membership = member.groupMemberships?.find(
+                      (m) => m.groupId === groupId
+                    );
+                    return (membership?.certifications || [])
+                      .filter((c) => certFilters.includes(c.name))
+                      .map((c, i) => (
+                        <tr key={`${member._id}-${i}`}>
+                          <td>{member.name}</td>
+                          <td>{c.name}</td>
+                          <td>{new Date(c.expiresAt).toLocaleDateString()}</td>
+                        </tr>
+                      ));
+                  })}
+              </tbody>
+            </table>
+            <div className={styles.filtersDiv}>
+              <div>
+                <label>Filter by Attributes:</label>
+                <Select
+                  isMulti
+                  options={attrOptions}
+                  value={attrOptions.filter((o) =>
+                    attrFilters.includes(o.value)
+                  )}
+                  onChange={(selected) =>
+                    setAttrFilters(selected.map((s) => s.value))
+                  }
+                  placeholder="Select attributes..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={customStyles}
+                />
+              </div>
+            </div>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Attribute Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedMembers
+                  .filter((member) => {
+                    if (attrFilters.length === 0) return true;
+
+                    const membership = member.groupMemberships?.find(
+                      (m) => m.groupId === groupId
+                    );
+                    const keys = (membership?.customAttributes || []).map(
+                      (a) => a.key
+                    );
+                    return attrFilters.some((f) => keys.includes(f));
+                  })
+                  .flatMap((member) => {
+                    const membership = member.groupMemberships?.find(
+                      (m) => m.groupId === groupId
+                    );
+                    return (membership?.customAttributes || [])
+                      .filter((attr) => attrFilters.includes(attr.key))
+                      .map((attr, i) => {
+                        let value = "N/A";
+                        switch (attr.type) {
+                          case "string":
+                            value = attr.valueString;
+                            break;
+                          case "number":
+                            value = attr.valueNumber?.toString();
+                            break;
+                          case "boolean":
+                            value =
+                              typeof attr.valueBoolean === "boolean"
+                                ? attr.valueBoolean.toString()
+                                : "N/A";
+                            break;
+                          case "date":
+                            value = attr.valueDate
+                              ? new Date(attr.valueDate).toLocaleDateString()
+                              : "N/A";
+                            break;
+                          case "duration":
+                            value =
+                              attr.valueDurationMinutes != null
+                                ? `${attr.valueDurationMinutes} min`
+                                : "N/A";
+                            break;
+                        }
+
+                        return (
+                          <tr key={`${member._id}-${attr.key}-${i}`}>
+                            <td>{member.name}</td>
+                            <td>{attr.key}</td>
+                            <td>{value}</td>
+                          </tr>
+                        );
+                      });
+                  })}
+              </tbody>
+            </table>
           </div>
         </div>
       </>
