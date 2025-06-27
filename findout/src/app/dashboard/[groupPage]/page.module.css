@@ -165,7 +165,6 @@
   overflow-x: auto;
 }
 
-
 .filtersDiv {
   display: flex;
   justify-content: space-between; /* ensures left alignment */
@@ -174,7 +173,6 @@
   margin-top: 20px;
   margin: 10px;
   gap: 10px;
-
 }
 
 .memberPageLinkCell {
@@ -187,11 +185,54 @@
   display: block;
   width: 100%;
   height: 100%;
-  padding: 8px 12px; 
+  padding: 8px 12px;
   text-decoration: none;
   color: inherit;
 }
 
 .fullCellLink:hover {
   background-color: lightgreen;
+}
+
+
+/* table edit and delete button */
+.editButton {
+  background-color: white;
+}
+
+.deleteButton {
+  background-color: white;
+}
+
+.editButton:hover {
+  background-color: darkorange;
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background-color: darkred;
+  cursor: pointer;
+}
+
+.tableButtonsDiv {
+  justify-content: right;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.saveChangesButton, 
+.cancelChangesButton {
+  background-color: white;
+  padding: 5px;
+}
+
+.saveChangesButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.cancelChangesButton:hover {
+  background-color: orangered;
+  cursor: pointer;
 }

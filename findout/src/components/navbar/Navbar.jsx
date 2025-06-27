@@ -15,11 +15,11 @@ const links = [
     title: "Dashboard",
     url: "/dashboard",
   },
-  {
-    id: 3,
-    title: "Contact",
-    url: "/contact",
-  },
+  // {
+  //   id: 3,
+  //   title: "Contact",
+  //   url: "/contact",
+  // },
 ];
 
 const Navbar = () => {

@@ -166,6 +166,43 @@ const GroupPage = () => {
     }),
   };
 
+  // state variable for certifications editing and deleting in group page
+  const [editingCerts, setEditingCerts] = useState({});
+  const [pendingCertChanges, setPendingCertChanges] = useState({
+    edited: [],
+    deleted: [],
+  });
+
+  // handle for certifications deleting and editting in bulk
+  const handleSavePendingCertChanges = async (changes = pendingCertChanges) => {
+    // console.log("Pending Cert Changes to Save:", changes);
+
+    try {
+      const res = await fetch("/api/users/bulkUpdateCerts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          pendingCertChanges: changes,
+        }),
+      });
+
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.message || "Failed to save changes");
+      }
+
+      // Clear state after successful update
+      setEditingCerts({});
+      setPendingCertChanges({ edited: [], deleted: [] });
+
+      // Optional reload
+      window.location.reload();
+    } catch (err) {
+      alert("Error saving changes: " + err.message);
+    }
+  };
+
   // Handler for deleting the group
   const handleDeleteGroup = async () => {
     if (!selectedGroup || !groupId) return;
@@ -452,12 +489,44 @@ const GroupPage = () => {
                 />
               </div>
             </div>
+            <div className={styles.tableButtonsDiv}>
+              {isAdmin && certFilters.length !== 0 && (
+                <button
+                  className={styles.saveChangesButton}
+                  onClick={() =>
+                    handleSavePendingCertChanges(pendingCertChanges)
+                  }
+                >
+                  Save Changes
+                </button>
+              )}
+
+              {isAdmin && certFilters.length != 0 && (
+                <button
+                  className={styles.cancelChangesButton}
+                  onClick={() => {
+                    setPendingCertChanges({
+                      edited: [],
+                      deleted: [],
+                    });
+                    setEditingCerts({});
+                    console.log(
+                      "Pending certs after cancel: ",
+                      pendingCertChanges
+                    );
+                  }}
+                >
+                  Cancel Changes
+                </button>
+              )}
+            </div>
             <table className={styles.memberTable}>
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Certification</th>
                   <th>Expires At</th>
+                  {isAdmin && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -472,7 +541,6 @@ const GroupPage = () => {
                       (c) => c.name
                     );
 
-                    // Show member if they have at least one of the selected certs
                     return certFilters.some((filter) =>
                       certNames.includes(filter)
                     );
@@ -481,13 +549,150 @@ const GroupPage = () => {
                     const membership = member.groupMemberships?.find(
                       (m) => m.groupId === groupId
                     );
+
                     return (membership?.certifications || [])
                       .filter((c) => certFilters.includes(c.name))
                       .map((c, i) => (
                         <tr key={`${member._id}-${i}`}>
                           <td>{member.name}</td>
                           <td>{c.name}</td>
-                          <td>{new Date(c.expiresAt).toLocaleDateString()}</td>
+                          <td>
+                            {editingCerts[`${member._id}_${c._id}`] ? (
+                              <input
+                                type="date"
+                                value={editingCerts[`${member._id}_${c._id}`]}
+                                onChange={(e) => {
+                                  const newDate = e.target.value;
+                                  setEditingCerts((prev) => ({
+                                    ...prev,
+                                    [`${member._id}_${c._id}`]: newDate,
+                                  }));
+
+                                  setPendingCertChanges((prev) => {
+                                    const updated = {
+                                      ...c,
+                                      expiresAt: new Date(
+                                        newDate
+                                      ).toISOString(),
+                                    };
+                                    return {
+                                      ...prev,
+                                      edited: [
+                                        ...prev.edited.filter(
+                                          (item) =>
+                                            item.cert._id !== c._id ||
+                                            item.userId !== member._id
+                                        ),
+                                        { userId: member._id, cert: updated },
+                                      ],
+                                    };
+                                  });
+                                }}
+                              />
+                            ) : (
+                              new Date(c.expiresAt).toLocaleDateString()
+                            )}
+                          </td>
+                          {isAdmin && (
+                            <td>
+                              <div className={styles.tableButtonsDiv}>
+                                {/* Edit Mode */}
+                                {editingCerts[`${member._id}_${c._id}`] ? (
+                                  <>
+                                    <button
+                                      className={styles.editButton}
+                                      onClick={() => {
+                                        setEditingCerts((prev) => {
+                                          const updated = { ...prev };
+                                          delete updated[
+                                            `${member._id}_${c._id}`
+                                          ];
+                                          return updated;
+                                        });
+                                        setPendingCertChanges((prev) => ({
+                                          ...prev,
+                                          edited: prev.edited.filter(
+                                            (item) =>
+                                              item.cert._id !== c._id ||
+                                              item.userId !== member._id
+                                          ),
+                                        }));
+                                      }}
+                                    >
+                                      ❌
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    className={styles.editButton}
+                                    disabled={
+                                      // disable if this cert is marked for deletion
+                                      pendingCertChanges.deleted.some(
+                                        (item) =>
+                                          item.cert._id === c._id &&
+                                          item.userId === member._id
+                                      )
+                                    }
+                                    onClick={() => {
+                                      setEditingCerts((prev) => ({
+                                        ...prev,
+                                        [`${member._id}_${c._id}`]:
+                                          c.expiresAt?.split("T")[0] || "",
+                                      }));
+                                    }}
+                                  >
+                                    🖊️
+                                  </button>
+                                )}
+
+                                {/* Delete Mode */}
+                                {pendingCertChanges.deleted.some(
+                                  (item) =>
+                                    item.cert._id === c._id &&
+                                    item.userId === member._id
+                                ) ? (
+                                  <button
+                                    className={styles.deleteButton}
+                                    onClick={() => {
+                                      // ❌ Cancel deletion
+                                      setPendingCertChanges((prev) => ({
+                                        ...prev,
+                                        deleted: prev.deleted.filter(
+                                          (item) =>
+                                            !(
+                                              item.cert._id === c._id &&
+                                              item.userId === member._id
+                                            )
+                                        ),
+                                      }));
+                                    }}
+                                  >
+                                    ❌
+                                  </button>
+                                ) : (
+                                  <button
+                                    className={styles.deleteButton}
+                                    disabled={
+                                      // disable if this cert is being edited
+                                      !!editingCerts[`${member._id}_${c._id}`]
+                                    }
+                                    onClick={() => {
+                                      // 🗑️ Mark for deletion
+                                      setPendingCertChanges((prev) => ({
+                                        ...prev,
+                                        deleted: [
+                                          ...prev.deleted,
+                                          { userId: member._id, cert: c },
+                                        ],
+                                      }));
+                                    }}
+                                  >
+                                    🗑️
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ));
                   })}
@@ -511,6 +716,13 @@ const GroupPage = () => {
                   styles={customStyles}
                 />
               </div>
+            </div>
+            <div>
+              {isAdmin && attrFilters.length != 0 && (
+                <button className={styles.saveChangesButton}>
+                  Save Changes
+                </button>
+              )}
             </div>
             <table className={styles.memberTable}>
               <thead>

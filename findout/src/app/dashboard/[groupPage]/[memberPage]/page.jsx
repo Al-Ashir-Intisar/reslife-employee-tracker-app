@@ -738,7 +738,7 @@ const member = () => {
                   <tr>
                     <th>ID</th>
                     <td>{selectedMember._id}</td>
-                    <th>Group Role</th>
+                    <th>Team Role</th>
                     <td>
                       {editRoleMode ? (
                         <>
