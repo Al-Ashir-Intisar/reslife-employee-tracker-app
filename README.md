@@ -34,9 +34,13 @@ This system is especially useful in dynamic environments where quick access to d
 ## ToDo
 - Add Delete Member Button for admin of the group: Completed ✅: 6/25/2025
 - Add button to make the user an admin/give admin previlages: Completed ✅: 6/25/2025
-    - Only owner can give that previlages and take it away
-    - If the member is an admin then show remove admin previlages (only to owner) button if not then show opposite
-- Add button for admin to give certificates or attributes to all members of a group at once: Completed: 
+    - Only owner can give that previlages and take it away ✅
+    - If the member is an admin then show remove admin previlages (only to owner) button if not then show opposite ✅
+- Add button for admin to add/edit certificates or attributes to members of a group in bulk: Completed ✅: 6/27/2025
+    - Add certificates and attributes number along with group role (access) and team role (job) ✅
+    - Add filtering options based on certifications or custom attributes variables and display the value in a new table with any member with that certification in their membership ✅
+    - Add Filtered values delete and edit option for the admin for certifications and attributes ✅
+    - Add button for adding certs or attributes in bulk based on selected users ✅
 - Add Track Hour with location record for each users
     - Needs automatic limit when work starts and not recorded end time
     - Last two weeks work stats bar chart
