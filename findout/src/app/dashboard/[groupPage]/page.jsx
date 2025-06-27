@@ -390,6 +390,12 @@ const GroupPage = () => {
             Add new Members
           </button>
           {/* <button className={styles.sendInvite}>Invite a new user</button> */}
+          <button className={styles.createMember} disabled={!isAdmin}>
+            Add an Attribute
+          </button>
+          <button className={styles.createMember} disabled={!isAdmin}>
+            Add a Certification
+          </button>
           <button
             className={styles.deleteGroup}
             onClick={handleDeleteGroup}

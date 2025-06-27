@@ -188,6 +188,9 @@
   padding: 8px 12px;
   text-decoration: none;
   color: inherit;
+  background-color: darkorange;
+  border: 2px solid black;
+  box-sizing: border-box;
 }
 
 .fullCellLink:hover {

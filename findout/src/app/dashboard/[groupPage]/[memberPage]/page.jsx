@@ -523,7 +523,7 @@ const member = () => {
             disabled={!isAdmin}
             onClick={toggleEditDetailsForm}
           >
-            Add/Edit Member Details
+            Add Member Details
           </button>
           <button
             className={styles.deleteMember}
