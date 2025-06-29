@@ -46,7 +46,7 @@ const Navbar = () => {
         {session.status === "unauthenticated" && (
           <button className={styles.login}>
             <Link href="/dashboard/login">
-              LogIn
+              LogIn or SignUp
             </Link>
           </button>
         )}

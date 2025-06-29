@@ -48,7 +48,7 @@ const Login = () => {
     return (
       <div className="pageContent">
         <div className={styles.logInDev}>
-          <form className={styles.form} onSubmit={handleSubmit}>
+          {/* <form className={styles.form} onSubmit={handleSubmit}>
             <input type="text" placeholder="email" className={styles.input} />
             <input
               type="password"
@@ -56,10 +56,10 @@ const Login = () => {
               className={styles.input}
             />
             <button className={styles.login}>LogIn</button>
-          </form>
+          </form> */}
 
           {/* Show error message if present */}
-          {error && <p className={styles.error}>{error}</p>}
+          {/* {error && <p className={styles.error}>{error}</p>} */}
 
           <button
             className={styles.login}
@@ -67,11 +67,11 @@ const Login = () => {
               signIn("google", { callbackUrl: "/dashboard" });
             }}
           >
-            Log In With Google
+            LogIn/SignUp With Google
           </button>
-          <Link href="/dashboard/register" className={styles.link}>
+          {/* <Link href="/dashboard/register" className={styles.link}>
             Create a new account
-          </Link>
+          </Link> */}
         </div>
       </div>
     );
