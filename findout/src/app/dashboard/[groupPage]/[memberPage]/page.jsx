@@ -12,7 +12,7 @@ import { Salsa } from "next/font/google";
 // const user = await userRes.json();
 
 async function getUsers(memberId) {
-  const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
+  const res = await fetch(`/api/users?id=${memberId}`, {
     cache: "no-store",
   });
 
@@ -23,7 +23,7 @@ async function getUsers(memberId) {
 }
 
 async function getGroups(groupIds) {
-  const res = await fetch("http://localhost:3000/api/groups/byids", {
+  const res = await fetch("/api/groups/byids", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",

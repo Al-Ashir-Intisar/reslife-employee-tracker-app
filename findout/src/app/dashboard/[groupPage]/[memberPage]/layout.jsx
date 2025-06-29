@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 async function getUsers(memberId) {
-  const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
+  const res = await fetch(`/api/users?id=${memberId}`, {
     cache: "no-store",
   });
 

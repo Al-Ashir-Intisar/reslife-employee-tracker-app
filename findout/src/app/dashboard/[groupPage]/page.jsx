@@ -8,7 +8,7 @@ import Select from "react-select";
 import { set } from "mongoose";
 
 async function getGroups() {
-  const res = await fetch("http://localhost:3000/api/groups", {
+  const res = await fetch("/api/groups", {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch groups from MongoDB");
@@ -16,7 +16,7 @@ async function getGroups() {
 }
 
 async function getUsers(memberId) {
-  const res = await fetch(`http://localhost:3000/api/users?id=${memberId}`, {
+  const res = await fetch(`/api/users?id=${memberId}`, {
     cache: "no-store",
   });
 

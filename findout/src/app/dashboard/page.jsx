@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 async function getGroups(ids) {
-  const res = await fetch("http://localhost:3000/api/groups/byids", {
+  const res = await fetch("/api/groups/byids", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
