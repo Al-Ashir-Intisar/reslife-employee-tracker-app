@@ -39,6 +39,12 @@ const sessionUserProfile = () => {
   const session = useSession();
   const router = useRouter();
 
+  // state variables for showing form for user info update
+  const [showEditDetailsForm, setShowEditDetailsForm] = useState(false);
+  const [role, setRole] = useState("");
+  const [certifications, setCertifications] = useState([]);
+  const [customAttributes, setCustomAttributes] = useState([]);
+
   // get group id and session user id
   const params = useParams();
   const groupId = params.groupPage;
@@ -52,6 +58,7 @@ const sessionUserProfile = () => {
       try {
         const groupsArr = await getGroups([groupId]);
         setGroup(groupsArr[0]);
+        console.log(groupsArr);
       } catch (e) {
         console.error(e);
       }
@@ -92,13 +99,14 @@ const sessionUserProfile = () => {
       try {
         const data = await getUsers(sessionUserId);
         setSessionUserData(data);
+        console.log("Session User", data);
         const groupMembership = data.groupMemberships?.find(
           (m) =>
             m.groupId?.toString() === groupId?.toString() ||
             m.groupId === groupId
         );
         setSessionUserGroupmembership(groupMembership);
-        console.log("GroupMembership: ", groupMembership);
+        // console.log("GroupMembership: ", groupMembership);
       } catch (error) {
         console.error("Error fetching users from MongoDB:", error);
       }
@@ -113,6 +121,228 @@ const sessionUserProfile = () => {
       <div className="pageContent">
         {/* Primary Details Table */}
         <div className={styles.memberDetails}>
+          <div className={styles.dashButtons}>
+            <button
+              className={styles.editMember}
+              onClick={() => {
+                setRole(""); // Always blank
+                setCertifications([]); // Always blank
+                setCustomAttributes([]); // Always blank
+                setShowEditDetailsForm(true);
+              }}
+            >
+              Add Member Details
+            </button>
+
+            <button
+              className={styles.deleteMember}
+              onClick={async () => {
+                if (
+                  window.confirm(
+                    "Are you sure you want to remove yourself from this group?"
+                  )
+                ) {
+                  try {
+                    const res = await fetch("/api/users/removeFromGroup", {
+                      method: "DELETE",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        groupId,
+                        memberId: sessionUserId,
+                      }),
+                    });
+                    if (!res.ok) {
+                      const result = await res.json();
+                      throw new Error(
+                        result?.message || "Failed to remove from group"
+                      );
+                    }
+                    alert("Removed from group.");
+                    router.push("/dashboard");
+                  } catch (err) {
+                    alert("Error: " + err.message);
+                  }
+                }
+              }}
+            >
+              Remove yourself from this Group
+            </button>
+          </div>
+
+          {showEditDetailsForm && (
+            <div className={styles.formDiv}>
+              <form
+                className={styles.editDetailsForm}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  // You can add validation here if desired
+
+                  const data = {
+                    role,
+                    certifications,
+                    customAttributes,
+                  };
+
+                  try {
+                    const res = await fetch("/api/users/updateMembership", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        groupId,
+                        memberId: sessionUserId,
+                        ...data,
+                      }),
+                    });
+                    if (!res.ok) throw new Error("Failed to update membership");
+                    setShowEditDetailsForm(false);
+                    window.location.reload();
+                  } catch (err) {
+                    alert("Error saving details: " + err.message);
+                  }
+                }}
+              >
+                <div className={styles.cancelButtonDiv}>
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={() => setShowEditDetailsForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div>
+                  <h3>Role:</h3>
+                  <input
+                    type="text"
+                    placeholder="Assign a custom role"
+                    className={styles.input}
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                  />
+                </div>
+                {/* Certifications */}
+                <h3>Certifications</h3>
+                {certifications.map((cert, i) => (
+                  <div key={i}>
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      className={styles.input}
+                      value={cert.name}
+                      onChange={(e) => {
+                        const updated = [...certifications];
+                        updated[i].name = e.target.value;
+                        setCertifications(updated);
+                      }}
+                    />
+                    <label>Expiration</label>
+                    <input
+                      type="date"
+                      className={styles.input}
+                      value={cert.expiresAt || ""}
+                      onChange={(e) => {
+                        const updated = [...certifications];
+                        updated[i].expiresAt = e.target.value;
+                        setCertifications(updated);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className={styles.removeCertificationsButton}
+                      onClick={() => {
+                        setCertifications(
+                          certifications.filter((_, idx) => idx !== i)
+                        );
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className={styles.addCertificationsButton}
+                  onClick={() =>
+                    setCertifications([
+                      ...certifications,
+                      { name: "", expiresAt: "" },
+                    ])
+                  }
+                >
+                  Add Certification
+                </button>
+                {/* Custom Attributes */}
+                <h3>Custom Attributes</h3>
+                {customAttributes.map((attr, i) => (
+                  <div key={i}>
+                    <input
+                      type="text"
+                      placeholder="Key"
+                      className={styles.input}
+                      value={attr.key}
+                      onChange={(e) => {
+                        const updated = [...customAttributes];
+                        updated[i].key = e.target.value;
+                        setCustomAttributes(updated);
+                      }}
+                    />
+                    <select
+                      value={attr.type}
+                      onChange={(e) => {
+                        const updated = [...customAttributes];
+                        updated[i].type = e.target.value;
+                        setCustomAttributes(updated);
+                      }}
+                    >
+                      <option value="string">String</option>
+                      <option value="number">Number</option>
+                      <option value="boolean">Boolean</option>
+                      <option value="date">Date</option>
+                      <option value="duration">Duration</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Value"
+                      className={styles.input}
+                      value={attr.value || ""}
+                      onChange={(e) => {
+                        const updated = [...customAttributes];
+                        updated[i].value = e.target.value;
+                        setCustomAttributes(updated);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className={styles.removeAttributesButton}
+                      onClick={() => {
+                        setCustomAttributes(
+                          customAttributes.filter((_, idx) => idx !== i)
+                        );
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className={styles.addAttributesButton}
+                  onClick={() =>
+                    setCustomAttributes([
+                      ...customAttributes,
+                      { key: "", type: "string", value: "" },
+                    ])
+                  }
+                >
+                  Add Attribute
+                </button>
+                <button type="submit" className={styles.submitFormButton}>
+                  Save Changes
+                </button>
+              </form>
+            </div>
+          )}
+
           <h1>Your Profile for: {group?.name || "..."}</h1>
 
           <h2>Primary Details</h2>

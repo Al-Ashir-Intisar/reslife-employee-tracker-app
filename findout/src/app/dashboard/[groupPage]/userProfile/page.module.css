@@ -18,8 +18,8 @@
 }
 
 .backToGroupButton:hover {
-    background-color: orange;
-    cursor: pointer;
+  background-color: orange;
+  cursor: pointer;
 }
 
 .memberDetails {
@@ -60,4 +60,106 @@
   justify-content: space-between;
   gap: 10px;
   margin: 20px;
+}
+
+.editMember,
+.deleteMember {
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.editMember:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.deleteMember:hover {
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.formDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.editDetailsForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: left;
+  gap: 10px;
+  padding: 20px;
+  background-color: lightslategrey;
+  color: black;
+  border-radius: 8px;
+  width: 80%;
+}
+
+.input {
+  padding: 5px;
+  margin: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  font-weight: bold;
+}
+
+.cancelButtonDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: right;
+  gap: 10px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.removeCertificationsButton,
+.addCertificationsButton,
+.removeAttributesButton,
+.addAttributesButton,
+.submitFormButton,
+.cancelButton {
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.submitFormButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.addAttributesButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.addCertificationsButton:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+}
+
+.removeCertificationsButton:hover {
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.removeAttributesButton:hover {
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: orangered;
+  cursor: pointer;
 }

@@ -34,7 +34,7 @@ export const PUT = async (req) => {
     // Check if the session user is the user to be removed
     const isSameUser = session.user._id === memberId;
 
-    if (!isAdmin || !isSameUser) {
+    if (!isAdmin && !isSameUser) {
       return NextResponse.json(
         {
           message:
