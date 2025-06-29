@@ -41,20 +41,24 @@ This system is especially useful in dynamic environments where quick access to d
     - Add filtering options based on certifications or custom attributes variables and display the value in a new table with any member with that certification in their membership ✅
     - Add Filtered values delete and edit option for the admin for certifications and attributes ✅
     - Add button for adding certs or attributes in bulk based on selected users ✅
-- Add Track Hour with location record for each users
+- Add profile page for each users and edit fields and profile delete option: Completed: 6/29/2025 ✅
+    - Add similar to member page tables of details in userProfile page with edit details and delete group profile options ✅
+- Add Track Hour with location record for each users: Completed: 
     - Needs automatic limit when work starts and not recorded end time
     - Last two weeks work stats bar chart
     - Allow a window select for checking hour stats for a user
     - This view is only for admin and user itself
-- Add profile page for each users and delete option
-    - Think if it's better to just enable edit option for user if it's their own memberPage 
-- Add variable based group stats on each group page
-- Add project option in the group page (create, modify, delete functionality)
+- Add project/task option in the group page (create, modify, delete functionality)
+    - Group page will have two tables projects and members
     - Add event dates in the project details 
-    - Hall furniture inventory option
-- Group page will have two tables projects and members
-- Add project detail page similar to member page
-- Add group level stats on the dashboard page for each group
+    - Add project detail page similar to member page
+- Add group level stats on the dashboard page for each group: Completed: 
+- Update Added by / edited by in memberPgae tables so that it updates in the databased if the field is modified by anyone new.  
+
+After 7/9/2025
+
+- Modify the api routes for efficiency and reduce redundency 
+- Hall furniture inventory option
 - Ultimately could allow a floor plan page to be able to record which room is used for what in the log run plan
 - Storage Management inventory
 
