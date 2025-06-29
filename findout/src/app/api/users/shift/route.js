@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connect from "@/utils/db";
 import User from "@/models/User";
+import Group from "@/models/Group";
 import mongoose from "mongoose";
 
 export const POST = async (req) => {
@@ -41,14 +42,42 @@ export const POST = async (req) => {
     if (!user)
       return NextResponse.json({ message: "User not found" }, { status: 404 });
 
-    const membership = user.groupMemberships.find(
+    // Find or create groupMembership for this user and group
+    let membership = user.groupMemberships.find(
       (m) => m.groupId.toString() === groupId
     );
-    if (!membership)
-      return NextResponse.json(
-        { message: "Membership not found" },
-        { status: 404 }
-      );
+
+    if (!membership) {
+      // Check: is user a member of the group? (security)
+      const Group =
+        require("@/models/Group").default || require("@/models/Group");
+      const group = await Group.findById(groupId);
+
+      if (!group) {
+        return NextResponse.json(
+          { message: "Group not found" },
+          { status: 404 }
+        );
+      }
+      // Check if user is listed as a member of this group
+      if (!group.memberIds.map((id) => id.toString()).includes(userId)) {
+        return NextResponse.json(
+          { message: "User is not a member of this group" },
+          { status: 403 }
+        );
+      }
+      // If so, create groupMembership for this user/group
+      membership = {
+        groupId: group._id,
+        role: "",
+        certifications: [],
+        customAttributes: [],
+        workShifts: [],
+      };
+      user.groupMemberships.push(membership);
+      // Now membership points to the in-memory object, so further code will work
+      membership = user.groupMemberships[user.groupMemberships.length - 1];
+    }
 
     // --- 1. END SHIFT: If ending shift ---
     if (actualEndTime && endLocation) {

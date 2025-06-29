@@ -51,7 +51,8 @@ const sessionUserProfile = () => {
   const sessionUserId = session?.data?.user?._id;
   const [group, setGroup] = useState(null);
   const [sessionUserData, setSessionUserData] = useState(null);
-  const [sessionUserGroupMembership, setSessionUserGroupmembership] = useState(null);
+  const [sessionUserGroupMembership, setSessionUserGroupmembership] =
+    useState(null);
 
   // Fetch group
   useEffect(() => {
@@ -119,10 +120,7 @@ const sessionUserProfile = () => {
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - 7 * weeksFilter);
     return sessionUserGroupMembership.workShifts
-      .filter(
-        (shift) =>
-          new Date(shift.startTime) >= cutoff
-      )
+      .filter((shift) => new Date(shift.startTime) >= cutoff)
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
   }
 
@@ -134,7 +132,11 @@ const sessionUserProfile = () => {
       alert("Maximum shift length is 300 minutes.");
       return;
     }
-    if (!shiftMinutes || isNaN(Number(shiftMinutes)) || Number(shiftMinutes) < 15) {
+    if (
+      !shiftMinutes ||
+      isNaN(Number(shiftMinutes)) ||
+      Number(shiftMinutes) < 15
+    ) {
       alert("Shift length must be between 15 and 300 minutes.");
       return;
     }
@@ -224,6 +226,75 @@ const sessionUserProfile = () => {
     }
   }
 
+  const handleMemberDetailsSubmit = async (e) => {
+    e.preventDefault();
+
+    // -- Validation --
+    const errors = [];
+
+    if (role && !role.trim()) {
+      errors.push("Role cannot be empty if set.");
+    }
+
+    certifications.forEach((cert, i) => {
+      if (!cert.name || !cert.name.trim())
+        errors.push(`Certification ${i + 1} name required.`);
+      if (!cert.expiresAt || isNaN(Date.parse(cert.expiresAt)))
+        errors.push(`Certification ${i + 1} needs a valid expiration date.`);
+    });
+
+    customAttributes.forEach((attr, i) => {
+      if (!attr.key || !attr.key.trim())
+        errors.push(`Attribute ${i + 1} key required.`);
+      if (!attr.type) errors.push(`Attribute ${i + 1} type required.`);
+      if (
+        attr.value === undefined ||
+        attr.value === null ||
+        attr.value.toString().trim() === ""
+      ) {
+        errors.push(`Attribute ${i + 1} value required.`);
+      }
+    });
+
+    if (errors.length > 0) {
+      alert("Please fix the following:\n\n" + errors.join("\n"));
+      return;
+    }
+
+    // Prepare payload
+    const data = {};
+    if (role && role.trim()) data.role = role;
+    if (certifications.length) data.certifications = certifications;
+    if (customAttributes.length) data.customAttributes = customAttributes;
+
+    if (Object.keys(data).length === 0) {
+      alert("Please add at least one detail before saving.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/users/updateMembership", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          memberId: sessionUserId,
+          ...data,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to save.");
+      alert("Details added!");
+      setShowEditDetailsForm(false);
+      setRole("");
+      setCertifications([]);
+      setCustomAttributes([]);
+      window.location.reload();
+    } catch (err) {
+      alert("Save failed: " + err.message);
+    }
+  };
+
   if (session.status === "loading") {
     return (
       <div className="pageContent">
@@ -256,7 +327,9 @@ const sessionUserProfile = () => {
             className={styles.deleteMember}
             onClick={async () => {
               if (
-                window.confirm("Are you sure you want to remove yourself from this group?")
+                window.confirm(
+                  "Are you sure you want to remove yourself from this group?"
+                )
               ) {
                 try {
                   const res = await fetch("/api/users/removeFromGroup", {
@@ -269,7 +342,9 @@ const sessionUserProfile = () => {
                   });
                   if (!res.ok) {
                     const result = await res.json();
-                    throw new Error(result?.message || "Failed to remove from group");
+                    throw new Error(
+                      result?.message || "Failed to remove from group"
+                    );
                   }
                   alert("Removed from group.");
                   router.push("/dashboard");
@@ -301,18 +376,171 @@ const sessionUserProfile = () => {
           )}
         </div>
 
-        {/* Add member details form (same as before, not repeated here for brevity) */}
+        {/* Add member details form */}
         {showEditDetailsForm && (
-          // ... your existing Add Details form here ...
-          <div className={styles.formDiv}>
-            {/* ... copy your current form code here ... */}
-          </div>
+          <form
+            className={styles.editDetailsForm}
+            onSubmit={handleMemberDetailsSubmit}
+          >
+            <div className={styles.cancelButtonDiv}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={() => {
+                  setShowEditDetailsForm(false);
+                  setRole("");
+                  setCertifications([]);
+                  setCustomAttributes([]);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* Role */}
+            <div>
+              <h3>Role:</h3>
+              <input
+                type="text"
+                placeholder="Assign a custom role"
+                className={styles.input}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              />
+            </div>
+
+            {/* Certifications */}
+            <h3>Certifications</h3>
+            {certifications.map((cert, i) => (
+              <div key={i}>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className={styles.input}
+                  value={cert.name}
+                  onChange={(e) => {
+                    const updated = [...certifications];
+                    updated[i].name = e.target.value;
+                    setCertifications(updated);
+                  }}
+                />
+                <label>Expiration</label>
+                <input
+                  type="date"
+                  className={styles.input}
+                  value={cert.expiresAt || ""}
+                  onChange={(e) => {
+                    const updated = [...certifications];
+                    updated[i].expiresAt = e.target.value;
+                    setCertifications(updated);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.removeCertificationsButton}
+                  onClick={() => {
+                    setCertifications(
+                      certifications.filter((_, idx) => idx !== i)
+                    );
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className={styles.addCertificationsButton}
+              onClick={() =>
+                setCertifications([
+                  ...certifications,
+                  { name: "", expiresAt: "" },
+                ])
+              }
+            >
+              Add Certification
+            </button>
+
+            {/* Custom Attributes */}
+            <h3>Custom Attributes</h3>
+            {customAttributes.map((attr, i) => (
+              <div key={i}>
+                <input
+                  type="text"
+                  placeholder="Key"
+                  className={styles.input}
+                  value={attr.key}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].key = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                />
+                <select
+                  value={attr.type}
+                  className={styles.input}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].type = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                >
+                  <option value="string">String</option>
+                  <option value="number">Number</option>
+                  <option value="boolean">Boolean</option>
+                  <option value="date">Date</option>
+                  <option value="duration">Duration</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Value"
+                  className={styles.input}
+                  value={attr.value || ""}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].value = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.removeAttributesButton}
+                  onClick={() => {
+                    setCustomAttributes(
+                      customAttributes.filter((_, idx) => idx !== i)
+                    );
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className={styles.addAttributesButton}
+              onClick={() =>
+                setCustomAttributes([
+                  ...customAttributes,
+                  { key: "", type: "string", value: "" },
+                ])
+              }
+            >
+              Add Attribute
+            </button>
+
+            <button type="submit" className={styles.submitFormButton}>
+              Save Changes
+            </button>
+          </form>
         )}
 
         {/* Start Shift form */}
         {showShiftForm && (
           <div className={styles.formDiv}>
-            <form className={styles.editDetailsForm} onSubmit={handleShiftStart}>
+            <form
+              className={styles.editDetailsForm}
+              onSubmit={handleShiftStart}
+            >
               <h3>Start Shift</h3>
               <label>Estimated Shift Length (minutes, 15–300):</label>
               <input
@@ -321,7 +549,7 @@ const sessionUserProfile = () => {
                 max="300"
                 className={styles.input}
                 value={shiftMinutes}
-                onChange={e => setShiftMinutes(e.target.value)}
+                onChange={(e) => setShiftMinutes(e.target.value)}
                 required
                 placeholder="e.g., 60"
               />
@@ -389,7 +617,7 @@ const sessionUserProfile = () => {
                   </td>
                   <td>
                     {group?.adminIds
-                      ?.map(id => id.toString())
+                      ?.map((id) => id.toString())
                       .includes(cert.addedBy?.toString())
                       ? "admin"
                       : "user"}
@@ -455,7 +683,7 @@ const sessionUserProfile = () => {
                     <td>{value}</td>
                     <td>
                       {group?.adminIds
-                        ?.map(id => id.toString())
+                        ?.map((id) => id.toString())
                         .includes(attr.addedBy?.toString())
                         ? "admin"
                         : "user"}
@@ -479,10 +707,10 @@ const sessionUserProfile = () => {
               (last{" "}
               <select
                 value={weeksFilter}
-                onChange={e => setWeeksFilter(Number(e.target.value))}
+                onChange={(e) => setWeeksFilter(Number(e.target.value))}
                 style={{ fontSize: "1rem" }}
               >
-                {WEEK_OPTIONS.map(opt => (
+                {WEEK_OPTIONS.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -513,7 +741,9 @@ const sessionUserProfile = () => {
                 const actualEnd = shift.actualEndTime
                   ? new Date(shift.actualEndTime)
                   : null;
-                const start = shift.startTime ? new Date(shift.startTime) : null;
+                const start = shift.startTime
+                  ? new Date(shift.startTime)
+                  : null;
 
                 let status = "Open";
                 if (shift.actualEndTime) status = "Closed";
@@ -521,35 +751,29 @@ const sessionUserProfile = () => {
 
                 let duration = "";
                 if (start && (actualEnd || estEnd)) {
-                  const endTime =
-                    shift.actualEndTime || shift.estimatedEndTime;
+                  const endTime = shift.actualEndTime || shift.estimatedEndTime;
                   duration =
-                    Math.round(
-                      (new Date(endTime) - new Date(start)) / 60000
-                    ) + "";
+                    Math.round((new Date(endTime) - new Date(start)) / 60000) +
+                    "";
                 }
 
                 return (
                   <tr key={i}>
-                    <td>
-                      {start ? start.toLocaleString() : "N/A"}
-                    </td>
+                    <td>{start ? start.toLocaleString() : "N/A"}</td>
                     <td>
                       {shift.startLocation
-                        ? `${shift.startLocation.lat?.toFixed(5)}, ${shift.startLocation.lng?.toFixed(5)}`
+                        ? `${shift.startLocation.lat?.toFixed(
+                            5
+                          )}, ${shift.startLocation.lng?.toFixed(5)}`
                         : "N/A"}
                     </td>
-                    <td>
-                      {estEnd ? estEnd.toLocaleString() : "N/A"}
-                    </td>
-                    <td>
-                      {actualEnd
-                        ? actualEnd.toLocaleString()
-                        : ""}
-                    </td>
+                    <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td>
+                    <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
                     <td>
                       {shift.endLocation
-                        ? `${shift.endLocation.lat?.toFixed(5)}, ${shift.endLocation.lng?.toFixed(5)}`
+                        ? `${shift.endLocation.lat?.toFixed(
+                            5
+                          )}, ${shift.endLocation.lng?.toFixed(5)}`
                         : ""}
                     </td>
                     <td>{duration}</td>
