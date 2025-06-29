@@ -527,6 +527,9 @@ const GroupPage = () => {
     return (
       <>
         <div className={styles.dashButtons}>
+          <button className={styles.profileButton} onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}>
+            Your Profile
+          </button>
           <button
             className={styles.createMember}
             onClick={toggleAddMemberForm}
