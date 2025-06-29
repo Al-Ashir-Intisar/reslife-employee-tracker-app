@@ -159,7 +159,7 @@ const sessionUserProfile = () => {
               alert(data.message || "Failed to start shift");
               return;
             }
-            console.log(groupId, sessionUserId, latitude, longitude, shiftMinutes);
+            // console.log(groupId, sessionUserId, latitude, longitude, shiftMinutes);
             alert("Shift started!");
             setShowShiftForm(false);
             setShiftMinutes("");

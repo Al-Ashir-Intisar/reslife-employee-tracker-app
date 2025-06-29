@@ -157,7 +157,7 @@ const member = () => {
       return;
     }
 
-    console.log("Payload: ", payload);
+    // console.log("Payload: ", payload);
     // --- API call ---
     const res = await fetch("/api/users/updateMembership", {
       method: "PUT",
@@ -468,8 +468,8 @@ const member = () => {
       try {
         // Fetch groups from MongoDB
         const data = await getGroups([groupId]);
-        console.log("Fetched Group:", data);
-        console.log("ID of group to fetch", groupId);
+        // console.log("Fetched Group:", data);
+        // console.log("ID of group to fetch", groupId);
         setSelectedGroup(data[0]);
       } catch (error) {
         console.error("Error fetching groups from MongoDB:", error);
@@ -508,12 +508,12 @@ const member = () => {
   const isOwner = selectedGroup?.ownerId === session?.data?.user?._id;
   const memberIsOwner = selectedGroup?.ownerId === memberId;
   const isAdmin = selectedGroup?.adminIds?.includes(session?.data?.user?._id);
-  console.log("Session User ID:", session?.data?.user?._id);
-  console.log("Group Admin IDs:", selectedGroup?.adminIds);
-  console.log("Group Owner ID:", selectedGroup?.ownerId);
-  console.log("Is Admin:", isAdmin);
-  console.log("Session user is the owner:", isOwner);
-  console.log("Member of this page is owner:", memberIsOwner);
+  // console.log("Session User ID:", session?.data?.user?._id);
+  // console.log("Group Admin IDs:", selectedGroup?.adminIds);
+  // console.log("Group Owner ID:", selectedGroup?.ownerId);
+  // console.log("Is Admin:", isAdmin);
+  // console.log("Session user is the owner:", isOwner);
+  // console.log("Member of this page is owner:", memberIsOwner);
 
   if (session.status === "authenticated") {
     return (
@@ -863,7 +863,7 @@ const member = () => {
                       onClick={async () => {
                         try {
                           await removeMarkedCertifications(removedCertIds);
-                          console.log(removedCertIds);
+                          // console.log(removedCertIds);
                           await updateMemberField({
                             certifications: editedCerts,
                           });
@@ -1033,7 +1033,7 @@ const member = () => {
                         className={styles.removeFieldButton}
                         onClick={() => {
                           const toRemoveAttr = editedAttrs[i]?._id;
-                          console.log(toRemoveAttr);
+                          // console.log(toRemoveAttr);
                           if (toRemoveAttr) {
                             setRemovedAttrIds((prev) => [
                               ...prev,

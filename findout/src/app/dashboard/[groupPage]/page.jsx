@@ -212,7 +212,7 @@ const GroupPage = () => {
     value: name,
     label: name,
   }));
-  console.log("certOptions: ", certOptions);
+  // console.log("certOptions: ", certOptions);
 
   // Attribute filter state
   const [attrFilters, setAttrFilters] = useState([]);
@@ -237,7 +237,7 @@ const GroupPage = () => {
     value: key,
     label: key,
   }));
-  console.log("attrOptions: ", attrOptions);
+  // console.log("attrOptions: ", attrOptions);
 
   // custom styles for the select component
   const customStyles = {
@@ -463,9 +463,9 @@ const GroupPage = () => {
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting member IDs:", membersIds);
-    console.log("To group ID:", groupId);
-    console.log("With emails:", memberEmails);
+    // console.log("Submitting member IDs:", membersIds);
+    // console.log("To group ID:", groupId);
+    // console.log("With emails:", memberEmails);
 
     if (!groupId || membersIds.length === 0) {
       alert("Please add at least one valid member email.");
@@ -519,9 +519,9 @@ const GroupPage = () => {
     ?.map((id) => id.toString())
     .includes(session?.data?.user?._id);
 
-  console.log("Session user id:", session?.data?.user?._id);
-  console.log("Selected group member IDs:", selectedGroup?.adminIds);
-  console.log(isAdmin);
+  // console.log("Session user id:", session?.data?.user?._id);
+  // console.log("Selected group member IDs:", selectedGroup?.adminIds);
+  // console.log(isAdmin);
 
   if (session.status === "authenticated") {
     return (
@@ -886,10 +886,10 @@ const GroupPage = () => {
                       deleted: [],
                     });
                     setEditingCerts({});
-                    console.log(
-                      "Pending certs after cancel: ",
-                      pendingCertChanges
-                    );
+                    // console.log(
+                    //   "Pending certs after cancel: ",
+                    //   pendingCertChanges
+                    // );
                   }}
                 >
                   Cancel Changes

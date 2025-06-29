@@ -148,12 +148,12 @@ const Dashboard = () => {
       alert("Something went wrong.");
     }
 
-    console.log("Group Name:", newGroupName);
-    console.log("Description:", newDescription);
-    console.log("Member Emails:", uniqueMemberEmails);
-    console.log("Members IDs:", uniqueMembersIds);
-    console.log("Admin IDs:", uniqueAdminIds);
-    console.log("Owner ID:", groupOwnerId);
+    // console.log("Group Name:", newGroupName);
+    // console.log("Description:", newDescription);
+    // console.log("Member Emails:", uniqueMemberEmails);
+    // console.log("Members IDs:", uniqueMembersIds);
+    // console.log("Admin IDs:", uniqueAdminIds);
+    // console.log("Owner ID:", groupOwnerId);
 
     // Reset
     setGroupName("");
