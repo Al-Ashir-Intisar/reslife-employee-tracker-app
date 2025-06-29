@@ -44,10 +44,11 @@ This system is especially useful in dynamic environments where quick access to d
 - Add profile page for each users and edit fields and profile delete option: Completed: 6/29/2025 ✅
     - Add similar to member page tables of details in userProfile page with edit details and delete group profile options ✅
 - Add Track Hour with location record for each users: Completed: 
-    - Needs automatic limit when work starts and not recorded end time
-    - Last two weeks work stats bar chart
-    - Allow a window select for checking hour stats for a user
-    - This view is only for admin and user itself
+    - Needs automatic shift hour limit when work starts and saves that as end time if end time is not recorded not recorded ✅
+    - Last two weeks work stats bar chart/table ✅
+    - Allow a window select for checking hour stats for a user ✅
+- Add hour stats abd bar charts on memberpage for admins only and on userProfile.
+- add hours stats on group page for total group hours stats bar chart
 - Add project/task option in the group page (create, modify, delete functionality)
     - Group page will have two tables projects and members
     - Add event dates in the project details 
