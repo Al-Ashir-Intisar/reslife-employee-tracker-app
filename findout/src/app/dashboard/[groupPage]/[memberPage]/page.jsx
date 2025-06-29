@@ -40,10 +40,11 @@ async function getGroups(groupIds) {
 const member = () => {
   const session = useSession();
   const router = useRouter();
-  // Get the member ID from the URL parameters
+
+  // Getting the member ID and group ID from the URL parameters
   const params = useParams();
-  const memberId = params.memberPage; // e.g. "member1"
-  const groupId = params.groupPage; // e.g. "group1"
+  const memberId = params.memberPage;
+  const groupId = params.groupPage;
 
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -55,7 +56,7 @@ const member = () => {
   const [customAttributes, setCustomAttributes] = useState([]);
 
   // variable to track edit mode for user info tables
-  const [editGroupAdminMode, setEditGroupAdminMode] = useState(false);
+  // const [editGroupAdminMode, setEditGroupAdminMode] = useState(false);
   const [editRoleMode, setEditRoleMode] = useState(false);
   const [editCertsMode, setEditCertsMode] = useState(false);
   const [editAttrsMode, setEditAttrsMode] = useState(false);
@@ -913,7 +914,13 @@ const member = () => {
                                 ? new Date(cert.expiresAt).toLocaleDateString()
                                 : "N/A"}
                             </td>
-                            <td>{cert.addedBy}</td>
+                            <td>
+                              {selectedGroup?.adminIds
+                                ?.map((id) => id.toString())
+                                .includes(cert.addedBy?.toString())
+                                ? "admin"
+                                : "user"}
+                            </td>
                           </tr>
                         )) ?? (
                         <tr>
@@ -1084,6 +1091,7 @@ const member = () => {
                         <th>Key</th>
                         <th>Type</th>
                         <th>Value</th>
+                        <th>Added By</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1127,11 +1135,18 @@ const member = () => {
                               <td>{attr.key}</td>
                               <td>{attr.type}</td>
                               <td>{value}</td>
+                              <td>
+                                {selectedGroup?.adminIds
+                                  ?.map((id) => id.toString())
+                                  .includes(attr.addedBy?.toString())
+                                  ? "admin"
+                                  : "user"}
+                              </td>
                             </tr>
                           );
                         }) ?? (
                         <tr>
-                          <td colSpan="3">No attributes found.</td>
+                          <td colSpan="4">No attributes found.</td>
                         </tr>
                       )}
                     </tbody>

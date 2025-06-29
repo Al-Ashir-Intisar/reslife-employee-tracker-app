@@ -27,13 +27,19 @@ export const PUT = async (req) => {
     if (!group) {
       return NextResponse.json({ message: "Group not found" }, { status: 404 });
     }
-
+    // check if session user is an admin
     const isAdmin = group.adminIds.some(
       (id) => id.toString() === session.user._id
     );
-    if (!isAdmin) {
+    // Check if the session user is the user to be removed
+    const isSameUser = session.user._id === memberId;
+
+    if (!isAdmin || !isSameUser) {
       return NextResponse.json(
-        { message: "Forbidden: Session user is not an admin of this group" },
+        {
+          message:
+            "Forbidden: Session user is not an admin of this group nor is the owner of this profile",
+        },
         { status: 403 }
       );
     }

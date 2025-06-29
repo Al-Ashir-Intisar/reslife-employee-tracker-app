@@ -30,9 +30,14 @@ export const DELETE = async (req) => {
     const isAdmin = group.adminIds.some(
       (id) => id.toString() === session.user._id
     );
-    if (!isAdmin) {
+
+    // Check if the session user is the user to be removed
+    const isSameUser = session.user._id === memberId;
+
+
+    if (!isAdmin || !isSameUser) {
       return NextResponse.json(
-        { message: "Forbidden: You are not an admin of this group" },
+        { message: "Forbidden: Session user is not an admin of this group nor is the owner of this profile" },
         { status: 403 }
       );
     }

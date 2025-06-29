@@ -1,0 +1,63 @@
+.dashButtons {
+  display: flex;
+  justify-content: flex-start; /* ensures left alignment */
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%; /* optional: ensures full-width container */
+  margin-bottom: 20px;
+  margin: 10px;
+  gap: 20px;
+}
+
+.backToGroupButton {
+  background-color: lightblue;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.backToGroupButton:hover {
+    background-color: orange;
+    cursor: pointer;
+}
+
+.memberDetails {
+  background-color: black;
+  width: 90vw;
+  min-height: 80vh;
+  margin: 0 auto;
+  padding: 15px;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: top;
+  align-items: center;
+}
+
+.memberTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.memberTable th,
+.memberTable td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.memberTable th {
+  background-color: orange;
+  color: black;
+  font-weight: bold;
+}
+
+.rowWiseElementDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px;
+}
