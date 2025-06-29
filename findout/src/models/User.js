@@ -60,6 +60,23 @@ const userSchema = new Schema(
             addedAt: { type: Date, default: Date.now },
           },
         ],
+        workShifts: [
+          {
+            startTime: { type: Date, required: true },
+            startLocation: {
+              lat: Number,
+              lng: Number,
+            },
+            estimatedEndTime: Date, // optional, for user’s prediction
+            actualEndTime: Date, // when shift is ended
+            endLocation: {
+              lat: Number,
+              lng: Number,
+            },
+            addedBy: { type: mongoose.Types.ObjectId, ref: "User" },
+            addedAt: { type: Date, default: Date.now },
+          },
+        ],
         addedBy: { type: mongoose.Types.ObjectId, ref: "User" },
         addedAt: { type: Date, default: Date.now },
       },
