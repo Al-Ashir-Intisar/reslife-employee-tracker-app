@@ -48,6 +48,8 @@ This system is especially useful in dynamic environments where quick access to d
     - Last two weeks work stats bar chart/table ✅
     - Allow a window select for checking hour stats for a user ✅
 - Add hour stats abd bar charts on memberpage for admins only and on userProfile.
+- Add select all option for admin in grouppage to add fields to multiple users at a time.
+- Add login exporation limit while not in session or other secure logic. 
 - add hours stats on group page for total group hours stats bar chart
 - Add project/task option in the group page (create, modify, delete functionality)
     - Group page will have two tables projects and members
