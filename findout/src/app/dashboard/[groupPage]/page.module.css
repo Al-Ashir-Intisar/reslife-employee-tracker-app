@@ -38,9 +38,10 @@
 
 .dashButtons {
   display: flex;
-  justify-content: flex-start; /* ensures left alignment */
-  align-items: flex-start;
-  width: 100%; /* optional: ensures full-width container */
+  justify-content: space-evenly; /* ensures left alignment */
+  align-items: center;
+  flex-wrap: wrap;
+  width: 80%; /* optional: ensures full-width container */
   margin-bottom: 20px;
   margin: 10px;
   gap: 10px;
@@ -161,7 +162,6 @@
   width: 90vw;
   min-height: 80vh;
   margin: 0 auto;
-  padding: 15px;
   gap: 10px;
   display: flex;
   flex-direction: column;

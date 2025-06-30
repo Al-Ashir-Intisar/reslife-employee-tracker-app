@@ -526,6 +526,7 @@ const GroupPage = () => {
   if (session.status === "authenticated") {
     return (
       <>
+      <div className="pageContent">
         <div className={styles.dashButtons}>
           <button className={styles.profileButton} onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}>
             Your Profile
@@ -797,7 +798,7 @@ const GroupPage = () => {
           </div>
         )}
 
-        <div className="pageContent">
+        
           <div className={styles.memberDetails}>
             <table className={styles.memberTable}>
               <thead>

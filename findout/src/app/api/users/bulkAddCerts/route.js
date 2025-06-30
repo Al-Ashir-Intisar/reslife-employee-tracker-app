@@ -32,13 +32,37 @@ export const PUT = async (req) => {
 
     // --- Add/Edit Certifications ---
     for (const { userId, cert } of edited) {
+      // 1. Ensure the user is in group.membersId
+      if (!group.membersId.some((id) => id.toString() === userId.toString())) {
+        return new NextResponse(
+          `User with id ${userId} is not a member of this group`,
+          { status: 400 }
+        );
+      }
+
+      // 2. Find user and create membership if needed
       const user = await User.findById(userId);
       if (!user) continue;
 
-      const membership = user.groupMemberships.find(
+      let membership = user.groupMemberships.find(
         (m) => m.groupId.toString() === groupId
       );
-      if (!membership) continue;
+      if (!membership) {
+        let membershipDefault = {
+          groupId: new mongoose.Types.ObjectId(groupId),
+          role: "member",
+          certifications: [],
+          customAttributes: [],
+          workShifts: [],
+          addedBy: new mongoose.Types.ObjectId(sessionUserId),
+          addedAt: new Date(),
+        };
+        user.groupMemberships.push(membershipDefault);
+      }
+
+      membership = user.groupMemberships.find(
+        (m) => m.groupId.toString() === groupId
+      );
 
       // Check if certification with this name exists (case-insensitive)
       const existing = membership.certifications.find(
