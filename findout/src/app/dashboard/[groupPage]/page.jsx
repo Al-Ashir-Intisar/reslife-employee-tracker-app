@@ -526,279 +526,281 @@ const GroupPage = () => {
   if (session.status === "authenticated") {
     return (
       <>
-      <div className="pageContent">
-        <div className={styles.dashButtons}>
-          <button className={styles.profileButton} onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}>
-            Your Profile
-          </button>
-          <button
-            className={styles.createMember}
-            onClick={toggleAddMemberForm}
-            disabled={!isAdmin}
-          >
-            Add new Members
-          </button>
-          {/* <button className={styles.sendInvite}>Invite a new user</button> */}
-          <button
-            className={styles.createMember}
-            disabled={!isAdmin}
-            onClick={() => setShowAddAttributeForm(true)}
-          >
-            Add an Attribute
-          </button>
-
-          <button
-            className={styles.createMember}
-            disabled={!isAdmin}
-            onClick={() => setShowAddCertificationForm(true)}
-          >
-            Add a Certification
-          </button>
-
-          <button
-            className={styles.deleteGroup}
-            onClick={handleDeleteGroup}
-            disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
-          >
-            Delete this Group
-          </button>
-        </div>
-        {showAddAttributeForm && (
-          <div className={styles.formDiv}>
-            <form
-              className={styles.addMemberForm}
-              onSubmit={handleBulkAddAttribute}
+        
+          <div className={styles.dashButtons}>
+            <button
+              className={styles.profileButton}
+              onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}
             >
-              <h3>Add Attribute to Multiple Members</h3>
+              Your Profile
+            </button>
+            <button
+              className={styles.createMember}
+              onClick={toggleAddMemberForm}
+              disabled={!isAdmin}
+            >
+              Add new Members
+            </button>
+            {/* <button className={styles.sendInvite}>Invite a new user</button> */}
+            <button
+              className={styles.createMember}
+              disabled={!isAdmin}
+              onClick={() => setShowAddAttributeForm(true)}
+            >
+              Add an Attribute
+            </button>
 
-              <label>Assign to:</label>
-              <Select
-                isMulti
-                options={selectedMembers.map((m) => ({
-                  value: m._id,
-                  label: m.name || m.email,
-                }))}
-                value={selectedMembers
-                  .filter((m) => attrFormUserIds.includes(m._id))
-                  .map((m) => ({
+            <button
+              className={styles.createMember}
+              disabled={!isAdmin}
+              onClick={() => setShowAddCertificationForm(true)}
+            >
+              Add a Certification
+            </button>
+
+            <button
+              className={styles.deleteGroup}
+              onClick={handleDeleteGroup}
+              disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
+            >
+              Delete this Group
+            </button>
+          </div>
+          {showAddAttributeForm && (
+            <div className={styles.formDiv}>
+              <form
+                className={styles.addMemberForm}
+                onSubmit={handleBulkAddAttribute}
+              >
+                <h3>Add Attribute to Multiple Members</h3>
+
+                <label>Assign to:</label>
+                <Select
+                  isMulti
+                  options={selectedMembers.map((m) => ({
                     value: m._id,
                     label: m.name || m.email,
                   }))}
-                onChange={(selected) =>
-                  setAttrFormUserIds(selected.map((opt) => opt.value))
-                }
-                placeholder="Select members..."
-                className="react-select-container"
-                classNamePrefix="react-select"
-                styles={customStyles}
-              />
+                  value={selectedMembers
+                    .filter((m) => attrFormUserIds.includes(m._id))
+                    .map((m) => ({
+                      value: m._id,
+                      label: m.name || m.email,
+                    }))}
+                  onChange={(selected) =>
+                    setAttrFormUserIds(selected.map((opt) => opt.value))
+                  }
+                  placeholder="Select members..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={customStyles}
+                />
 
-              <label>Key:</label>
-              <input
-                type="text"
-                value={attrFormKey}
-                onChange={(e) => setAttrFormKey(e.target.value)}
-                required
-              />
-
-              <label>Type:</label>
-              <select
-                value={attrFormType}
-                onChange={(e) => {
-                  setAttrFormType(e.target.value);
-                  setAttrFormValue(""); // reset value on type change
-                }}
-              >
-                <option value="string">String</option>
-                <option value="number">Number</option>
-                <option value="boolean">Boolean</option>
-                <option value="date">Date</option>
-                <option value="duration">Duration</option>
-              </select>
-
-              <label>Value:</label>
-              {/* Input depends on type */}
-              {attrFormType === "string" && (
+                <label>Key:</label>
                 <input
                   type="text"
-                  value={attrFormValue}
-                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  value={attrFormKey}
+                  onChange={(e) => setAttrFormKey(e.target.value)}
                   required
                 />
-              )}
-              {attrFormType === "number" && (
-                <input
-                  type="number"
-                  value={attrFormValue}
-                  onChange={(e) => setAttrFormValue(e.target.value)}
-                  required
-                />
-              )}
-              {attrFormType === "boolean" && (
+
+                <label>Type:</label>
                 <select
-                  value={attrFormValue}
-                  onChange={(e) => setAttrFormValue(e.target.value)}
-                  required
+                  value={attrFormType}
+                  onChange={(e) => {
+                    setAttrFormType(e.target.value);
+                    setAttrFormValue(""); // reset value on type change
+                  }}
                 >
-                  <option value="">Select</option>
-                  <option value="true">true</option>
-                  <option value="false">false</option>
+                  <option value="string">String</option>
+                  <option value="number">Number</option>
+                  <option value="boolean">Boolean</option>
+                  <option value="date">Date</option>
+                  <option value="duration">Duration</option>
                 </select>
-              )}
-              {attrFormType === "date" && (
+
+                <label>Value:</label>
+                {/* Input depends on type */}
+                {attrFormType === "string" && (
+                  <input
+                    type="text"
+                    value={attrFormValue}
+                    onChange={(e) => setAttrFormValue(e.target.value)}
+                    required
+                  />
+                )}
+                {attrFormType === "number" && (
+                  <input
+                    type="number"
+                    value={attrFormValue}
+                    onChange={(e) => setAttrFormValue(e.target.value)}
+                    required
+                  />
+                )}
+                {attrFormType === "boolean" && (
+                  <select
+                    value={attrFormValue}
+                    onChange={(e) => setAttrFormValue(e.target.value)}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                )}
+                {attrFormType === "date" && (
+                  <input
+                    type="date"
+                    value={attrFormValue}
+                    onChange={(e) => setAttrFormValue(e.target.value)}
+                    required
+                  />
+                )}
+                {attrFormType === "duration" && (
+                  <input
+                    type="number"
+                    min="0"
+                    value={attrFormValue}
+                    onChange={(e) => setAttrFormValue(e.target.value)}
+                    required
+                    placeholder="Minutes"
+                  />
+                )}
+
+                <div className={styles.formButtonGroup}>
+                  <button type="submit" className={styles.submitButton}>
+                    Add Attribute
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={() => setShowAddAttributeForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {showAddCertificationForm && (
+            <div className={styles.formDiv}>
+              <form
+                className={styles.addMemberForm}
+                onSubmit={handleBulkAddCertification}
+              >
+                <h3>Add Certification to Multiple Members</h3>
+
+                <label>Assign to:</label>
+                <Select
+                  isMulti
+                  options={selectedMembers.map((m) => ({
+                    value: m._id,
+                    label: m.name || m.email,
+                  }))}
+                  value={selectedMembers
+                    .filter((m) => certFormUserIds.includes(m._id))
+                    .map((m) => ({
+                      value: m._id,
+                      label: m.name || m.email,
+                    }))}
+                  onChange={(selected) =>
+                    setCertFormUserIds(selected.map((opt) => opt.value))
+                  }
+                  placeholder="Select members..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={customStyles}
+                />
+
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={certFormName}
+                  onChange={(e) => setCertFormName(e.target.value)}
+                  required
+                />
+
+                <label>Expires At:</label>
                 <input
                   type="date"
-                  value={attrFormValue}
-                  onChange={(e) => setAttrFormValue(e.target.value)}
+                  value={certFormExpiresAt}
+                  onChange={(e) => setCertFormExpiresAt(e.target.value)}
                   required
                 />
-              )}
-              {attrFormType === "duration" && (
-                <input
-                  type="number"
-                  min="0"
-                  value={attrFormValue}
-                  onChange={(e) => setAttrFormValue(e.target.value)}
-                  required
-                  placeholder="Minutes"
-                />
-              )}
 
-              <div className={styles.formButtonGroup}>
-                <button type="submit" className={styles.submitButton}>
-                  Add Attribute
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={() => setShowAddAttributeForm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+                <div className={styles.formButtonGroup}>
+                  <button type="submit" className={styles.submitButton}>
+                    Add Certification
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={() => setShowAddCertificationForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
-        {showAddCertificationForm && (
-          <div className={styles.formDiv}>
-            <form
-              className={styles.addMemberForm}
-              onSubmit={handleBulkAddCertification}
-            >
-              <h3>Add Certification to Multiple Members</h3>
+          {showAddMemberForm && (
+            <div className={styles.formDiv}>
+              <form className={styles.addMemberForm}>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Enter member email"
+                    className={styles.input}
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    required
+                  />
+                  <ul className={styles.emailList}>
+                    {memberEmails.map((email, index) => (
+                      <li key={index}>
+                        {email}
+                        <button
+                          className={styles.removeEmailButton}
+                          type="button"
+                          onClick={() => handleRemoveEmail(email)}
+                        >
+                          x
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              <label>Assign to:</label>
-              <Select
-                isMulti
-                options={selectedMembers.map((m) => ({
-                  value: m._id,
-                  label: m.name || m.email,
-                }))}
-                value={selectedMembers
-                  .filter((m) => certFormUserIds.includes(m._id))
-                  .map((m) => ({
-                    value: m._id,
-                    label: m.name || m.email,
-                  }))}
-                onChange={(selected) =>
-                  setCertFormUserIds(selected.map((opt) => opt.value))
-                }
-                placeholder="Select members..."
-                className="react-select-container"
-                classNamePrefix="react-select"
-                styles={customStyles}
-              />
+                <div className={styles.formButtonGroup}>
+                  <button
+                    type="button"
+                    className={styles.addToListButton}
+                    onClick={handleAddEmail}
+                    disabled={!newEmail.trim()}
+                  >
+                    Add to List
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.submitButton}
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
-              <label>Name:</label>
-              <input
-                type="text"
-                value={certFormName}
-                onChange={(e) => setCertFormName(e.target.value)}
-                required
-              />
-
-              <label>Expires At:</label>
-              <input
-                type="date"
-                value={certFormExpiresAt}
-                onChange={(e) => setCertFormExpiresAt(e.target.value)}
-                required
-              />
-
-              <div className={styles.formButtonGroup}>
-                <button type="submit" className={styles.submitButton}>
-                  Add Certification
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={() => setShowAddCertificationForm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {showAddMemberForm && (
-          <div className={styles.formDiv}>
-            <form className={styles.addMemberForm}>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Enter member email"
-                  className={styles.input}
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  required
-                />
-                <ul className={styles.emailList}>
-                  {memberEmails.map((email, index) => (
-                    <li key={index}>
-                      {email}
-                      <button
-                        className={styles.removeEmailButton}
-                        type="button"
-                        onClick={() => handleRemoveEmail(email)}
-                      >
-                        x
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={styles.formButtonGroup}>
-                <button
-                  type="button"
-                  className={styles.addToListButton}
-                  onClick={handleAddEmail}
-                  disabled={!newEmail.trim()}
-                >
-                  Add to List
-                </button>
-                <button
-                  type="submit"
-                  className={styles.submitButton}
-                  onClick={handleSubmit}
-                >
-                  Submit
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        
           <div className={styles.memberDetails}>
             <table className={styles.memberTable}>
               <thead>
@@ -897,6 +899,7 @@ const GroupPage = () => {
                 </button>
               )}
             </div>
+
             <table className={styles.memberTable}>
               <thead>
                 <tr>
@@ -1075,6 +1078,7 @@ const GroupPage = () => {
                   })}
               </tbody>
             </table>
+
             <div className={styles.filtersDiv}>
               <div>
                 <label>Filter by Attributes:</label>
@@ -1524,7 +1528,6 @@ const GroupPage = () => {
               </tbody>
             </table>
           </div>
-        </div>
       </>
     );
   }

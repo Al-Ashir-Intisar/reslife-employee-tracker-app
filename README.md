@@ -47,16 +47,20 @@ This system is especially useful in dynamic environments where quick access to d
     - Needs automatic shift hour limit when work starts and saves that as end time if end time is not recorded not recorded ✅
     - Last two weeks work stats bar chart/table ✅
     - Allow a window select for checking hour stats for a user ✅
-- Add hour stats abd bar charts on memberpage for admins only and on userProfile.
-- Add select all option for admin in grouppage to add fields to multiple users at a time.
-- Add login exporation limit while not in session or other secure logic. 
-- add hours stats on group page for total group hours stats bar chart
+- Update Added by / edited by in memberPgae tables so that it updates in the databased if the field is modified by anyone new: Completed: 6/30/2025 ✅
 - Add project/task option in the group page (create, modify, delete functionality)
     - Group page will have two tables projects and members
     - Add event dates in the project details 
     - Add project detail page similar to member page
+- Add hour stats abd bar charts on memberpage for admins only and on userProfile.
+- Add select all option for admin in grouppage to add fields to multiple users at a time.
+- Add login exporation limit while not in session or other secure logic. 
+- add hours stats on group page for total group hours stats bar chart
 - Add group level stats on the dashboard page for each group: Completed: 
-- Update Added by / edited by in memberPgae tables so that it updates in the databased if the field is modified by anyone new.  
+- Modify the styling to optimize for mobile phone view
+    - Modified group page ✅
+    - Modified member page ✅
+    - Modified user profile page ✅
 
 After 7/9/2025
 

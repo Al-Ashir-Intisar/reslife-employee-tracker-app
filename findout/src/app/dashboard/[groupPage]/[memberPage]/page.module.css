@@ -21,16 +21,16 @@
 
 .dashButtons {
   display: flex;
-  justify-content: flex-start; /* ensures left alignment */
-  align-items: flex-start;
+  justify-content: space-evenly; /* ensures left alignment */
+  align-items: center;
   flex-wrap: wrap;
-  width: 100%; /* optional: ensures full-width container */
+  width: 80%; /* optional: ensures full-width container */
   margin-bottom: 20px;
   margin: 10px;
-  gap: 20px;
+  gap: 10px;
 }
 
-.editMember, 
+.editMember,
 .deleteMember {
   background-color: lightblue;
   border: none;
@@ -165,8 +165,8 @@
 }
 
 .editButton,
-.saveButton, 
-.cancelEditButton, 
+.saveButton,
+.cancelEditButton,
 .removeFieldButton {
   background-color: black;
   color: orange;
@@ -203,4 +203,91 @@
   justify-content: space-between;
   gap: 10px;
   margin: 20px;
+}
+
+@media (max-width: 500px) {
+  /* Buttons */
+  .editMember,
+  .deleteMember,
+  .removeCertificationsButton,
+  .addCertificationsButton,
+  .removeAttributesButton,
+  .addAttributesButton,
+  .submitFormButton,
+  .cancelButton,
+  .editButton,
+  .saveButton,
+  .cancelEditButton,
+  .removeFieldButton {
+    font-size: 12 !important;
+    padding: 5px 7px !important;
+    min-width: 0 !important;
+  }
+
+  /* Top buttons row */
+  .dashButtons {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 95vw !important;
+    gap: 5px;
+    margin: 0px !important;
+  }
+
+  /* Forms */
+  .editDetailsForm,
+  .formDiv {
+    padding: 8px !important;
+    width: 98vw !important;
+    font-size: 13px !important;
+  }
+  .input {
+    font-size: 12px !important;
+    padding: 6px 5px !important;
+    margin: 6px !important;
+  }
+
+  /* Tables */
+  .memberTable {
+    width: 96vw !important;
+    max-width: 480px !important;
+    min-width: 320px;
+    font-size: 11px !important;
+    margin: 0 auto !important;
+    display: block;
+    overflow-x: auto;
+  }
+  .memberTable th,
+  .memberTable td {
+    font-size: 11px !important;
+    padding: 4px 2px !important;
+    word-break: break-word;
+    text-align: center !important;
+  }
+
+  /* Details card area */
+  .memberDetails {
+    width: 100vw !important;
+    padding: 4px !important;
+    min-height: unset !important;
+    align-items: center !important;
+  }
+
+  .rowWiseElementDiv {
+    margin: 5px !important;
+    gap: 5px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Headings */
+  .memberDetails h2,
+  .memberDetails h3 {
+    font-size: 17px !important;
+    margin: 6px 0 !important;
+  }
+
+  .mainTitle {
+    font-size: 20 !important;
+  }
 }

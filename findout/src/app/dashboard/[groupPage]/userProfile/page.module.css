@@ -163,3 +163,87 @@
   background-color: orangered;
   cursor: pointer;
 }
+
+@media (max-width: 500px) {
+  /* Buttons */
+  .editMember,
+  .deleteMember,
+  .backToGroupButton,
+  .removeCertificationsButton,
+  .addCertificationsButton,
+  .removeAttributesButton,
+  .addAttributesButton,
+  .submitFormButton,
+  .cancelButton {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    min-width: 0 !important;
+  }
+
+  .dashButtons {
+    width: 98vw !important;
+    gap: 5px;
+    margin: 0 !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .formDiv,
+  .editDetailsForm {
+    padding: 8px !important;
+    width: 98vw !important;
+    font-size: 13px !important;
+  }
+
+  .input {
+    font-size: 12px !important;
+    padding: 6px 5px !important;
+    margin: 6px !important;
+  }
+
+  .memberDetails {
+    width: 100vw !important;
+    padding: 4px !important;
+    min-height: unset !important;
+    align-items: center !important;
+  }
+
+  .memberTable {
+    width: 96vw !important;
+    max-width: 480px !important;
+    min-width: 320px;
+    font-size: 11px !important;
+    margin: 0 auto !important;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .memberTable th,
+  .memberTable td {
+    font-size: 11px !important;
+    padding: 4px 2px !important;
+    word-break: break-word;
+    text-align: center !important;
+  }
+
+  .rowWiseElementDiv {
+    margin: 5px !important;
+    gap: 5px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Headings for memberDetails and forms only */
+  .memberDetails h1,
+  .memberDetails h2,
+  .memberDetails h3,
+  .formDiv h2,
+  .formDiv h3 {
+    font-size: 17px !important;
+    margin: 6px 0 !important;
+  }
+}

@@ -169,3 +169,9 @@
   background-color: orange;
   cursor: pointer;
 }
+
+@media (max-width: 500px) {
+  .mainTitle {
+    font-size: 20;
+  }
+}
