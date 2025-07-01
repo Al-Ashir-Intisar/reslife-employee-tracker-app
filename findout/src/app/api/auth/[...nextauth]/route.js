@@ -40,32 +40,43 @@ export const authOptions = {
     error: "/dashboard/login",
   },
 
+  session: {
+    strategy: "jwt",
+  },
+
+  // Set the session cookie to be a "browser session" cookie (expires on browser close)
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        // No 'expires' or 'maxAge' here!
+      },
+    },
+  },
+
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        // console.log("🔐 signIn callback hit");
-        // console.log("🧑 user:", user);
-        // console.log("🔗 account:", account);
-
         if (account.provider === "google") {
           await connect();
           const existingUser = await User.findOne({ email: user.email });
 
           if (!existingUser) {
-            // console.log("🆕 Creating new Google user:", user.email);
-
             const randomPassword = Math.random().toString(36).slice(-8); // 8+ chars
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
             await User.create({
               name: user.name ?? "GoogleUser",
               email: user.email,
-              password: hashedPassword, // ✅ satisfies schema
+              password: hashedPassword, // satisfies schema
               groupsIds: [],
             });
           }
         }
-
         return true;
       } catch (err) {
         console.error("❌ Error in signIn callback:");
