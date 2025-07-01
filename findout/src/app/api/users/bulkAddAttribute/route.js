@@ -54,6 +54,7 @@ export const PUT = async (req) => {
           certifications: [],
           customAttributes: [],
           workShifts: [],
+          tasks: [],
           addedBy: new mongoose.Types.ObjectId(sessionUserId),
           addedAt: new Date(),
         };

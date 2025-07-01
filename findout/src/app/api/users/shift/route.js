@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 export const POST = async (req) => {
   const session = await getServerSession(authOptions);
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const sessionUserId = session.user._id || session.user.id;
 
   try {
     const {
@@ -67,17 +68,22 @@ export const POST = async (req) => {
         );
       }
       // If so, create groupMembership for this user/group
-      membership = {
+      let membershipDefault = {
         groupId: group._id,
         role: "",
         certifications: [],
         customAttributes: [],
         workShifts: [],
+        tasks: [],
+        addedBy: new mongoose.Types.ObjectId(sessionUserId),
+        addedAt: new Date(),
       };
-      user.groupMemberships.push(membership);
-      // Now membership points to the in-memory object, so further code will work
-      membership = user.groupMemberships[user.groupMemberships.length - 1];
+      user.groupMemberships.push(membershipDefault);
     }
+
+    membership = user.groupMemberships.find(
+      (m) => m.groupId.toString() === groupId
+    );
 
     // --- 1. END SHIFT: If ending shift ---
     if (actualEndTime && endLocation) {

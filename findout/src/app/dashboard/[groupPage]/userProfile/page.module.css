@@ -164,6 +164,25 @@
   cursor: pointer;
 }
 
+/* table edit and delete button */
+.editButton {
+  background-color: white;
+}
+
+.deleteButton {
+  background-color: white;
+}
+
+.editButton:hover {
+  background-color: darkorange;
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background-color: darkred;
+  cursor: pointer;
+}
+
 @media (max-width: 500px) {
   /* Buttons */
   .editMember,

@@ -515,6 +515,118 @@ const member = () => {
   // console.log("Session user is the owner:", isOwner);
   // console.log("Member of this page is owner:", memberIsOwner);
 
+  // states for tasks show and assign task and shift table
+  const [weeksFilter, setWeeksFilter] = useState(1);
+  const [deadlineFilter, setDeadlineFilter] = useState("");
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDeadline, setTaskDeadline] = useState("");
+
+  // Helpers for membership, shifts, tasks:
+  function getMembership() {
+    return selectedMember?.groupMemberships?.find(
+      (m) => m.groupId === groupId || m.groupId?._id === groupId
+    );
+  }
+
+  function getRecentShifts() {
+    const membership = getMembership();
+    if (!membership?.workShifts?.length) return [];
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(now.getDate() - 7 * weeksFilter);
+    return membership.workShifts
+      .filter((shift) => new Date(shift.startTime) >= cutoff)
+      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+  }
+
+  function getFilteredTasks() {
+    const membership = getMembership();
+    if (!membership?.tasks?.length) return [];
+    const now = new Date();
+
+    return membership.tasks
+      .filter((task) => {
+        if (!deadlineFilter) return true;
+        const taskDeadline = new Date(task.deadline);
+        if (deadlineFilter === "past") return taskDeadline < now;
+        if (deadlineFilter === "today") {
+          const today = now.toISOString().slice(0, 10);
+          return taskDeadline.toISOString().slice(0, 10) === today;
+        }
+        if (deadlineFilter === "upcoming") return taskDeadline > now;
+        return true;
+      })
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  }
+
+  // Handlers for Task Actions
+  async function updateTaskStatus(taskId, completed) {
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: memberId,
+          taskId,
+          completed,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to update task.");
+      alert("Task status updated!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+
+  async function removeTask(taskId) {
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: memberId,
+          taskId,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to delete task.");
+      alert("Task removed!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+
+  async function handleAssignTask(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: memberId,
+          description: taskDescription,
+          deadline: taskDeadline,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to assign task.");
+      alert("Task assigned!");
+      setShowTaskForm(false);
+      setTaskDescription("");
+      setTaskDeadline("");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+
   if (session.status === "authenticated") {
     return (
       <>
@@ -532,6 +644,13 @@ const member = () => {
             onClick={() => handleRemoveMember({ groupId, memberId })}
           >
             Remove member from this Group
+          </button>
+          <button
+            className={styles.editMember}
+            disabled={!isAdmin}
+            onClick={() => setShowTaskForm(true)}
+          >
+            Assign Task
           </button>
         </div>
 
@@ -685,6 +804,51 @@ const member = () => {
                 Save Changes
               </button>
             </form>
+          )}
+          {/* Assign Task Modal */}
+          {showTaskForm && isAdmin && (
+            <div className={styles.formDiv}>
+              <form
+                className={styles.editDetailsForm}
+                onSubmit={handleAssignTask}
+              >
+                <h3>Assign Task</h3>
+                <label>Description (max 280 chars):</label>
+                <textarea
+                  className={styles.input}
+                  maxLength={280}
+                  value={taskDescription}
+                  required
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  placeholder="Describe the task"
+                  style={{ minHeight: 60, resize: "vertical" }}
+                />
+                <label>Deadline:</label>
+                <input
+                  className={styles.input}
+                  type="datetime-local"
+                  value={taskDeadline}
+                  required
+                  onChange={(e) => setTaskDeadline(e.target.value)}
+                />
+                <div className={styles.cancelButtonDiv}>
+                  <button type="submit" className={styles.submitFormButton}>
+                    Assign Task
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={() => {
+                      setShowTaskForm(false);
+                      setTaskDescription("");
+                      setTaskDeadline("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
         </div>
 
@@ -1147,6 +1311,224 @@ const member = () => {
                         }) ?? (
                         <tr>
                           <td colSpan="4">No attributes found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
+              )}
+              {isAdmin && (
+                <>
+                  {/* Shifts Table & Filter */}
+                  <div
+                    className={styles.rowWiseElementDiv}
+                    style={{ marginTop: "2rem" }}
+                  >
+                    <h2>
+                      Shifts{" "}
+                      <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+                        (last{" "}
+                        <select
+                          value={weeksFilter}
+                          onChange={(e) =>
+                            setWeeksFilter(Number(e.target.value))
+                          }
+                          style={{ fontSize: "1rem" }}
+                        >
+                          {[1, 2, 3, 4].map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                        {weeksFilter === 1 ? " week" : " weeks"})
+                      </span>
+                    </h2>
+                  </div>
+                  <table className={styles.memberTable}>
+                    <thead>
+                      <tr>
+                        <th>Start Time</th>
+                        <th>Start Location</th>
+                        <th>Estimated End</th>
+                        <th>Actual End</th>
+                        <th>End Location</th>
+                        <th>Duration (min)</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getRecentShifts().length > 0 ? (
+                        getRecentShifts().map((shift, i) => {
+                          const estEnd = shift.estimatedEndTime
+                            ? new Date(shift.estimatedEndTime)
+                            : null;
+                          const actualEnd = shift.actualEndTime
+                            ? new Date(shift.actualEndTime)
+                            : null;
+                          const start = shift.startTime
+                            ? new Date(shift.startTime)
+                            : null;
+
+                          let status = "Open";
+                          if (shift.actualEndTime) status = "Closed";
+                          else if (estEnd && new Date() > estEnd)
+                            status = "Timed Out";
+
+                          let duration = "";
+                          if (start && (actualEnd || estEnd)) {
+                            const endTime =
+                              shift.actualEndTime || shift.estimatedEndTime;
+                            duration =
+                              Math.round(
+                                (new Date(endTime) - new Date(start)) / 60000
+                              ) + "";
+                          }
+
+                          return (
+                            <tr key={i}>
+                              <td>{start ? start.toLocaleString() : "N/A"}</td>
+                              <td>
+                                {shift.startLocation
+                                  ? `${shift.startLocation.lat?.toFixed(
+                                      5
+                                    )}, ${shift.startLocation.lng?.toFixed(5)}`
+                                  : "N/A"}
+                              </td>
+                              <td>
+                                {estEnd ? estEnd.toLocaleString() : "N/A"}
+                              </td>
+                              <td>
+                                {actualEnd ? actualEnd.toLocaleString() : ""}
+                              </td>
+                              <td>
+                                {shift.endLocation
+                                  ? `${shift.endLocation.lat?.toFixed(
+                                      5
+                                    )}, ${shift.endLocation.lng?.toFixed(5)}`
+                                  : ""}
+                              </td>
+                              <td>{duration}</td>
+                              <td>{status}</td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan="7">No shift records found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  {/* TASKS SECTION */}
+                  <div
+                    className={styles.rowWiseElementDiv}
+                    style={{ marginTop: "2rem" }}
+                  >
+                    <h2>
+                      Tasks{" "}
+                      <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+                        <select
+                          value={deadlineFilter}
+                          onChange={(e) => setDeadlineFilter(e.target.value)}
+                          style={{ fontSize: "1rem" }}
+                        >
+                          <option value="">All</option>
+                          <option value="today">Due Today</option>
+                          <option value="upcoming">Upcoming</option>
+                          <option value="past">Past Due</option>
+                        </select>
+                      </span>
+                    </h2>
+                  </div>
+                  <table className={styles.memberTable}>
+                    <thead>
+                      <tr>
+                        <th>Description</th>
+                        <th>Deadline</th>
+                        <th>Assigned By</th>
+                        <th>Assigned At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getFilteredTasks().length > 0 ? (
+                        getFilteredTasks().map((task) => (
+                          <tr
+                            key={task._id}
+                            style={{
+                              backgroundColor: task.completed
+                                ? "lightgreen"
+                                : "black",
+                              color: task.completed ? "black" : "white",
+                            }}
+                          >
+                            <td>{task.description}</td>
+                            <td>
+                              {task.deadline
+                                ? new Date(task.deadline).toLocaleString()
+                                : "N/A"}
+                            </td>
+                            <td>
+                              {selectedGroup?.adminIds
+                                ?.map((id) => id.toString())
+                                .includes(task.assignedBy?.toString())
+                                ? "admin"
+                                : "user"}
+                            </td>
+                            <td>
+                              {task.assignedAt
+                                ? new Date(task.assignedAt).toLocaleString()
+                                : "N/A"}
+                            </td>
+                            <td>
+                              {task.completed ? (
+                                <button
+                                  title="Mark as Incomplete"
+                                  className={styles.editButton}
+                                  onClick={async () => {
+                                    if (
+                                      window.confirm("Mark task as incomplete?")
+                                    ) {
+                                      await updateTaskStatus(task._id, false);
+                                    }
+                                  }}
+                                >
+                                  ⏳
+                                </button>
+                              ) : (
+                                <button
+                                  title="Mark as Completed"
+                                  className={styles.editButton}
+                                  onClick={async () => {
+                                    if (
+                                      window.confirm("Mark task as complete?")
+                                    ) {
+                                      await updateTaskStatus(task._id, true);
+                                    }
+                                  }}
+                                >
+                                  ✔️
+                                </button>
+                              )}
+                              <button
+                                title="Remove Task"
+                                className={styles.deleteButton}
+                                onClick={async () => {
+                                  if (window.confirm("Remove this task?")) {
+                                    await removeTask(task._id);
+                                  }
+                                }}
+                              >
+                                🗑️
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5">No tasks found.</td>
                         </tr>
                       )}
                     </tbody>

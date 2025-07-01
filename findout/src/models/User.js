@@ -77,6 +77,32 @@ const userSchema = new Schema(
             addedAt: { type: Date, default: Date.now },
           },
         ],
+        tasks: [
+          {
+            description: {
+              type: String,
+              required: true,
+              maxlength: 280, // Reasonable max length
+            },
+            deadline: {
+              type: Date,
+              required: true,
+            },
+            assignedBy: {
+              type: mongoose.Types.ObjectId,
+              ref: "User",
+              required: true,
+            },
+            assignedAt: {
+              type: Date,
+              default: Date.now,
+            },
+            completed: {
+              type: Boolean,
+              default: false,
+            },
+          },
+        ],
         addedBy: { type: mongoose.Types.ObjectId, ref: "User" },
         addedAt: { type: Date, default: Date.now },
       },

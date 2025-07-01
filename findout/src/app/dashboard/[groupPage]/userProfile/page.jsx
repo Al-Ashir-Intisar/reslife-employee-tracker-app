@@ -54,6 +54,28 @@ const sessionUserProfile = () => {
   const [sessionUserGroupMembership, setSessionUserGroupmembership] =
     useState(null);
 
+  // Auth redirect
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/dashboard/login");
+    }
+  }, [session.status, router]);
+
+  if (session.status === "loading") {
+    return (
+      <div className="pageContent">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  if (session.status !== "authenticated") {
+    return null;
+  }
+
+  useEffect(() => {
+    document.title = "Group User Profile";
+  }, []);
+
   // Fetch group
   useEffect(() => {
     const fetchGroup = async () => {
@@ -88,16 +110,65 @@ const sessionUserProfile = () => {
     }
   }, [sessionUserId, groupId]);
 
-  // Auth redirect
-  useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/dashboard/login");
-    }
-  }, [session.status, router]);
+  // state for tasks display table and filter
+  const [deadlineFilter, setDeadlineFilter] = useState(""); // "" means show all
 
-  useEffect(() => {
-    document.title = "Member Details";
-  }, []);
+  // function for filtering tasks based on deadline
+  function getFilteredTasks() {
+    if (!sessionUserGroupMembership?.tasks?.length) return [];
+    const now = new Date();
+
+    return sessionUserGroupMembership.tasks
+      .filter((task) => {
+        if (!deadlineFilter) return true;
+        const taskDeadline = new Date(task.deadline);
+        if (deadlineFilter === "past") return taskDeadline < now;
+        if (deadlineFilter === "today") {
+          const today = now.toISOString().slice(0, 10);
+          return taskDeadline.toISOString().slice(0, 10) === today;
+        }
+        if (deadlineFilter === "upcoming") return taskDeadline > now;
+        return true;
+      })
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  }
+
+  //  State for Showing the Form and Task Details
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDeadline, setTaskDeadline] = useState("");
+
+  // Assign Task Handler Function
+  async function handleAssignTask(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: sessionUserId, // assigning to self; change if assigning to others
+          description: taskDescription,
+          deadline: taskDeadline,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to assign task.");
+      alert("Task assigned!");
+      // console.log(
+      //   "Assigned task",
+      //   sessionUserId,
+      //   taskDescription,
+      //   taskDeadline
+      // );
+      setShowTaskForm(false);
+      setTaskDescription("");
+      setTaskDeadline("");
+      window.location.reload(); // update table
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
 
   // Helper: get open shift if exists
   function getOpenShift() {
@@ -179,6 +250,48 @@ const sessionUserProfile = () => {
     } else {
       alert("Geolocation not supported.");
       setShowShiftForm(false);
+    }
+  }
+
+  // shift modify or remove handlers
+  async function updateTaskStatus(taskId, completed) {
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: sessionUserId,
+          taskId, // use taskId now
+          completed,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to update task.");
+      alert("Task status updated!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+
+  async function removeTask(taskId) {
+    try {
+      const res = await fetch("/api/users/task", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: sessionUserId,
+          taskId, // use taskId now
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || "Failed to delete task.");
+      alert("Task removed!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
     }
   }
 
@@ -295,495 +408,646 @@ const sessionUserProfile = () => {
     }
   };
 
-  if (session.status === "loading") {
+  if (session.status === "authenticated") {
+    // --- Main render ---
     return (
-      <div className="pageContent">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-  if (session.status !== "authenticated") {
-    return null;
-  }
-
-  // --- Main render ---
-  return (
-    <div className={styles.memberDetails}>
-      {/* Action buttons */}
-      <div className={styles.dashButtons}>
-        <button
-          className={styles.editMember}
-          onClick={() => {
-            setRole("");
-            setCertifications([]);
-            setCustomAttributes([]);
-            setShowEditDetailsForm(true);
-          }}
-        >
-          Add Member Details
-        </button>
-        <button
-          className={styles.deleteMember}
-          onClick={async () => {
-            if (
-              window.confirm(
-                "Are you sure you want to remove yourself from this group?"
-              )
-            ) {
-              try {
-                const res = await fetch("/api/users/removeFromGroup", {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    groupId,
-                    memberId: sessionUserId,
-                  }),
-                });
-                if (!res.ok) {
-                  const result = await res.json();
-                  throw new Error(
-                    result?.message || "Failed to remove from group"
-                  );
-                }
-                alert("Removed from group.");
-                router.push("/dashboard");
-              } catch (err) {
-                alert("Error: " + err.message);
-              }
-            }
-          }}
-        >
-          Remove yourself from this Group
-        </button>
-        <button
-          className={styles.editMember}
-          onClick={() => setShowShiftForm(true)}
-          disabled={!!openShift}
-          title={openShift ? "You already have an open shift." : ""}
-        >
-          Start a Shift
-        </button>
-        {openShift && (
+      <div className={styles.memberDetails}>
+        {/* Action buttons */}
+        <div className={styles.dashButtons}>
           <button
             className={styles.editMember}
-            style={{ background: "#fa5555", color: "#fff" }}
-            onClick={handleShiftEnd}
-            disabled={endingShift}
+            onClick={() => {
+              setRole("");
+              setCertifications([]);
+              setCustomAttributes([]);
+              setShowEditDetailsForm(true);
+            }}
           >
-            {endingShift ? "Ending..." : "End Shift"}
+            Add Member Details
           </button>
-        )}
-      </div>
-
-      {/* Add member details form */}
-      {showEditDetailsForm && (
-        <form
-          className={styles.editDetailsForm}
-          onSubmit={handleMemberDetailsSubmit}
-        >
-          <div className={styles.cancelButtonDiv}>
+          <button
+            className={styles.deleteMember}
+            onClick={async () => {
+              if (
+                window.confirm(
+                  "Are you sure you want to remove yourself from this group?"
+                )
+              ) {
+                try {
+                  const res = await fetch("/api/users/removeFromGroup", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      groupId,
+                      memberId: sessionUserId,
+                    }),
+                  });
+                  if (!res.ok) {
+                    const result = await res.json();
+                    throw new Error(
+                      result?.message || "Failed to remove from group"
+                    );
+                  }
+                  alert("Removed from group.");
+                  router.push("/dashboard");
+                } catch (err) {
+                  alert("Error: " + err.message);
+                }
+              }
+            }}
+          >
+            Remove yourself from this Group
+          </button>
+          <button
+            className={styles.editMember}
+            onClick={() => setShowShiftForm(true)}
+            disabled={!!openShift}
+            title={openShift ? "You already have an open shift." : ""}
+          >
+            Start a Shift
+          </button>
+          {openShift && (
             <button
-              type="button"
-              className={styles.cancelButton}
-              onClick={() => {
-                setShowEditDetailsForm(false);
-                setRole("");
-                setCertifications([]);
-                setCustomAttributes([]);
-              }}
+              className={styles.editMember}
+              style={{ background: "#fa5555", color: "#fff" }}
+              onClick={handleShiftEnd}
+              disabled={endingShift}
             >
-              Cancel
+              {endingShift ? "Ending..." : "End Shift"}
             </button>
-          </div>
-
-          {/* Role */}
-          <div>
-            <h3>Role:</h3>
-            <input
-              type="text"
-              placeholder="Assign a custom role"
-              className={styles.input}
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            />
-          </div>
-
-          {/* Certifications */}
-          <h3>Certifications</h3>
-          {certifications.map((cert, i) => (
-            <div key={i}>
-              <input
-                type="text"
-                placeholder="Name"
-                className={styles.input}
-                value={cert.name}
-                onChange={(e) => {
-                  const updated = [...certifications];
-                  updated[i].name = e.target.value;
-                  setCertifications(updated);
-                }}
-              />
-              <label>Expiration</label>
-              <input
-                type="date"
-                className={styles.input}
-                value={cert.expiresAt || ""}
-                onChange={(e) => {
-                  const updated = [...certifications];
-                  updated[i].expiresAt = e.target.value;
-                  setCertifications(updated);
-                }}
-              />
-              <button
-                type="button"
-                className={styles.removeCertificationsButton}
-                onClick={() => {
-                  setCertifications(
-                    certifications.filter((_, idx) => idx !== i)
-                  );
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+          )}
           <button
-            type="button"
-            className={styles.addCertificationsButton}
-            onClick={() =>
-              setCertifications([
-                ...certifications,
-                { name: "", expiresAt: "" },
-              ])
-            }
+            className={styles.editMember}
+            onClick={() => setShowTaskForm(true)}
           >
-            Add Certification
+            Assign Task
           </button>
+        </div>
 
-          {/* Custom Attributes */}
-          <h3>Custom Attributes</h3>
-          {customAttributes.map((attr, i) => (
-            <div key={i}>
-              <input
-                type="text"
-                placeholder="Key"
-                className={styles.input}
-                value={attr.key}
-                onChange={(e) => {
-                  const updated = [...customAttributes];
-                  updated[i].key = e.target.value;
-                  setCustomAttributes(updated);
-                }}
-              />
-              <select
-                value={attr.type}
-                className={styles.input}
-                onChange={(e) => {
-                  const updated = [...customAttributes];
-                  updated[i].type = e.target.value;
-                  setCustomAttributes(updated);
-                }}
-              >
-                <option value="string">String</option>
-                <option value="number">Number</option>
-                <option value="boolean">Boolean</option>
-                <option value="date">Date</option>
-                <option value="duration">Duration</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Value"
-                className={styles.input}
-                value={attr.value || ""}
-                onChange={(e) => {
-                  const updated = [...customAttributes];
-                  updated[i].value = e.target.value;
-                  setCustomAttributes(updated);
-                }}
-              />
-              <button
-                type="button"
-                className={styles.removeAttributesButton}
-                onClick={() => {
-                  setCustomAttributes(
-                    customAttributes.filter((_, idx) => idx !== i)
-                  );
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className={styles.addAttributesButton}
-            onClick={() =>
-              setCustomAttributes([
-                ...customAttributes,
-                { key: "", type: "string", value: "" },
-              ])
-            }
+        {/* Add member details form */}
+        {showEditDetailsForm && (
+          <form
+            className={styles.editDetailsForm}
+            onSubmit={handleMemberDetailsSubmit}
           >
-            Add Attribute
-          </button>
-
-          <button type="submit" className={styles.submitFormButton}>
-            Save Changes
-          </button>
-        </form>
-      )}
-
-      {/* Start Shift form */}
-      {showShiftForm && (
-        <div className={styles.formDiv}>
-          <form className={styles.editDetailsForm} onSubmit={handleShiftStart}>
-            <h3>Start Shift</h3>
-            <label>Estimated Shift Length (minutes, 15–300):</label>
-            <input
-              type="number"
-              min="15"
-              max="300"
-              className={styles.input}
-              value={shiftMinutes}
-              onChange={(e) => setShiftMinutes(e.target.value)}
-              required
-              placeholder="e.g., 60"
-            />
             <div className={styles.cancelButtonDiv}>
-              <button type="submit" className={styles.submitFormButton}>
-                Log Start
-              </button>
               <button
                 type="button"
                 className={styles.cancelButton}
-                onClick={() => setShowShiftForm(false)}
+                onClick={() => {
+                  setShowEditDetailsForm(false);
+                  setRole("");
+                  setCertifications([]);
+                  setCustomAttributes([]);
+                }}
               >
                 Cancel
               </button>
             </div>
-          </form>
-        </div>
-      )}
 
-      {/* Profile and tables */}
-      <h1>Your Profile for: {group?.name || "..."}</h1>
-      <h2>Primary Details</h2>
-      <table className={styles.memberTable}>
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <td>{sessionUserData?.name || "N/A"}</td>
-          </tr>
-          <tr>
-            <th>Email</th>
-            <td>{sessionUserData?.email || "N/A"}</td>
-          </tr>
-          <tr>
-            <th>ID</th>
-            <td>{sessionUserData?._id || "N/A"}</td>
-          </tr>
-          <tr>
-            <th>Team Role</th>
-            <td>{sessionUserGroupMembership?.role || "N/A"}</td>
-          </tr>
-        </tbody>
-      </table>
+            {/* Role */}
+            <div>
+              <h3>Role:</h3>
+              <input
+                type="text"
+                placeholder="Assign a custom role"
+                className={styles.input}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              />
+            </div>
 
-      {/* Certifications Table */}
-      <div className={styles.rowWiseElementDiv}>
-        <h2>Certifications</h2>
-      </div>
-      <table className={styles.memberTable}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Expires At</th>
-            <th>Added By</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessionUserGroupMembership?.certifications?.length > 0 ? (
-            sessionUserGroupMembership.certifications.map((cert, i) => (
-              <tr key={i}>
-                <td>{cert.name}</td>
-                <td>
-                  {cert.expiresAt
-                    ? new Date(cert.expiresAt).toLocaleDateString()
-                    : "N/A"}
-                </td>
-                <td>
-                  {group?.adminIds
-                    ?.map((id) => id.toString())
-                    .includes(cert.addedBy?.toString())
-                    ? "admin"
-                    : "user"}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="3">No certifications found.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {/* Custom Attributes Table */}
-      <div className={styles.rowWiseElementDiv}>
-        <h2>Custom Attributes</h2>
-      </div>
-      <table className={styles.memberTable}>
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Type</th>
-            <th>Value</th>
-            <th>Added By</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessionUserGroupMembership?.customAttributes?.length > 0 ? (
-            sessionUserGroupMembership.customAttributes.map((attr, i) => {
-              let value;
-              switch (attr.type) {
-                case "string":
-                  value = attr.valueString ?? "N/A";
-                  break;
-                case "number":
-                  value = attr.valueNumber?.toString() ?? "N/A";
-                  break;
-                case "boolean":
-                  value =
-                    typeof attr.valueBoolean === "boolean"
-                      ? attr.valueBoolean.toString()
-                      : "N/A";
-                  break;
-                case "date":
-                  value = attr.valueDate
-                    ? new Date(attr.valueDate).toLocaleDateString()
-                    : "N/A";
-                  break;
-                case "duration":
-                  value =
-                    attr.valueDurationMinutes != null
-                      ? `${attr.valueDurationMinutes} min`
-                      : "N/A";
-                  break;
-                default:
-                  value = "N/A";
+            {/* Certifications */}
+            <h3>Certifications</h3>
+            {certifications.map((cert, i) => (
+              <div key={i}>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className={styles.input}
+                  value={cert.name}
+                  onChange={(e) => {
+                    const updated = [...certifications];
+                    updated[i].name = e.target.value;
+                    setCertifications(updated);
+                  }}
+                />
+                <label>Expiration</label>
+                <input
+                  type="date"
+                  className={styles.input}
+                  value={cert.expiresAt || ""}
+                  onChange={(e) => {
+                    const updated = [...certifications];
+                    updated[i].expiresAt = e.target.value;
+                    setCertifications(updated);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.removeCertificationsButton}
+                  onClick={() => {
+                    setCertifications(
+                      certifications.filter((_, idx) => idx !== i)
+                    );
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className={styles.addCertificationsButton}
+              onClick={() =>
+                setCertifications([
+                  ...certifications,
+                  { name: "", expiresAt: "" },
+                ])
               }
-              return (
+            >
+              Add Certification
+            </button>
+
+            {/* Custom Attributes */}
+            <h3>Custom Attributes</h3>
+            {customAttributes.map((attr, i) => (
+              <div key={i}>
+                <input
+                  type="text"
+                  placeholder="Key"
+                  className={styles.input}
+                  value={attr.key}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].key = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                />
+                <select
+                  value={attr.type}
+                  className={styles.input}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].type = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                >
+                  <option value="string">String</option>
+                  <option value="number">Number</option>
+                  <option value="boolean">Boolean</option>
+                  <option value="date">Date</option>
+                  <option value="duration">Duration</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Value"
+                  className={styles.input}
+                  value={attr.value || ""}
+                  onChange={(e) => {
+                    const updated = [...customAttributes];
+                    updated[i].value = e.target.value;
+                    setCustomAttributes(updated);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.removeAttributesButton}
+                  onClick={() => {
+                    setCustomAttributes(
+                      customAttributes.filter((_, idx) => idx !== i)
+                    );
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className={styles.addAttributesButton}
+              onClick={() =>
+                setCustomAttributes([
+                  ...customAttributes,
+                  { key: "", type: "string", value: "" },
+                ])
+              }
+            >
+              Add Attribute
+            </button>
+
+            <button type="submit" className={styles.submitFormButton}>
+              Save Changes
+            </button>
+          </form>
+        )}
+
+        {/* Start Shift form */}
+        {showShiftForm && (
+          <div className={styles.formDiv}>
+            <form
+              className={styles.editDetailsForm}
+              onSubmit={handleShiftStart}
+            >
+              <h3>Start Shift</h3>
+              <label>Estimated Shift Length (minutes, 15–300):</label>
+              <input
+                type="number"
+                min="15"
+                max="300"
+                className={styles.input}
+                value={shiftMinutes}
+                onChange={(e) => setShiftMinutes(e.target.value)}
+                required
+                placeholder="e.g., 60"
+              />
+              <div className={styles.cancelButtonDiv}>
+                <button type="submit" className={styles.submitFormButton}>
+                  Log Start
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowShiftForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        {/* Assign task form */}
+        {showTaskForm && (
+          <div className={styles.formDiv}>
+            <form
+              className={styles.editDetailsForm}
+              onSubmit={handleAssignTask}
+            >
+              <h3>Assign Task</h3>
+              <label>Description (max 280 chars):</label>
+              <textarea
+                className={styles.input}
+                maxLength={280}
+                value={taskDescription}
+                required
+                onChange={(e) => setTaskDescription(e.target.value)}
+                placeholder="Describe the task"
+                style={{ minHeight: 60, resize: "vertical" }}
+              />
+              <label>Deadline:</label>
+              <input
+                className={styles.input}
+                type="datetime-local"
+                value={taskDeadline}
+                required
+                onChange={(e) => setTaskDeadline(e.target.value)}
+              />
+              <div className={styles.cancelButtonDiv}>
+                <button type="submit" className={styles.submitFormButton}>
+                  Assign Task
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => {
+                    setShowTaskForm(false);
+                    setTaskDescription("");
+                    setTaskDeadline("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Profile and tables */}
+        <h1>Your Profile for: {group?.name || "..."}</h1>
+        <h2>Primary Details</h2>
+        <table className={styles.memberTable}>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{sessionUserData?.name || "N/A"}</td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td>{sessionUserData?.email || "N/A"}</td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>{sessionUserData?._id || "N/A"}</td>
+            </tr>
+            <tr>
+              <th>Team Role</th>
+              <td>{sessionUserGroupMembership?.role || "N/A"}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Certifications Table */}
+        <div className={styles.rowWiseElementDiv}>
+          <h2>Certifications</h2>
+        </div>
+        <table className={styles.memberTable}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Expires At</th>
+              <th>Added By</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sessionUserGroupMembership?.certifications?.length > 0 ? (
+              sessionUserGroupMembership.certifications.map((cert, i) => (
                 <tr key={i}>
-                  <td>{attr.key}</td>
-                  <td>{attr.type}</td>
-                  <td>{value}</td>
+                  <td>{cert.name}</td>
+                  <td>
+                    {cert.expiresAt
+                      ? new Date(cert.expiresAt).toLocaleDateString()
+                      : "N/A"}
+                  </td>
                   <td>
                     {group?.adminIds
                       ?.map((id) => id.toString())
-                      .includes(attr.addedBy?.toString())
+                      .includes(cert.addedBy?.toString())
                       ? "admin"
                       : "user"}
                   </td>
                 </tr>
-              );
-            })
-          ) : (
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3">No certifications found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Custom Attributes Table */}
+        <div className={styles.rowWiseElementDiv}>
+          <h2>Custom Attributes</h2>
+        </div>
+        <table className={styles.memberTable}>
+          <thead>
             <tr>
-              <td colSpan="4">No attributes found.</td>
+              <th>Key</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Added By</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sessionUserGroupMembership?.customAttributes?.length > 0 ? (
+              sessionUserGroupMembership.customAttributes.map((attr, i) => {
+                let value;
+                switch (attr.type) {
+                  case "string":
+                    value = attr.valueString ?? "N/A";
+                    break;
+                  case "number":
+                    value = attr.valueNumber?.toString() ?? "N/A";
+                    break;
+                  case "boolean":
+                    value =
+                      typeof attr.valueBoolean === "boolean"
+                        ? attr.valueBoolean.toString()
+                        : "N/A";
+                    break;
+                  case "date":
+                    value = attr.valueDate
+                      ? new Date(attr.valueDate).toLocaleDateString()
+                      : "N/A";
+                    break;
+                  case "duration":
+                    value =
+                      attr.valueDurationMinutes != null
+                        ? `${attr.valueDurationMinutes} min`
+                        : "N/A";
+                    break;
+                  default:
+                    value = "N/A";
+                }
+                return (
+                  <tr key={i}>
+                    <td>{attr.key}</td>
+                    <td>{attr.type}</td>
+                    <td>{value}</td>
+                    <td>
+                      {group?.adminIds
+                        ?.map((id) => id.toString())
+                        .includes(attr.addedBy?.toString())
+                        ? "admin"
+                        : "user"}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="4">No attributes found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-      {/* Work Shifts Table and Filter */}
-      <div className={styles.rowWiseElementDiv} style={{ marginTop: "2rem" }}>
-        <h2>
-          Shifts{" "}
-          <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-            (last{" "}
-            <select
-              value={weeksFilter}
-              onChange={(e) => setWeeksFilter(Number(e.target.value))}
-              style={{ fontSize: "1rem" }}
-            >
-              {WEEK_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-            {weeksFilter === 1 ? " week" : " weeks"})
-          </span>
-        </h2>
-      </div>
-      <table className={styles.memberTable}>
-        <thead>
-          <tr>
-            <th>Start Time</th>
-            <th>Start Location</th>
-            <th>Estimated End</th>
-            <th>Actual End</th>
-            <th>End Location</th>
-            <th>Duration (min)</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {getRecentShifts().length > 0 ? (
-            getRecentShifts().map((shift, i) => {
-              const estEnd = shift.estimatedEndTime
-                ? new Date(shift.estimatedEndTime)
-                : null;
-              const actualEnd = shift.actualEndTime
-                ? new Date(shift.actualEndTime)
-                : null;
-              const start = shift.startTime ? new Date(shift.startTime) : null;
+        {/* Work Shifts Table and Filter */}
+        <div className={styles.rowWiseElementDiv} style={{ marginTop: "2rem" }}>
+          <h2>
+            Shifts{" "}
+            <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+              (last{" "}
+              <select
+                value={weeksFilter}
+                onChange={(e) => setWeeksFilter(Number(e.target.value))}
+                style={{ fontSize: "1rem" }}
+              >
+                {WEEK_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {weeksFilter === 1 ? " week" : " weeks"})
+            </span>
+          </h2>
+        </div>
+        <table className={styles.memberTable}>
+          <thead>
+            <tr>
+              <th>Start Time</th>
+              <th>Start Location</th>
+              <th>Estimated End</th>
+              <th>Actual End</th>
+              <th>End Location</th>
+              <th>Duration (min)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {getRecentShifts().length > 0 ? (
+              getRecentShifts().map((shift, i) => {
+                const estEnd = shift.estimatedEndTime
+                  ? new Date(shift.estimatedEndTime)
+                  : null;
+                const actualEnd = shift.actualEndTime
+                  ? new Date(shift.actualEndTime)
+                  : null;
+                const start = shift.startTime
+                  ? new Date(shift.startTime)
+                  : null;
 
-              let status = "Open";
-              if (shift.actualEndTime) status = "Closed";
-              else if (estEnd && new Date() > estEnd) status = "Timed Out";
+                let status = "Open";
+                if (shift.actualEndTime) status = "Closed";
+                else if (estEnd && new Date() > estEnd) status = "Timed Out";
 
-              let duration = "";
-              if (start && (actualEnd || estEnd)) {
-                const endTime = shift.actualEndTime || shift.estimatedEndTime;
-                duration =
-                  Math.round((new Date(endTime) - new Date(start)) / 60000) +
-                  "";
-              }
+                let duration = "";
+                if (start && (actualEnd || estEnd)) {
+                  const endTime = shift.actualEndTime || shift.estimatedEndTime;
+                  duration =
+                    Math.round((new Date(endTime) - new Date(start)) / 60000) +
+                    "";
+                }
 
-              return (
-                <tr key={i}>
-                  <td>{start ? start.toLocaleString() : "N/A"}</td>
+                return (
+                  <tr key={i}>
+                    <td>{start ? start.toLocaleString() : "N/A"}</td>
+                    <td>
+                      {shift.startLocation
+                        ? `${shift.startLocation.lat?.toFixed(
+                            5
+                          )}, ${shift.startLocation.lng?.toFixed(5)}`
+                        : "N/A"}
+                    </td>
+                    <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td>
+                    <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
+                    <td>
+                      {shift.endLocation
+                        ? `${shift.endLocation.lat?.toFixed(
+                            5
+                          )}, ${shift.endLocation.lng?.toFixed(5)}`
+                        : ""}
+                    </td>
+                    <td>{duration}</td>
+                    <td>{status}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="7">No shift records found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Tasks Table and filter */}
+        <div className={styles.rowWiseElementDiv} style={{ marginTop: "2rem" }}>
+          <h2>
+            Tasks{" "}
+            <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+              <select
+                value={deadlineFilter}
+                onChange={(e) => setDeadlineFilter(e.target.value)}
+                style={{ fontSize: "1rem" }}
+              >
+                <option value="">All</option>
+                <option value="today">Due Today</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="past">Past Due</option>
+              </select>
+            </span>
+          </h2>
+        </div>
+        <table className={styles.memberTable}>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Deadline</th>
+              <th>Assigned By</th>
+              <th>Assigned At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {getFilteredTasks().length > 0 ? (
+              getFilteredTasks().map((task) => (
+                <tr
+                  key={task._id}
+                  style={{
+                    backgroundColor: task.completed ? "lightgreen" : "black",
+                    color: task.completed ? "black" : "white",
+                  }}
+                >
+                  <td>{task.description}</td>
                   <td>
-                    {shift.startLocation
-                      ? `${shift.startLocation.lat?.toFixed(
-                          5
-                        )}, ${shift.startLocation.lng?.toFixed(5)}`
+                    {task.deadline
+                      ? new Date(task.deadline).toLocaleString()
                       : "N/A"}
                   </td>
-                  <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td>
-                  <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
                   <td>
-                    {shift.endLocation
-                      ? `${shift.endLocation.lat?.toFixed(
-                          5
-                        )}, ${shift.endLocation.lng?.toFixed(5)}`
-                      : ""}
+                    {group?.adminIds
+                      ?.map((id) => id.toString())
+                      .includes(task.assignedBy?.toString())
+                      ? "admin"
+                      : "user"}
                   </td>
-                  <td>{duration}</td>
-                  <td>{status}</td>
+                  <td>
+                    {task.assignedAt
+                      ? new Date(task.assignedAt).toLocaleString()
+                      : "N/A"}
+                  </td>
+                  <td>
+                    {task.completed ? (
+                      <button
+                        title="Mark as Incomplete"
+                        className={styles.editButton}
+                        onClick={async () => {
+                          if (window.confirm("Mark task as incomplete?")) {
+                            await updateTaskStatus(task._id, false);
+                          }
+                        }}
+                      >
+                        ⏳
+                      </button>
+                    ) : (
+                      <button
+                        title="Mark as Completed"
+                        className={styles.editButton}
+                        onClick={async () => {
+                          if (window.confirm("Mark task as complete?")) {
+                            await updateTaskStatus(task._id, true);
+                          }
+                        }}
+                      >
+                        ✔️
+                      </button>
+                    )}
+                    <button
+                      title="Remove Task"
+                      className={styles.deleteButton}
+                      onClick={async () => {
+                        if (window.confirm("Remove this task?")) {
+                          await removeTask(task._id);
+                        }
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  </td>
                 </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan="7">No shift records found.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">No tasks found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 };
 
 export default sessionUserProfile;

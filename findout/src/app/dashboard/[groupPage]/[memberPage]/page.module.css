@@ -167,10 +167,16 @@
 .editButton,
 .saveButton,
 .cancelEditButton,
-.removeFieldButton {
-  background-color: black;
-  color: orange;
-  margin: 2px;
+.removeFieldButton,
+.deleteButton {
+  background-color: lightblue;
+  color: black;
+}
+
+.deleteButton:hover {
+  color: black;
+  background-color: orangered;
+  cursor: pointer;
 }
 
 .editButton:hover {
@@ -215,7 +221,7 @@
   .addAttributesButton,
   .submitFormButton,
   .cancelButton,
-  .editButton,
+  /* .editButton, */
   .saveButton,
   .cancelEditButton,
   .removeFieldButton {
