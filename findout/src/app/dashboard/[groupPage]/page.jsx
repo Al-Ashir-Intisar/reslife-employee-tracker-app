@@ -616,10 +616,10 @@ const GroupPage = () => {
         }),
       });
       if (!res.ok) throw new Error("Failed to save task changes");
-      console.log("Changes:", changes);
+      // console.log("Changes:", changes);
       setEditingTasks({});
       setPendingTaskChanges({ edited: [], deleted: [] });
-      // window.location.reload();
+      window.location.reload();
     } catch (err) {
       alert("Error saving task changes: " + err.message);
     }
