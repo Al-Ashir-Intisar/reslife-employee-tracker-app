@@ -141,13 +141,18 @@
 
 .addEmailButton,
 .cancleCreateGroupButton,
-.createGroupButton,
-.removeEmailButton {
+.createGroupButton {
   background-color: lightblue;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 5px;
+}
+.removeEmailButton {
+  background-color: white;
+  border: none;
+  padding: 2px 4px;
+  font-size: 16px;
 }
 
 .addEmailButton:hover {
@@ -166,12 +171,113 @@
 }
 
 .removeEmailButton:hover {
-  background-color: orange;
+  background-color: orangered;
+  cursor: pointer;
+}
+
+.groupsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto 20px auto;
+  background: black;
+}
+
+.groupsTable th,
+.groupsTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  color: white;
+}
+
+.groupsTable th {
+  background: orange;
+  color: black;
+  font-weight: bold;
+}
+
+.groupsTable tr {
+  background: #222;
+}
+
+.groupsTable tr:hover {
+  background: #444;
+  color: lightgreen;
   cursor: pointer;
 }
 
 @media (max-width: 500px) {
   .mainTitle {
-    font-size: 20;
+    font-size: 18 !important;
+    padding: 0.5rem 0.5rem !important;
+  }
+
+  .group {
+    padding: 5px;
+    font-size: 14 !important;
+  }
+  .title {
+    font-size: 20 !important;
+    word-break: break-all;
+  }
+  .description {
+    font-size: 13 !important;
+    word-break: break-all;
+  }
+
+  .createGroupForm {
+    width: 90vw !important;
+    min-width: 0 !important;
+    font-size: 12 !important;
+    flex-direction: column !important;
+    padding: 10px 2px !important;
+  }
+
+  .input {
+    width: 80% !important;
+    font-size: 13 !important;
+    padding: 8px 6px !important;
+    box-sizing: border-box;
+  }
+
+  .formButtonGroup,
+  .emailInputContainer {
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 80% !important;
+  }
+
+  .dashButtons,
+  .formButtonGroup {
+    flex-direction: column !important;
+    align-items: center;
+    gap: 6px !important;
+    margin: 5px !important;
+  }
+
+  .emailList li {
+    font-size: 13px !important;
+    padding: 2px 0 !important;
+  }
+
+  .createGroup {
+    font-size: 13 !important;
+    width: 80%;
+  }
+
+  .addEmailButton,
+  .createGroupButton,
+  .cancleCreateGroupButton {
+    width: 50% !important;
+    font-size: 13 !important;
+  }
+
+  .groupsTable th,
+  .groupsTable td {
+    padding: 4px;
+    font-size: 12px;
+  }
+  .groupsTable {
+    font-size: 12px;
   }
 }

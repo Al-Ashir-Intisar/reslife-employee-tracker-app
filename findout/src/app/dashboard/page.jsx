@@ -59,7 +59,6 @@ const Dashboard = () => {
   const [memberEmails, setMemberEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
 
-
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
     const trimmed = newEmail.trim();
@@ -318,21 +317,43 @@ const Dashboard = () => {
         )}
         {!showCreateGroupForm && (
           <div className="pageContent">
-            <div className={styles.groups}>
-              {groups &&
-                groups.map((group) => (
-                  <Link
-                    key={group.name}
-                    href={`/dashboard/${group._id}`}
-                    className={styles.group}
-                  >
-                    <span className={styles.title}>{group.name}</span>
-                    <span className={styles.description}>
-                      {group.description}
-                    </span>
-                  </Link>
-                ))}
-            </div>
+            <table className={styles.groupsTable}>
+              <thead>
+                <tr>
+                  <th>Group Name</th>
+                  <th>Description</th>
+                  <th>members</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groups && groups.length > 0 ? (
+                  groups.map((group) => (
+                    <tr
+                      key={group._id}
+                      onClick={() => router.push(`/dashboard/${group._id}`)}
+                      style={{ cursor: "pointer" }}
+                      className={styles.groupRow}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          router.push(`/dashboard/${group._id}`);
+                        }
+                      }}
+                    >
+                      <td>{group.name}</td>
+                      <td>{group.description}</td>
+                      <td>{(group.membersId || []).length}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: "center" }}>
+                      No groups found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         )}
       </>
