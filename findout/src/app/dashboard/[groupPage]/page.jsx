@@ -1701,19 +1701,21 @@ const GroupPage = () => {
             </tbody>
           </table>
           <div className={styles.filtersDiv}>
-            <label>Filter by Tasks:</label>
-            <Select
-              isMulti
-              options={taskOptions}
-              value={taskOptions.filter((o) => taskFilters.includes(o.value))}
-              onChange={(selected) =>
-                setTaskFilters(selected.map((s) => s.value))
-              }
-              placeholder="Select task descriptions..."
-              className="react-select-container"
-              classNamePrefix="react-select"
-              styles={customStyles}
-            />
+            <div>
+              <label>Filter by Tasks:</label>
+              <Select
+                isMulti
+                options={taskOptions}
+                value={taskOptions.filter((o) => taskFilters.includes(o.value))}
+                onChange={(selected) =>
+                  setTaskFilters(selected.map((s) => s.value))
+                }
+                placeholder="Select task descriptions..."
+                className="react-select-container"
+                classNamePrefix="react-select"
+                styles={customStyles}
+              />
+            </div>
           </div>
           <div className={styles.tableButtonsDiv}>
             {isAdmin && taskFilters.length !== 0 && (
