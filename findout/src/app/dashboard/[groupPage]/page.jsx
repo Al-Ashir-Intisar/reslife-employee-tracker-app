@@ -1747,7 +1747,7 @@ const GroupPage = () => {
                 <th>Task Description</th>
                 <th>Deadline</th>
                 <th>Assigned By</th>
-                <th>Assigned At</th>
+                {/* <th>Assigned At</th> */}
                 {isAdmin && <th>Actions</th>}
               </tr>
             </thead>
@@ -1807,11 +1807,11 @@ const GroupPage = () => {
                                 ? "admin"
                                 : "user"}
                             </td>
-                            <td>
+                            {/* <td>
                               {t.assignedAt
                                 ? new Date(t.assignedAt).toLocaleString()
                                 : "N/A"}
-                            </td>
+                            </td> */}
                             {isAdmin && (
                               <td>
                                 <div className={styles.tableButtonsDiv}>
