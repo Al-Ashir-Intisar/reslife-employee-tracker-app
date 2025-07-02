@@ -193,7 +193,7 @@ const Dashboard = () => {
 
         // 2. Fetch groups based on groupIds
         if (user?.groupIds?.length) {
-          // console.log("User groupIds:", user.groupIds);
+          console.log("User groupIds:", user.groupIds);
           const groups = await getGroups(user.groupIds);
           setGroups(groups);
         } else {

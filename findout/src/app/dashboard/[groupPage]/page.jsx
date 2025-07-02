@@ -158,6 +158,7 @@ const GroupPage = () => {
     const fetchGroups = async () => {
       try {
         const data = await getGroups();
+        // console.log(data);
         const group = data.find((g) => g._id === groupId);
         setSelectedGroup(group);
       } catch (error) {
