@@ -1,10 +1,11 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import styles from "./page.module.css";
-import Link from "next/link";
+// import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+// import { headers } from "next/headers";
 
 async function getGroups(ids) {
   const res = await fetch("/api/groups/byids", {
@@ -39,16 +40,33 @@ const Dashboard = () => {
     setShowCreateGroupForm(!showCreateGroupForm);
   };
 
+  // Fetching the user by email and then setting both currentUser and groups
   useEffect(() => {
-    const fetchUserId = async () => {
-      if (!sessionEmail) return;
-      const res = await fetch(`/api/users?email=${sessionEmail}`);
-      const user = await res.json();
-      // console.log("Current user:", user);
-      setCurrentUser(user);
+    const fetchUserAndGroups = async () => {
+      if (session.status !== "authenticated" || !session.data?.user?.email)
+        return;
+
+      try {
+        const res = await fetch(`/api/users?email=${session.data.user.email}`);
+        const user = await res.json();
+        setCurrentUser(user);
+
+        if (user?.groupIds?.length) {
+          const grps = await getGroups(user.groupIds);
+          setGroups(grps);
+        } else {
+          setGroups([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user or groups:", error);
+        setGroups([]);
+      }
     };
-    fetchUserId();
-  }, [sessionEmail]);
+
+    fetchUserAndGroups();
+  }, [session.status, session.data?.user?.email]);
+  console.log("Current User-State:", currentUser);
+  console.log("Groups-State:", groups);
 
   // State to hold new group name and description and member IDs
   const [newGroupName, setGroupName] = useState("");
@@ -179,33 +197,34 @@ const Dashboard = () => {
     document.title = "Dashboard";
   }, []);
 
-  useEffect(() => {
-    const fetchUserGroups = async () => {
-      if (session.status !== "authenticated") return;
+  // useEffect(() => {
+  //   const fetchUserGroups = async () => {
+  //     if (session.status !== "authenticated") return;
 
-      try {
-        // 1. Get user info by email
-        const userRes = await fetch(
-          `/api/users?email=${session.data.user.email}`
-        );
-        const user = await userRes.json();
-        // console.log("User fetched:", user);
+  //     try {
+  //       // 1. Get user info by email
+  //       const userRes = await fetch(
+  //         `/api/users?email=${session.data.user.email}`
+  //       );
+  //       const user = await userRes.json();
+  //       console.log("User fetched:", user);
+  //       console.log("Current User", currentUser);
 
-        // 2. Fetch groups based on groupIds
-        if (user?.groupIds?.length) {
-          console.log("User groupIds:", user.groupIds);
-          const groups = await getGroups(user.groupIds);
-          setGroups(groups);
-        } else {
-          setGroups([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user groups:", error);
-      }
-    };
+  //       // 2. Fetch groups based on groupIds
+  //       if (user?.groupIds?.length) {
+  //         console.log("User groupIds:", user.groupIds);
+  //         const grps = await getGroups(user.groupIds);
+  //         setGroups(grps);
+  //       } else {
+  //         setGroups([]);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch user groups:", error);
+  //     }
+  //   };
 
-    fetchUserGroups();
-  }, [session.status]);
+  //   fetchUserGroups();
+  // }, [session.status]);
   // console.log("Groups fetched:", groups);
 
   useEffect(() => {
@@ -323,6 +342,7 @@ const Dashboard = () => {
                   <th>Group Name</th>
                   <th>Description</th>
                   <th>members</th>
+                  <th>Session User</th>
                 </tr>
               </thead>
               <tbody>
@@ -343,6 +363,7 @@ const Dashboard = () => {
                       <td>{group.name}</td>
                       <td>{group.description}</td>
                       <td>{(group.membersId || []).length}</td>
+                      <td>{currentUser.name}</td>
                     </tr>
                   ))
                 ) : (
