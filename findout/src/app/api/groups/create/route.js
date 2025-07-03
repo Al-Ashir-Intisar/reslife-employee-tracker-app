@@ -26,13 +26,13 @@ export const POST = async (req) => {
     const existing = await Group.findOne({ name });
     if (existing)
       return new NextResponse("Group name already exists", { status: 409 });
-
     const newGroup = new Group({
       name,
       description,
       membersId: membersObjectId,
       ownerId: ownerObjectId,
       adminIds: adminObjectIds,
+      announcement: "", // initialize as empty
     });
 
     await newGroup.save();

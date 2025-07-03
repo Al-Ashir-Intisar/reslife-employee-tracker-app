@@ -25,6 +25,11 @@ const groupSchema = new Schema(
       type: [Types.ObjectId],
       required: false,
     },
+    announcement: {
+      message: { type: String, default: "Now group admins can add an announcement for the group! Try it out." },
+      updatedAt: { type: Date },
+      updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
   },
   { timestamps: true }
 );

@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 export const POST = async (req) => {
   const session = await getServerSession(authOptions);
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
-  const sessionUserId = session.user._id || session.user.id;
+  const sessionUserId = session.user._id;
 
   try {
     const {

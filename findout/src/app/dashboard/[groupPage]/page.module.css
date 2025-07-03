@@ -244,6 +244,20 @@
   cursor: pointer;
 }
 
+.announcementBlock {
+  background: #222;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.09);
+  width: 100%;
+  
+}
+.announcementText {
+  font-size: 1.1em;
+  white-space: pre-wrap;
+  color: #fff;
+}
 
 @media (max-width: 500px) {
   .createMember,

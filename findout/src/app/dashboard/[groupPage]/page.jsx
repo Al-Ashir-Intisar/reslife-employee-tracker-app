@@ -626,57 +626,145 @@ const GroupPage = () => {
     }
   };
 
+  // state variables for anouncement edit
+  const [editAnnouncement, setEditAnnouncement] = useState(false);
+  const [announcementDraft, setAnnouncementDraft] = useState(
+    selectedGroup?.announcement?.message || ""
+  );
+
   if (session.status === "authenticated") {
     return (
       <>
-        <div className={styles.dashButtons}>
-          <button
-            className={styles.profileButton}
-            onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}
-          >
-            Your Profile
-          </button>
-          <button
-            className={styles.createMember}
-            onClick={toggleAddMemberForm}
-            disabled={!isAdmin}
-          >
-            Add new Members
-          </button>
-          {/* <button className={styles.sendInvite}>Invite a new user</button> */}
-          <button
-            className={styles.createMember}
-            disabled={!isAdmin}
-            onClick={() => setShowAddAttributeForm(true)}
-          >
-            Add an Attribute
-          </button>
-
-          <button
-            className={styles.createMember}
-            disabled={!isAdmin}
-            onClick={() => setShowAddCertificationForm(true)}
-          >
-            Add a Certification
-          </button>
-
-          <button
-            className={styles.createMember}
-            disabled={!isAdmin}
-            onClick={() => setShowBulkAssignTaskForm(true)}
-          >
-            Assign Task
-          </button>
-
-          <button
-            className={styles.deleteGroup}
-            onClick={handleDeleteGroup}
-            disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
-          >
-            Delete this Group
-          </button>
-        </div>
         <div className="pageContent">
+          <div className={styles.dashButtons}>
+            <button
+              className={styles.profileButton}
+              onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}
+            >
+              Your Profile
+            </button>
+            <button
+              className={styles.createMember}
+              onClick={toggleAddMemberForm}
+              disabled={!isAdmin}
+            >
+              Add new Members
+            </button>
+            {/* <button className={styles.sendInvite}>Invite a new user</button> */}
+            <button
+              className={styles.createMember}
+              disabled={!isAdmin}
+              onClick={() => setShowAddAttributeForm(true)}
+            >
+              Add an Attribute
+            </button>
+
+            <button
+              className={styles.createMember}
+              disabled={!isAdmin}
+              onClick={() => setShowAddCertificationForm(true)}
+            >
+              Add a Certification
+            </button>
+
+            <button
+              className={styles.createMember}
+              disabled={!isAdmin}
+              onClick={() => setShowBulkAssignTaskForm(true)}
+            >
+              Assign Task
+            </button>
+
+            <button
+              className={styles.deleteGroup}
+              onClick={handleDeleteGroup}
+              disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
+            >
+              Delete this Group
+            </button>
+          </div>
+          {/* div for announcement display */}
+          <div className={styles.announcementBlock}>
+            <h3>Group Announcement</h3>
+            {isAdmin && editAnnouncement ? (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const res = await fetch("/api/groups/announcement", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        groupId,
+                        announcement: {
+                          message: announcementDraft,
+                          updatedAt: new Date(),
+                          updatedBy: session?.data?.user?._id,
+                        },
+                      }),
+                    });
+                    if (!res.ok)
+                      throw new Error("Failed to update announcement");
+                    setEditAnnouncement(false);
+                    window.location.reload();
+                  } catch (err) {
+                    alert("Error: " + err.message);
+                  }
+                }}
+              >
+                <textarea
+                  value={announcementDraft}
+                  onChange={(e) => setAnnouncementDraft(e.target.value)}
+                  maxLength={400}
+                  rows={3}
+                  style={{ width: "100%" }}
+                />
+                <button type="submit" className={styles.editButton}>
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className={styles.deleteButton}
+                  onClick={() => {
+                    setEditAnnouncement(false);
+                    setAnnouncementDraft(
+                      selectedGroup?.announcement?.message || ""
+                    );
+                  }}
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <>
+                <div className={styles.announcementText}>
+                  {selectedGroup?.announcement?.message?.length > 0 ? (
+                    selectedGroup.announcement.message
+                  ) : (
+                    <span style={{ color: "#888" }}>No announcement yet.</span>
+                  )}
+                </div>
+                {isAdmin && (
+                  <button
+                    className={styles.editButton}
+                    style={{ marginTop: "0.5rem" }}
+                    onClick={() => {
+                      setEditAnnouncement(true);
+                      setAnnouncementDraft(
+                        selectedGroup?.announcement?.message || ""
+                      );
+                    }}
+                  >
+                    {selectedGroup?.announcement?.message?.length > 0
+                      ? "Edit"
+                      : "Add"}{" "}
+                    Announcement
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
           {showAddAttributeForm && (
             <div className={styles.formDiv}>
               <form
