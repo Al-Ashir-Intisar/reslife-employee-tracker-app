@@ -30,7 +30,7 @@ a {
   background-color: black;
   width: 90vw;
   min-height: 80vh;
-  margin-bottom: 20px;
+  margin: 0 auto;
   padding: 15px;
   gap: 10px;
   display: flex;
