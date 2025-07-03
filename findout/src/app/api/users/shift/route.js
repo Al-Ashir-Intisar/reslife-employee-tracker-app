@@ -61,7 +61,7 @@ export const POST = async (req) => {
         );
       }
       // Check if user is listed as a member of this group
-      if (!group.memberIds.map((id) => id.toString()).includes(userId)) {
+      if (!group.membersId.map((id) => id.toString()).includes(userId)) {
         return NextResponse.json(
           { message: "User is not a member of this group" },
           { status: 403 }
