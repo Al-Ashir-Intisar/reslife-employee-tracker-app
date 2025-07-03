@@ -685,7 +685,7 @@ const GroupPage = () => {
           </div>
           {/* div for announcement display */}
           <div className={styles.announcementBlock}>
-            <h3>Group Announcement</h3>
+            <h3 className={styles.announcementHeader}>Group Announcement:</h3>
             {isAdmin && editAnnouncement ? (
               <form
                 onSubmit={async (e) => {

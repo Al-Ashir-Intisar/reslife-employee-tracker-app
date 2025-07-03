@@ -245,7 +245,7 @@
 }
 
 .announcementBlock {
-  background: #222;
+  background: rgb(117, 118, 119);
   padding: 1rem;
   border-radius: 1rem;
   margin: 1.5rem 0;
@@ -254,9 +254,14 @@
   
 }
 .announcementText {
-  font-size: 1.1em;
+  font-size: 16;
   white-space: pre-wrap;
-  color: #fff;
+  color: #ffffff;
+}
+
+.announcementHeader {
+  color: darkorange;
+  font-weight: bold;
 }
 
 @media (max-width: 500px) {
