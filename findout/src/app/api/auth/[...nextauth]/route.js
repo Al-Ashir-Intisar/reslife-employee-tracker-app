@@ -74,6 +74,7 @@ export const authOptions = {
               email: user.email,
               password: hashedPassword, // satisfies schema
               groupsIds: [],
+              groupMemberships: [],
             });
           }
         }

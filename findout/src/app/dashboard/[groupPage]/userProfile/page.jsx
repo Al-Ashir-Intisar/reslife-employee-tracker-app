@@ -758,9 +758,20 @@ const sessionUserProfile = () => {
               <td>{sessionUserData?.email || "N/A"}</td>
             </tr>
             <tr>
-              <th>ID</th>
-              <td>{sessionUserData?._id || "N/A"}</td>
+              <th>Group Role</th>
+              <td>
+                {group?.ownerId?.toString() === sessionUserData?._id
+                  ? "Owner"
+                  : group?.adminIds
+                      ?.map((id) => id.toString())
+                      .includes(sessionUserData?._id)
+                  ? "Admin"
+                  : sessionUserGroupMembership
+                  ? "Member"
+                  : "N/A"}
+              </td>
             </tr>
+
             <tr>
               <th>Team Role</th>
               <td>{sessionUserGroupMembership?.role || "N/A"}</td>
