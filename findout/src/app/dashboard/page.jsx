@@ -342,7 +342,7 @@ const Dashboard = () => {
                   <th>Group Name</th>
                   <th>Description</th>
                   <th>members</th>
-                  <th>Session User</th>
+                  {/* <th>Session User</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -363,7 +363,7 @@ const Dashboard = () => {
                       <td>{group.name}</td>
                       <td>{group.description}</td>
                       <td>{(group.membersId || []).length}</td>
-                      <td>{currentUser.name}</td>
+                      {/* <td>{currentUser.name}</td> */}
                     </tr>
                   ))
                 ) : (
