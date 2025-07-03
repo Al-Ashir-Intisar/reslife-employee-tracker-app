@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connect from "@/utils/db";
 import Group from "@/models/Group";
+import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import mongoose from "mongoose";
@@ -38,6 +39,16 @@ export const PUT = async (req) => {
       groupObjectId,
       { $addToSet: { membersId: { $each: newMemberObjectIds } } },
       { new: true }
+    );
+
+    // Update each user's groupIds
+    await Promise.all(
+      newMemberObjectIds.map(async (userId) => {
+        const res = await User.findByIdAndUpdate(userId, {
+          $addToSet: { groupIds: groupObjectId },
+        });
+        console.log(`Updated user ${userId} =>`, res);
+      })
     );
 
     return NextResponse.json(updatedGroup, { status: 200 });

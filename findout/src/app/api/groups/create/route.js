@@ -32,7 +32,7 @@ export const POST = async (req) => {
       membersId: membersObjectId,
       ownerId: ownerObjectId,
       adminIds: adminObjectIds,
-      announcement: "", // initialize as empty
+      announcement: "Now group admins can add an announcement for the group! Try it out.", // initialize as empty
     });
 
     await newGroup.save();

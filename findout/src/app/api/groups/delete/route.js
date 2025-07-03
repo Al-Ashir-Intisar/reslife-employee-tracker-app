@@ -1,4 +1,3 @@
-// /app/api/groups/delete/route.js
 import { NextResponse } from "next/server";
 import connect from "@/utils/db";
 import Group from "@/models/Group";
