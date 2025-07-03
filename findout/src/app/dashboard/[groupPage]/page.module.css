@@ -161,7 +161,7 @@
   background-color: black;
   width: 90vw;
   min-height: 80vh;
-  margin: 0 auto;
+  margin-bottom: 20px;
   gap: 10px;
   display: flex;
   flex-direction: column;
@@ -286,7 +286,7 @@
   .memberDetails {
     width: 100vw !important;
     padding: 2px !important;
-    margin: 0 !important;
+    margin-bottom: 20px !important;
     min-height: unset;
     display: flex !important;
     flex-direction: column !important;
