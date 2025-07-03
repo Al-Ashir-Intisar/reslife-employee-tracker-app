@@ -253,7 +253,29 @@ const sessionUserProfile = () => {
     }
   }
 
-  // shift modify or remove handlers
+  // shift remove handler
+  async function removeShift(shiftId) {
+    try {
+      const res = await fetch("/api/users/shift", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          userId: sessionUserId,
+          shiftId,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok)
+        throw new Error(result?.message || "Failed to remove shift.");
+      alert("Shift removed!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+
+  // task modify or remove handlers
   async function updateTaskStatus(taskId, completed) {
     try {
       const res = await fetch("/api/users/task", {
@@ -882,12 +904,14 @@ const sessionUserProfile = () => {
               <th>Actual End</th>
               <th>End Location</th>
               <th>Duration (min)</th>
-              <th>Status</th>
+              {/* <th>Status</th> */}
+              <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {getRecentShifts().length > 0 ? (
-              getRecentShifts().map((shift, i) => {
+              getRecentShifts().map((shift) => {
                 const estEnd = shift.estimatedEndTime
                   ? new Date(shift.estimatedEndTime)
                   : null;
@@ -910,8 +934,20 @@ const sessionUserProfile = () => {
                     "";
                 }
 
+                // Row coloring
+                let rowColor = "";
+                if (!shift.actualEndTime) rowColor = "lightgreen"; // light red/coral for open
+                // else leave as default (black)
+
                 return (
-                  <tr key={i}>
+                  <tr
+                    key={shift._id}
+                    style={{
+                      backgroundColor:
+                        rowColor || (shift.actualEndTime ? "black" : undefined),
+                      color: rowColor ? "black" : "white",
+                    }}
+                  >
                     <td>{start ? start.toLocaleString() : "N/A"}</td>
                     <td>
                       {shift.startLocation
@@ -930,13 +966,26 @@ const sessionUserProfile = () => {
                         : ""}
                     </td>
                     <td>{duration}</td>
-                    <td>{status}</td>
+                    {/* <td>{status}</td> */}
+                    <td>
+                      <button
+                        className={styles.deleteButton}
+                        title="Remove Shift"
+                        onClick={async () => {
+                          if (window.confirm("Remove this shift?")) {
+                            await removeShift(shift._id);
+                          }
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan="7">No shift records found.</td>
+                <td colSpan="8">No shift records found.</td>
               </tr>
             )}
           </tbody>

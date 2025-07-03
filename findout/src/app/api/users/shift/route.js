@@ -172,3 +172,60 @@ export const POST = async (req) => {
     );
   }
 };
+
+// api for deleting the shift
+export const DELETE = async (req) => {
+  const session = await getServerSession(authOptions);
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const sessionUserId = session.user._id || session.user.id;
+
+  try {
+    const { groupId, userId, shiftId } = await req.json();
+
+    if (!groupId || !userId || !shiftId)
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+
+    if (userId !== sessionUserId) {
+      return NextResponse.json(
+        { message: "Forbidden: user mismatch." },
+        { status: 403 }
+      );
+    }
+
+    await connect();
+    const user = await User.findById(userId);
+    if (!user)
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+
+    const membership = user.groupMemberships.find(
+      (m) => m.groupId.toString() === groupId
+    );
+    if (!membership)
+      return NextResponse.json(
+        { message: "Membership not found" },
+        { status: 404 }
+      );
+
+    const prevLength = membership.workShifts.length;
+    membership.workShifts = membership.workShifts.filter(
+      (shift) => !(shift._id && shift._id.toString() === shiftId)
+    );
+
+    if (membership.workShifts.length === prevLength)
+      return NextResponse.json({ message: "Shift not found" }, { status: 404 });
+
+    user.markModified("groupMemberships");
+    await user.save();
+
+    return NextResponse.json({ message: "Shift removed!" }, { status: 200 });
+  } catch (err) {
+    console.error("Error deleting shift:", err);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+};
