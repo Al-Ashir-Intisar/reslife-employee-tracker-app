@@ -59,9 +59,21 @@ This system is especially useful in dynamic environments where quick access to d
   - Modified group page ✅
   - Modified member page ✅
   - Modified user profile page ✅
+- Fixed NEXTAUTH_URL environment variable missmatch in vercel. Completed ✅: 7/2/2025
+- Fixed shift api variable name missmatch (changed memberIds to membersId). Completed ✅: 7/2/2025
+- Add delete button to delete a shift only in userProfile page. Complete ✅: 7/2/2025
+- Add attributes for the group/notice/announcement kind of thing. Completed ✅: 7/2/2025
+- In session authencated checks also check for if the user exists in the database or not. 
+  - Can't check that in the api because we are allowing for creating new user if user does not exist yet. ✅
+  - Added the database check on render in member page. ✅
+  - Add check on login page to see if the user is authenticated or not and send back to dashboard if authenticated.
+- Wrap the tables into a div that is scrollable both horizontally and vertically and only shows 5 rows at a time max.
+- Add page not found fallback page when group/member does not exist for group, member , profile page.
 - Add hour stats abd bar charts on memberpage for admins only and on userProfile.
 - Add select all option for admin in grouppage to add fields to multiple users at a time.
-- Add login exporation limit while not in session or other secure logic.
+- Add login exporation limit while not in session or other secure logic. Completed : 
+  - Added browser close session expiration. But browsers stores user session even when closed. ✅
+  - Need own data record of session use for proper implementation
 - add hours stats on group page for total group hours stats bar chart
 - Add group level stats on the dashboard page for each group: Completed:
 - Add button to assign a shift (time) to a task
