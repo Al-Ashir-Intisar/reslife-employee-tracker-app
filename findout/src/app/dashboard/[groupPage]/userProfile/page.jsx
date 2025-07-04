@@ -574,7 +574,7 @@ const sessionUserProfile = () => {
                     );
                   }}
                 >
-                  Remove
+                  X
                 </button>
               </div>
             ))}
@@ -641,7 +641,7 @@ const sessionUserProfile = () => {
                     );
                   }}
                 >
-                  Remove
+                  X
                 </button>
               </div>
             ))}
@@ -955,7 +955,7 @@ const sessionUserProfile = () => {
                     key={shift._id}
                     style={{
                       backgroundColor:
-                        rowColor || (shift.actualEndTime ? "black" : undefined),
+                        rowColor || (shift.actualEndTime ? "#181c25" : undefined),
                       color: rowColor ? "black" : "white",
                     }}
                   >
@@ -1036,7 +1036,7 @@ const sessionUserProfile = () => {
                 <tr
                   key={task._id}
                   style={{
-                    backgroundColor: task.completed ? "lightgreen" : "black",
+                    backgroundColor: task.completed ? "lightgreen" : "#181c25",
                     color: task.completed ? "black" : "white",
                   }}
                 >

@@ -1,21 +1,19 @@
-.title {
-  font-size: 40;
-  font-weight: bold;
-}
+/* styles for member page */
 
 .mainTitle {
   font-size: 25px;
   font-weight: bold;
   text-align: left;
   padding: 0px;
-  background: linear-gradient(to right, black 0%, orange 50%, black 100%);
-  color: white;
+  background: linear-gradient(to right, black 0%, #181c25 50%, black 100%);
+  color: #f5d389;
   padding: 0.5rem 1rem;
   display: inline-block;
+  border-bottom: #f5d389 1px solid;
 }
 
 .mainTitle:hover {
-  color: lightgreen;
+  color: white;
   cursor: pointer;
 }
 
@@ -32,7 +30,7 @@
 
 .editMember,
 .deleteMember {
-  background-color: lightblue;
+  background-color: #f5d389;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
@@ -40,12 +38,12 @@
 }
 
 .editMember:hover {
-  background-color: lightgreen;
+  background-color: white;
   cursor: pointer;
 }
 
 .deleteMember:hover {
-  background-color: orangered;
+  background-color: white;
   cursor: pointer;
 }
 
@@ -57,19 +55,19 @@
 
 .memberTable th,
 .memberTable td {
-  border: 1px solid #ccc;
+  border: 1px solid #f5d389;
   padding: 10px;
   text-align: left;
 }
 
 .memberTable th {
-  background-color: orange;
+  background-color: #f5d389;
   color: black;
   font-weight: bold;
 }
 
 .memberDetails {
-  background-color: black;
+  background-color: #181c25;
   width: 90vw;
   min-height: 80vh;
   margin: 0 auto;
@@ -94,10 +92,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: left;
+  align-items: center;
   gap: 10px;
   padding: 20px;
-  background-color: lightslategrey;
+  background-color: #f5d389;
   color: black;
   border-radius: 8px;
   width: 80%;
@@ -118,7 +116,8 @@
 .addAttributesButton,
 .submitFormButton,
 .cancelButton {
-  background-color: lightblue;
+  background-color: black;
+  color: white;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
@@ -126,17 +125,20 @@
 }
 
 .submitFormButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
 .addAttributesButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
 .addCertificationsButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
@@ -151,26 +153,41 @@
 }
 
 .cancelButton:hover {
-  background-color: orangered;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
 .cancelButtonDiv {
   display: flex;
   flex-direction: column;
-  align-items: right;
+  align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  width: 100%;
 }
 
-.editButton,
 .saveButton,
 .cancelEditButton,
-.removeFieldButton,
-.deleteButton {
-  background-color: lightblue;
+.removeFieldButton {
+  background-color: #f5d389;
   color: black;
+}
+
+.editButton {
+  background-color: #f5d389;
+  color: black;
+}
+
+.deleteButton,
+.actionsEdit {
+  background-color: white;
+  color: black;
+}
+
+.actionsEdit:hover {
+  background-color: #f5d389;
+  color: black;
+  cursor: pointer;
 }
 
 .deleteButton:hover {
@@ -181,7 +198,7 @@
 
 .editButton:hover {
   color: black;
-  background-color: orange;
+  background-color: white;
   cursor: pointer;
 }
 

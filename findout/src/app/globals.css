@@ -8,7 +8,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color: black;
+  background-color: #181c25;
   color: aliceblue;
 }
 
@@ -18,7 +18,7 @@ a {
 }
 
 .container {
-  background-color: orange;
+  background-color: #181c25;
   width: 100vw;
   min-height: 5vh;
   margin: 0 auto;
@@ -27,8 +27,8 @@ a {
 }
 
 .pageContent {
-  background-color: black;
-  width: 90vw;
+  background-color: #181c25;
+  width: 95vw;
   min-height: 80vh;
   margin: 0 auto;
   padding: 15px;
@@ -40,7 +40,7 @@ a {
 }
 
 .layoutContainer {
-  background-color: black;
+  background-color: #181c25;
   margin: 0;
   padding: 0px;
   gap: 0px;
@@ -49,18 +49,19 @@ a {
   flex-direction: column;
 }
 
-
 .react-select__control {
   background-color: #fff;
-  border-color: #ffa500;
+  border-color: #F5D389;
   color: #000;
 }
 
 .react-select__multi-value {
-  background-color: #ffa500;
+  background-color: #F5D389;
   color: #000;
+  border: #000 1px solid;
 }
 
 .react-select__menu {
   z-index: 100;
+  background-color: #F5D389;
 }

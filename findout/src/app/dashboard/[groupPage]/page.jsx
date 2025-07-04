@@ -250,7 +250,7 @@ const GroupPage = () => {
     }),
     multiValue: (base) => ({
       ...base,
-      backgroundColor: "#ffa500",
+      backgroundColor: "#F5D389",
       color: "#000",
     }),
     menu: (base) => ({
@@ -643,45 +643,53 @@ const GroupPage = () => {
             >
               Your Profile
             </button>
-            <button
-              className={styles.createMember}
-              onClick={toggleAddMemberForm}
-              disabled={!isAdmin}
-            >
-              Add new Members
-            </button>
+            {isAdmin && (
+              <button
+                className={styles.createMember}
+                onClick={toggleAddMemberForm}
+                disabled={!isAdmin}
+              >
+                Add new Members
+              </button>
+            )}
+
             {/* <button className={styles.sendInvite}>Invite a new user</button> */}
-            <button
-              className={styles.createMember}
-              disabled={!isAdmin}
-              onClick={() => setShowAddAttributeForm(true)}
-            >
-              Add an Attribute
-            </button>
-
-            <button
-              className={styles.createMember}
-              disabled={!isAdmin}
-              onClick={() => setShowAddCertificationForm(true)}
-            >
-              Add a Certification
-            </button>
-
-            <button
-              className={styles.createMember}
-              disabled={!isAdmin}
-              onClick={() => setShowBulkAssignTaskForm(true)}
-            >
-              Assign Task
-            </button>
-
-            <button
-              className={styles.deleteGroup}
-              onClick={handleDeleteGroup}
-              disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
-            >
-              Delete this Group
-            </button>
+            {isAdmin && (
+              <button
+                className={styles.createMember}
+                disabled={!isAdmin}
+                onClick={() => setShowAddAttributeForm(true)}
+              >
+                Add an Attribute
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                className={styles.createMember}
+                disabled={!isAdmin}
+                onClick={() => setShowAddCertificationForm(true)}
+              >
+                Add a Certification
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                className={styles.createMember}
+                disabled={!isAdmin}
+                onClick={() => setShowBulkAssignTaskForm(true)}
+              >
+                Assign Task
+              </button>
+            )}
+            {session?.data?.user?._id === selectedGroup?.ownerId && (
+              <button
+                className={styles.deleteGroup}
+                onClick={handleDeleteGroup}
+                disabled={session?.data?.user?._id !== selectedGroup?.ownerId}
+              >
+                Delete this Group
+              </button>
+            )}
           </div>
           {/* div for announcement display */}
           <div className={styles.announcementBlock}>
@@ -1255,7 +1263,7 @@ const GroupPage = () => {
                                 {editingCerts[`${member._id}_${c._id}`] ? (
                                   <>
                                     <button
-                                      className={styles.editButton}
+                                      className={styles.tableEdit}
                                       onClick={() => {
                                         setEditingCerts((prev) => {
                                           const updated = { ...prev };
@@ -1279,7 +1287,7 @@ const GroupPage = () => {
                                   </>
                                 ) : (
                                   <button
-                                    className={styles.editButton}
+                                    className={styles.tableEdit}
                                     disabled={
                                       // disable if this cert is marked for deletion
                                       pendingCertChanges.deleted.some(
@@ -1307,7 +1315,7 @@ const GroupPage = () => {
                                     item.userId === member._id
                                 ) ? (
                                   <button
-                                    className={styles.deleteButton}
+                                    className={styles.tableDelete}
                                     onClick={() => {
                                       // ❌ Cancel deletion
                                       setPendingCertChanges((prev) => ({
@@ -1326,7 +1334,7 @@ const GroupPage = () => {
                                   </button>
                                 ) : (
                                   <button
-                                    className={styles.deleteButton}
+                                    className={styles.tableDelete}
                                     disabled={
                                       // disable if this cert is being edited
                                       !!editingCerts[`${member._id}_${c._id}`]
@@ -1689,7 +1697,7 @@ const GroupPage = () => {
                                   {/* Edit Button */}
                                   {isEditing ? (
                                     <button
-                                      className={styles.editButton}
+                                      className={styles.tableEdit}
                                       onClick={() => {
                                         setEditingAttrs((prev) => {
                                           const updated = { ...prev };
@@ -1710,7 +1718,7 @@ const GroupPage = () => {
                                     </button>
                                   ) : (
                                     <button
-                                      className={styles.editButton}
+                                      className={styles.tableEdit}
                                       disabled={isDeleting}
                                       onClick={() => {
                                         // Initial edit value per type
@@ -1760,7 +1768,7 @@ const GroupPage = () => {
                                   {/* Delete Button */}
                                   {isDeleting ? (
                                     <button
-                                      className={styles.deleteButton}
+                                      className={styles.tableDelete}
                                       onClick={() => {
                                         setPendingAttrChanges((prev) => ({
                                           ...prev,
@@ -1778,7 +1786,7 @@ const GroupPage = () => {
                                     </button>
                                   ) : (
                                     <button
-                                      className={styles.deleteButton}
+                                      className={styles.tableDelete}
                                       disabled={isEditing}
                                       onClick={() => {
                                         setPendingAttrChanges((prev) => ({
@@ -1897,7 +1905,7 @@ const GroupPage = () => {
                               style={{
                                 backgroundColor: t.completed
                                   ? "lightgreen"
-                                  : "black",
+                                  : "#181c25",
                                 color: t.completed ? "black" : "white",
                               }}
                             >
@@ -1926,7 +1934,7 @@ const GroupPage = () => {
                                     {/* Complete/Incomplete Button */}
                                     {isEditing ? (
                                       <button
-                                        className={styles.editButton}
+                                        className={styles.tableEdit}
                                         onClick={() => {
                                           setEditingTasks((prev) => {
                                             const updated = { ...prev };
@@ -1947,7 +1955,7 @@ const GroupPage = () => {
                                       </button>
                                     ) : t.completed ? (
                                       <button
-                                        className={styles.editButton}
+                                        className={styles.tableEdit}
                                         disabled={isDeleting}
                                         onClick={() => {
                                           setEditingTasks((prev) => ({
@@ -1975,7 +1983,7 @@ const GroupPage = () => {
                                       </button>
                                     ) : (
                                       <button
-                                        className={styles.editButton}
+                                        className={styles.tableEdit}
                                         disabled={isDeleting}
                                         onClick={() => {
                                           setEditingTasks((prev) => ({
@@ -2006,7 +2014,7 @@ const GroupPage = () => {
                                     {/* Delete Button */}
                                     {isDeleting ? (
                                       <button
-                                        className={styles.deleteButton}
+                                        className={styles.tableDelete}
                                         onClick={() => {
                                           setPendingTaskChanges((prev) => ({
                                             ...prev,
@@ -2024,7 +2032,7 @@ const GroupPage = () => {
                                       </button>
                                     ) : (
                                       <button
-                                        className={styles.deleteButton}
+                                        className={styles.tableDelete}
                                         disabled={isEditing}
                                         onClick={() => {
                                           setPendingTaskChanges((prev) => ({

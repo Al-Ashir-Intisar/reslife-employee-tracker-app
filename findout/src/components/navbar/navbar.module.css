@@ -1,5 +1,5 @@
 .container {
-  background-color: orange;
+  background-color: #181c25;
   width: 100vw;
   min-height: 8vh;
   margin: 0 auto;
@@ -7,10 +7,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  border-bottom: 1px solid #f5d389; /* <-- Only bottom border */
+  border-radius: 2%;
 }
 
 .links {
-  color: black;
+  color: #f5d389;
   font-size: 20;
   display: flex;
   flex-direction: row;
@@ -21,7 +23,7 @@
 }
 
 .link {
-  color: black;
+  color: #f5d389;
   font-size: 28;
   font-weight: bold;
 }
@@ -33,7 +35,7 @@
 .logout {
   padding: 5px;
   border: none;
-  background-color: rgb(65, 255, 151);
+  background-color: #f5d389;
   cursor: pointer;
   border-radius: 3px;
   font-size: 20;
@@ -47,7 +49,7 @@
 .login {
   padding: 5px;
   border: none;
-  background-color: rgb(65, 255, 151);
+  background-color:  #f5d389;
   cursor: pointer;
   border-radius: 3px;
   font-size: 20;
@@ -63,7 +65,6 @@
   color: black;
   font-size: 20;
 }
-
 
 @media (max-width: 500px) {
   .link {

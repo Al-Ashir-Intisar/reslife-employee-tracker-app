@@ -9,21 +9,8 @@
   gap: 20px;
 }
 
-.backToGroupButton {
-  background-color: lightblue;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
-}
-
-.backToGroupButton:hover {
-  background-color: orange;
-  cursor: pointer;
-}
-
 .memberDetails {
-  background-color: black;
+  background-color: #181c25;
   width: 90vw;
   min-height: 80vh;
   margin: 0 auto;
@@ -49,7 +36,7 @@
 }
 
 .memberTable th {
-  background-color: orange;
+  background-color: #f5d389;
   color: black;
   font-weight: bold;
 }
@@ -64,7 +51,7 @@
 
 .editMember,
 .deleteMember {
-  background-color: lightblue;
+  background-color: #f5d389;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
@@ -72,12 +59,12 @@
 }
 
 .editMember:hover {
-  background-color: lightgreen;
+  background-color: white;
   cursor: pointer;
 }
 
 .deleteMember:hover {
-  background-color: orangered;
+  background-color: white;
   cursor: pointer;
 }
 
@@ -93,14 +80,13 @@
 .editDetailsForm {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: left;
+  align-items: center;
   gap: 10px;
   padding: 20px;
-  background-color: lightslategrey;
+  background-color: #f5d389;
   color: black;
   border-radius: 8px;
-  width: 80%;
+  width: 100%;
 }
 
 .input {
@@ -110,15 +96,15 @@
   border: none;
   outline: none;
   font-weight: bold;
+  width: 100%;
 }
 
 .cancelButtonDiv {
   display: flex;
   flex-direction: column;
-  align-items: right;
+  align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  width: 100%;
 }
 
 .removeCertificationsButton,
@@ -127,25 +113,29 @@
 .addAttributesButton,
 .submitFormButton,
 .cancelButton {
-  background-color: lightblue;
+  background-color: black;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 5px;
+  color: white;
 }
 
 .submitFormButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
 .addAttributesButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
 .addCertificationsButton:hover {
-  background-color: lightgreen;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
@@ -160,7 +150,8 @@
 }
 
 .cancelButton:hover {
-  background-color: orangered;
+  background-color: white;
+  color: black;
   cursor: pointer;
 }
 
@@ -174,7 +165,7 @@
 }
 
 .editButton:hover {
-  background-color: darkorange;
+  background-color: #f5d389;
   cursor: pointer;
 }
 

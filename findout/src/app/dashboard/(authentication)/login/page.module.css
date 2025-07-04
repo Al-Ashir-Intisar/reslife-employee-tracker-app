@@ -2,7 +2,7 @@
   padding: 5px;
   min-width: 70px;
   border: none;
-  background-color: aqua;
+  background-color: #f5d389;
   cursor: pointer;
   border-radius: 3px;
 }
@@ -34,8 +34,8 @@
 }
 
 .login:hover {
-  color: rgb(9, 35, 9);
-  background-color: rgb(21, 253, 176);
+  color: black;
+  background-color: white;
 }
 
 .link:hover {

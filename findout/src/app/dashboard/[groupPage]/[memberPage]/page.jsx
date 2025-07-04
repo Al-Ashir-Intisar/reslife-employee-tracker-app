@@ -438,14 +438,30 @@ const member = () => {
   };
 
   useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/dashboard/login");
-    }
-  }, [session.status, router]);
-
-  useEffect(() => {
     document.title = "Member Details";
   }, []);
+
+  useEffect(() => {
+    const checkUserInDB = async () => {
+      if (session.status === "authenticated" && session.data?.user?.email) {
+        const res = await fetch(`/api/users?email=${session.data.user.email}`);
+        if (!res.ok) {
+          // Could not fetch user - redirect
+          router.push("/dashboard/login");
+          return;
+        }
+        const user = await res.json();
+        if (!user || !user._id) {
+          // User not in your DB, redirect
+          router.push("/dashboard/login");
+        }
+      } else if (session.status === "unauthenticated") {
+        router.push("/dashboard/login");
+      }
+    };
+
+    checkUserInDB();
+  }, [session.status, session.data?.user?.email, router]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -524,9 +540,8 @@ const member = () => {
 
   // Helpers for membership, shifts, tasks:
   function getMembership() {
-    return selectedMember?.groupMemberships?.find(
-      (m) => m.groupId === groupId || m.groupId?._id === groupId
-    );
+    console.log("Member", selectedMember);
+    return selectedMember?.groupMemberships?.find((m) => m.groupId === groupId);
   }
 
   function getRecentShifts() {
@@ -542,6 +557,7 @@ const member = () => {
 
   function getFilteredTasks() {
     const membership = getMembership();
+    console.log("membership", membership);
     if (!membership?.tasks?.length) return [];
     const now = new Date();
 
@@ -716,7 +732,7 @@ const member = () => {
                       setCertifications(updated);
                     }}
                   >
-                    Remove
+                    X
                   </button>
                 </div>
               ))}
@@ -783,7 +799,7 @@ const member = () => {
                       setCustomAttributes(updated);
                     }}
                   >
-                    Remove
+                    X
                   </button>
                 </div>
               ))}
@@ -1460,7 +1476,7 @@ const member = () => {
                             style={{
                               backgroundColor: task.completed
                                 ? "lightgreen"
-                                : "black",
+                                : "#181c25",
                               color: task.completed ? "black" : "white",
                             }}
                           >
@@ -1486,7 +1502,7 @@ const member = () => {
                               {task.completed ? (
                                 <button
                                   title="Mark as Incomplete"
-                                  className={styles.editButton}
+                                  className={styles.actionsEdit}
                                   onClick={async () => {
                                     if (
                                       window.confirm("Mark task as incomplete?")
@@ -1500,7 +1516,7 @@ const member = () => {
                               ) : (
                                 <button
                                   title="Mark as Completed"
-                                  className={styles.editButton}
+                                  className={styles.actionsEdit}
                                   onClick={async () => {
                                     if (
                                       window.confirm("Mark task as complete?")
