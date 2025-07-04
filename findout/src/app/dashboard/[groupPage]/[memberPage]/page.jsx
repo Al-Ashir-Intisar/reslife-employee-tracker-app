@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import MapModal from "@/components/mapmodal/MapModal"; // use the correct path
+
 // import { set } from "mongoose";
 // import { Salsa } from "next/font/google";
 
@@ -40,6 +42,11 @@ async function getGroups(groupIds) {
 const member = () => {
   const session = useSession();
   const router = useRouter();
+
+  // state for map display
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalCoords, setModalCoords] = useState(null);
+  const [modalTitle, setModalTitle] = useState("");
 
   // Getting the member ID and group ID from the URL parameters
   const params = useParams();
@@ -1404,12 +1411,41 @@ const member = () => {
                           return (
                             <tr key={i}>
                               <td>{start ? start.toLocaleString() : "N/A"}</td>
-                              <td>
-                                {shift.startLocation
-                                  ? `${shift.startLocation.lat?.toFixed(
+                              <td
+                                style={
+                                  shift.startLocation
+                                    ? {
+                                        background: "#e0e0e0",
+                                        color: "black",
+                                        cursor: "pointer",
+                                        fontWeight: "bold",
+                                        border: "2px solid #f5d389",
+                                        padding: "8px",
+                                      }
+                                    : {}
+                                }
+                              >
+                                {shift.startLocation ? (
+                                  <span
+                                    style={{
+                                      color: "black",
+                                      textDecoration: "underline",
+                                      cursor: "pointer",
+                                    }}
+                                    title="Show on Map"
+                                    onClick={() => {
+                                      setModalCoords(shift.startLocation);
+                                      setModalTitle("Shift Start Location");
+                                      setModalOpen(true);
+                                    }}
+                                  >
+                                    {`${shift.startLocation.lat?.toFixed(
                                       5
-                                    )}, ${shift.startLocation.lng?.toFixed(5)}`
-                                  : "N/A"}
+                                    )}, ${shift.startLocation.lng?.toFixed(5)}`}
+                                  </span>
+                                ) : (
+                                  "N/A"
+                                )}
                               </td>
                               <td>
                                 {estEnd ? estEnd.toLocaleString() : "N/A"}
@@ -1417,12 +1453,41 @@ const member = () => {
                               <td>
                                 {actualEnd ? actualEnd.toLocaleString() : ""}
                               </td>
-                              <td>
-                                {shift.endLocation
-                                  ? `${shift.endLocation.lat?.toFixed(
+                              <td
+                                style={
+                                  shift.endLocation
+                                    ? {
+                                        background: "#e0e0e0",
+                                        color: "black",
+                                        cursor: "pointer",
+                                        fontWeight: "bold",
+                                        border: "2px solid #f5d389",
+                                        padding: "8px",
+                                      }
+                                    : {}
+                                }
+                              >
+                                {shift.endLocation ? (
+                                  <span
+                                    style={{
+                                      color: "black",
+                                      textDecoration: "underline",
+                                      cursor: "pointer",
+                                    }}
+                                    title="Show on Map"
+                                    onClick={() => {
+                                      setModalCoords(shift.endLocation);
+                                      setModalTitle("Shift End Location");
+                                      setModalOpen(true);
+                                    }}
+                                  >
+                                    {`${shift.endLocation.lat?.toFixed(
                                       5
-                                    )}, ${shift.endLocation.lng?.toFixed(5)}`
-                                  : ""}
+                                    )}, ${shift.endLocation.lng?.toFixed(5)}`}
+                                  </span>
+                                ) : (
+                                  ""
+                                )}
                               </td>
                               <td>{duration}</td>
                               <td>{status}</td>
@@ -1436,6 +1501,12 @@ const member = () => {
                       )}
                     </tbody>
                   </table>
+                  <MapModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    coords={modalCoords}
+                    title={modalTitle}
+                  />
 
                   {/* TASKS SECTION */}
                   <div
