@@ -360,7 +360,32 @@ const Dashboard = () => {
                         }
                       }}
                     >
-                      <td>{group.name}</td>
+                      <td
+                        style={
+                          group.name
+                            ? {
+                                background: "#e0e0e0",
+                                color: "black",
+                                cursor: "pointer",
+                                border: "1px solid brown",
+                                fontWeight: "bold",
+                                // padding: "10px 16px",
+                                transition: "background 0.2s, color 0.2s",
+                              }
+                            : {}
+                        }
+                        onMouseOver={(e) => {
+                          if (group.name)
+                            e.currentTarget.style.background = "#f5d389";
+                        }}
+                        onMouseOut={(e) => {
+                          if (group.name)
+                            e.currentTarget.style.background = "#e0e0e0";
+                        }}
+                      >
+                        {group.name}
+                      </td>
+
                       <td>{group.description}</td>
                       <td>{(group.membersId || []).length}</td>
                       {/* <td>{currentUser.name}</td> */}

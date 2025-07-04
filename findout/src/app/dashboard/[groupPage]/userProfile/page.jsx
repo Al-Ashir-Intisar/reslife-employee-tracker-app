@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import MapModal from "@/components/mapmodal/MapModal"; // adjust the path if necessary
 
 // Fetch user details
 async function getUsers(memberId) {
@@ -30,6 +31,11 @@ const WEEK_OPTIONS = [1, 2, 3, 4];
 const sessionUserProfile = () => {
   const session = useSession();
   const router = useRouter();
+
+  // states for map display for locations
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalCoords, setModalCoords] = useState(null);
+  const [modalTitle, setModalTitle] = useState("");
 
   // State for user info form
   const [showEditDetailsForm, setShowEditDetailsForm] = useState(false);
@@ -195,10 +201,27 @@ const sessionUserProfile = () => {
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
   }
 
+  function isMobileDevice() {
+    return (
+      typeof window.orientation !== "undefined" ||
+      navigator.userAgent.indexOf("Mobi") !== -1
+    );
+  }
+
   // Shift Start Handler
   async function handleShiftStart(e) {
     e.preventDefault();
     const startTime = new Date();
+
+    // // Restrict to mobile only
+    // if (!isMobileDevice()) {
+    //   alert(
+    //     "Shift can only be started from a mobile device with GPS/location capability."
+    //   );
+    //   setShowShiftForm(false);
+    //   return;
+    // }
+
     if (Number(shiftMinutes) > 300) {
       alert("Maximum shift length is 300 minutes.");
       return;
@@ -211,9 +234,20 @@ const sessionUserProfile = () => {
       alert("Shift length must be between 15 and 300 minutes.");
       return;
     }
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
+          // Accuracy check
+          if (pos.coords.accuracy > 50) {
+            alert(
+              `Location accuracy is too low (+-${Math.round(
+                pos.coords.accuracy
+              )} meters). Please use a mobile phone or move to an area with better GPS signal.`
+            );
+            setShowShiftForm(false);
+            return;
+          }
           const { latitude, longitude } = pos.coords;
           try {
             const res = await fetch("/api/users/shift", {
@@ -232,11 +266,9 @@ const sessionUserProfile = () => {
               alert(data.message || "Failed to start shift");
               return;
             }
-            // console.log(groupId, sessionUserId, latitude, longitude, shiftMinutes);
             alert("Shift started!");
             setShowShiftForm(false);
             setShiftMinutes("");
-            // Optionally, reload to show the open shift
             window.location.reload();
           } catch (err) {
             alert("Error saving shift: " + err.message);
@@ -245,11 +277,77 @@ const sessionUserProfile = () => {
         (error) => {
           alert("Could not get your location.");
           setShowShiftForm(false);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
       alert("Geolocation not supported.");
       setShowShiftForm(false);
+    }
+  }
+
+  // Shift End Handler
+  async function handleShiftEnd() {
+    if (!openShift) return;
+    setEndingShift(true);
+
+    // // Restrict to mobile only
+    // if (!isMobileDevice()) {
+    //   alert(
+    //     "Shift can only be ended from a mobile device with GPS/location capability."
+    //   );
+    //   setEndingShift(false);
+    //   return;
+    // }
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          // Accuracy check
+          if (pos.coords.accuracy > 50) {
+            alert(
+              `Location accuracy is too low (+-${Math.round(
+                pos.coords.accuracy
+              )} meters). Please use a mobile phone or move to an area with better GPS signal.`
+            );
+            setEndingShift(false);
+            return;
+          }
+          const { latitude, longitude } = pos.coords;
+          try {
+            const res = await fetch("/api/users/shift", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                groupId,
+                userId: sessionUserId,
+                actualEndTime: new Date(),
+                endLocation: { lat: latitude, lng: longitude },
+              }),
+            });
+            if (!res.ok) {
+              const data = await res.json();
+              alert(data.message || "Failed to end shift");
+              setEndingShift(false);
+              return;
+            }
+            alert("Shift ended!");
+            setEndingShift(false);
+            window.location.reload();
+          } catch (err) {
+            alert("Error ending shift: " + err.message);
+            setEndingShift(false);
+          }
+        },
+        (error) => {
+          alert("Could not get your location.");
+          setEndingShift(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      alert("Geolocation not supported.");
+      setEndingShift(false);
     }
   }
 
@@ -314,50 +412,6 @@ const sessionUserProfile = () => {
       window.location.reload();
     } catch (err) {
       alert("Error: " + err.message);
-    }
-  }
-
-  // Shift End Handler
-  async function handleShiftEnd() {
-    if (!openShift) return;
-    setEndingShift(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          try {
-            const res = await fetch("/api/users/shift", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                groupId,
-                userId: sessionUserId,
-                actualEndTime: new Date(),
-                endLocation: { lat: latitude, lng: longitude },
-              }),
-            });
-            if (!res.ok) {
-              const data = await res.json();
-              alert(data.message || "Failed to end shift");
-              setEndingShift(false);
-              return;
-            }
-            alert("Shift ended!");
-            setEndingShift(false);
-            window.location.reload();
-          } catch (err) {
-            alert("Error ending shift: " + err.message);
-            setEndingShift(false);
-          }
-        },
-        (error) => {
-          alert("Could not get your location.");
-          setEndingShift(false);
-        }
-      );
-    } else {
-      alert("Geolocation not supported.");
-      setEndingShift(false);
     }
   }
 
@@ -955,27 +1009,88 @@ const sessionUserProfile = () => {
                     key={shift._id}
                     style={{
                       backgroundColor:
-                        rowColor || (shift.actualEndTime ? "#181c25" : undefined),
+                        rowColor ||
+                        (shift.actualEndTime ? "#181c25" : undefined),
                       color: rowColor ? "black" : "white",
                     }}
                   >
                     <td>{start ? start.toLocaleString() : "N/A"}</td>
-                    <td>
-                      {shift.startLocation
-                        ? `${shift.startLocation.lat?.toFixed(
+                    <td
+                      style={
+                        shift.startLocation
+                          ? {
+                              background: "#e0e0e0",
+                              color: "black",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              border: "2px solid #f5d389",
+                              padding: "8px",
+                            }
+                          : {}
+                      }
+                    >
+                      {shift.startLocation ? (
+                        <span
+                          style={{
+                            color: "black",
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                          }}
+                          title="Show on Map"
+                          onClick={() => {
+                            setModalCoords(shift.startLocation);
+                            setModalTitle("Shift Start Location");
+                            setModalOpen(true);
+                          }}
+                        >
+                          {`${shift.startLocation.lat?.toFixed(
                             5
-                          )}, ${shift.startLocation.lng?.toFixed(5)}`
-                        : "N/A"}
+                          )}, ${shift.startLocation.lng?.toFixed(5)}`}
+                        </span>
+                      ) : (
+                        "N/A"
+                      )}
                     </td>
+
                     <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td>
                     <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
-                    <td>
-                      {shift.endLocation
-                        ? `${shift.endLocation.lat?.toFixed(
+                    <td
+                      style={
+                        shift.endLocation
+                          ? {
+                              background: "#e0e0e0",
+                              color: "black",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              border: "2px solid #f5d389",
+                              padding: "8px",
+                            }
+                          : {}
+                      }
+                    >
+                      {shift.endLocation ? (
+                        <span
+                          style={{
+                            color: "black",
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                          }}
+                          title="Show on Map"
+                          onClick={() => {
+                            setModalCoords(shift.endLocation);
+                            setModalTitle("Shift End Location");
+                            setModalOpen(true);
+                          }}
+                        >
+                          {`${shift.endLocation.lat?.toFixed(
                             5
-                          )}, ${shift.endLocation.lng?.toFixed(5)}`
-                        : ""}
+                          )}, ${shift.endLocation.lng?.toFixed(5)}`}
+                        </span>
+                      ) : (
+                        ""
+                      )}
                     </td>
+
                     <td>{duration}</td>
                     {/* <td>{status}</td> */}
                     <td>
@@ -1001,6 +1116,12 @@ const sessionUserProfile = () => {
             )}
           </tbody>
         </table>
+        <MapModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          coords={modalCoords}
+          title={modalTitle}
+        />
 
         {/* Tasks Table and filter */}
         <div className={styles.rowWiseElementDiv} style={{ marginTop: "2rem" }}>
