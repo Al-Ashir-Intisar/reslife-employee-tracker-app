@@ -211,7 +211,7 @@ a.secondary {
 }
 
 .subtitle {
-  font-family: "Great Vibes", cursive;
+  font-family: "Montserrat", sans-serif;
   font-size: 1.3rem;
   display: block;
   font-weight: 400;
@@ -223,7 +223,7 @@ a.secondary {
 }
 
 .description {
-  font-family: "Great Vibes", cursive;
+  font-family: "Montserrat", sans-serif;
   font-size: 22;
   font-weight: 500;
   background: linear-gradient(to right, #f4f4f4, #f4f4f4);
@@ -240,7 +240,7 @@ a.secondary {
   list-style: none;
   width: 100%;
   font-size: 1.08rem;
-  font-family: "Pacifico", cursive;
+  font-family: "Montserrat", sans-serif;
   color: black;
 }
 

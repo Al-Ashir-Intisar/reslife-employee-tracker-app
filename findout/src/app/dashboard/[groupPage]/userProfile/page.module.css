@@ -26,6 +26,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .memberTable th,
@@ -226,7 +227,6 @@
     max-width: 480px !important;
     min-width: 320px;
     font-size: 11px !important;
-    margin: 0 auto !important;
     display: block;
     overflow-x: auto;
   }
