@@ -63,23 +63,33 @@ This system is especially useful in dynamic environments where quick access to d
 - Fixed shift api variable name missmatch (changed memberIds to membersId). Completed ✅: 7/2/2025
 - Add delete button to delete a shift only in userProfile page. Complete ✅: 7/2/2025
 - Add attributes for the group/notice/announcement kind of thing. Completed ✅: 7/2/2025
-- In session authencated checks also check for if the user exists in the database or not. 
+- In session authencated checks also check for if the user exists in the database or not.
   - Can't check that in the api because we are allowing for creating new user if user does not exist yet. ✅
   - Added the database check on render in member page. ✅
-  - Add check on login page to see if the user is authenticated or not and send back to dashboard if authenticated.
+  - Add check on login page to see if the user is authenticated or not and send back to dashboard if authenticated. ✅
+- Added location view map option for shifts table in user profile and member page. Completed ✅: 7/4/2025
+- Add ability to add shifts to a task and show total hours for that task. 
+  - Add task Id array to shifts schema in users model ✅
+  - Edit shifts route to initiate taskid array while creating/modifying shifts ✅
+  - Edit shift create form to enable task assignment option for new shift start case ✅
+  - Allow exsiting shifts table edit option to add or remove tasks from the shift ✅
+  - Modify filter by div to include filter by tasks for work shifts table in member page and user profile page ✅
+  - Add hours total in group page table with date enabled filter and automatic filter for last week starting saturday.
+  - Need to fix time zone issue if filter option enabled. meaning need time zone variable for all pages
+- Form creation option by the admin to collect data about members.
 - Wrap the tables into a div that is scrollable both horizontally and vertically and only shows 5 rows at a time max.
 - Add page not found fallback page when group/member does not exist for group, member , profile page.
 - Add hour stats abd bar charts on memberpage for admins only and on userProfile.
 - Add select all option for admin in grouppage to add fields to multiple users at a time.
-- Add login exporation limit while not in session or other secure logic. Completed : 
-  - Added browser close session expiration. But browsers stores user session even when closed. ✅
-  - Need own data record of session use for proper implementation
 - add hours stats on group page for total group hours stats bar chart
 - Add group level stats on the dashboard page for each group: Completed:
 - Add button to assign a shift (time) to a task
+- convert shifts to a weekly barcharts 
 
 After 7/9/2025
-
+- Add login exporation limit while not in session or other secure logic. Completed :
+  - Added browser close session expiration. But browsers stores user session even when closed. ✅
+  - Need own data record of session use for proper implementation
 - Modify the api routes for efficiency and reduce redundency
 - Hall furniture inventory option
 - Ultimately could allow a floor plan page to be able to record which room is used for what in the log run plan
