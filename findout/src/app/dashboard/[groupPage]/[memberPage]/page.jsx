@@ -1187,7 +1187,7 @@ const member = () => {
                                   ""
                                 )}
                               </td>
-                              <td>{(duration / 60).toFixed(1)}</td>
+                              <td>{(duration / 60).toFixed(2)}</td>
 
                               {/* <td>{status}</td> */}
                             </tr>
@@ -1230,7 +1230,7 @@ const member = () => {
                                 },
                                 0
                               );
-                              return (totalMinutes / 60).toFixed(1);
+                              return (totalMinutes / 60).toFixed(2);
                             })()}
                           </td>
                         </tr>

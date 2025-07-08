@@ -1229,7 +1229,7 @@ const sessionUserProfile = () => {
                       )}
                     </td>
 
-                    <td>{(duration / 60).toFixed(1)}</td>
+                    <td>{(duration / 60).toFixed(2)}</td>
 
                     {/* <td>{status}</td> */}
                     <td>
@@ -1274,7 +1274,7 @@ const sessionUserProfile = () => {
                 }}
               >
                 <td colSpan={4}>Total</td>
-                <td>{getTotalHoursForRecentShifts().toFixed(1)}</td>
+                <td>{getTotalHoursForRecentShifts().toFixed(2)}</td>
                 <td></td>
               </tr>
             )}

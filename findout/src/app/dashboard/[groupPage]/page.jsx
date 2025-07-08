@@ -55,6 +55,30 @@ const GroupPage = () => {
   const [attrFormType, setAttrFormType] = useState("string");
   const [attrFormValue, setAttrFormValue] = useState("");
 
+  // function for total hours worked filter
+  function getLastSaturdayAndToday() {
+    const today = new Date();
+    const end = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    // Find the most recent previous Saturday
+    const lastSaturday = new Date(end);
+    while (lastSaturday.getDay() !== 6) {
+      lastSaturday.setDate(lastSaturday.getDate() - 1);
+    }
+    // The range is: lastSaturday (start) to today (end)
+    return {
+      start: lastSaturday.toISOString().slice(0, 10), // YYYY-MM-DD
+      end: end.toISOString().slice(0, 10),
+    };
+  }
+  // state for total hours worked filter
+  const [customDateRange, setCustomDateRange] = useState(
+    getLastSaturdayAndToday()
+  );
+
   // handle function for saving the add attribute changes
   const handleBulkAddAttribute = async (e) => {
     e.preventDefault();
@@ -1076,6 +1100,28 @@ const GroupPage = () => {
               </form>
             </div>
           )}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontWeight: "bold", marginRight: 8 }}>
+              Filter by Date Range:
+            </label>
+            <input
+              type="date"
+              value={customDateRange.start}
+              onChange={(e) =>
+                setCustomDateRange((r) => ({ ...r, start: e.target.value }))
+              }
+              style={{ marginRight: 8 }}
+            />
+            to
+            <input
+              type="date"
+              value={customDateRange.end}
+              onChange={(e) =>
+                setCustomDateRange((r) => ({ ...r, end: e.target.value }))
+              }
+              style={{ marginLeft: 8 }}
+            />
+          </div>
 
           <div className={styles.memberDetails}>
             <table className={styles.memberTable}>
@@ -1084,8 +1130,9 @@ const GroupPage = () => {
                   <th>Name</th>
                   <th>Group Role</th>
                   <th>Team Role</th>
-                  <th>Certifications & Attributes</th>
                   <th>Active Tasks</th>
+                  <th>Hours</th>
+                  <th>Variables</th>
                 </tr>
               </thead>
               <tbody>
@@ -1118,13 +1165,56 @@ const GroupPage = () => {
                       <td>{groupRole}</td>
                       <td>{role}</td>
                       <td>
-                        {(membership?.certifications || []).length +
-                          (membership?.customAttributes || []).length}
-                      </td>
-                      <td>
                         {membership?.tasks
                           ? membership.tasks.filter((t) => !t.completed).length
                           : 0}
+                      </td>
+                      <td>
+                        {(() => {
+                          if (
+                            !membership?.workShifts?.length ||
+                            !customDateRange.start ||
+                            !customDateRange.end
+                          )
+                            return "0.00";
+                          const startDate = new Date(
+                            customDateRange.start + "T00:00:00"
+                          );
+                          const endDate = new Date(
+                            customDateRange.end + "T23:59:59.999"
+                          );
+
+                          const filteredShifts = membership.workShifts.filter(
+                            (shift) => {
+                              const shiftStart = new Date(shift.startTime);
+                              return (
+                                shiftStart >= startDate && shiftStart <= endDate
+                              );
+                            }
+                          );
+                          const totalMinutes = filteredShifts.reduce(
+                            (sum, shift) => {
+                              const s = shift.startTime
+                                ? new Date(shift.startTime)
+                                : null;
+                              let e = null;
+                              if (shift.actualEndTime)
+                                e = new Date(shift.actualEndTime);
+                              else if (shift.estimatedEndTime)
+                                e = new Date(shift.estimatedEndTime);
+                              if (s && e)
+                                return sum + Math.round((e - s) / 60000);
+                              return sum;
+                            },
+                            0
+                          );
+                          return (totalMinutes / 60).toFixed(2);
+                        })()}
+                      </td>
+
+                      <td>
+                        {(membership?.certifications || []).length +
+                          (membership?.customAttributes || []).length}
                       </td>
                     </tr>
                   );
