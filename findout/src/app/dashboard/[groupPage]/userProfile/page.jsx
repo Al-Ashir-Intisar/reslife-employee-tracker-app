@@ -1189,8 +1189,8 @@ const sessionUserProfile = () => {
                       )}
                     </td>
 
-                    <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td>
-                    {/* <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td> */}
+                    {/* <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td> */}
+                    <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
                     <td
                       style={
                         shift.endLocation
