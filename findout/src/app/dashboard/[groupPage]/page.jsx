@@ -1131,6 +1131,259 @@ const GroupPage = () => {
                 })}
               </tbody>
             </table>
+            {/* table for tasks and  filter by tasks */}
+            <div className={styles.filtersDiv}>
+              <div>
+                <label>Filter by Tasks:</label>
+                <Select
+                  isMulti
+                  options={taskOptions}
+                  value={taskOptions.filter((o) =>
+                    taskFilters.includes(o.value)
+                  )}
+                  onChange={(selected) =>
+                    setTaskFilters(selected.map((s) => s.value))
+                  }
+                  placeholder="Select task descriptions..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={customStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.tableButtonsDiv}>
+              {isAdmin && taskFilters.length !== 0 && (
+                <>
+                  <button
+                    className={styles.saveChangesButton}
+                    onClick={() =>
+                      handleSavePendingTaskChanges(pendingTaskChanges)
+                    }
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    className={styles.cancelChangesButton}
+                    onClick={() => {
+                      setPendingTaskChanges({ edited: [], deleted: [] });
+                      setEditingTasks({});
+                    }}
+                  >
+                    Cancel Changes
+                  </button>
+                </>
+              )}
+            </div>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Task Description</th>
+                  <th>Deadline</th>
+                  <th>Assigned By</th>
+                  {/* <th>Assigned At</th> */}
+                  {isAdmin && <th>Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {taskFilters.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={isAdmin ? 6 : 5}
+                      style={{ textAlign: "center" }}
+                    >
+                      Select a task filter to view tasks.
+                    </td>
+                  </tr>
+                ) : (
+                  selectedMembers
+                    .filter((member) => {
+                      const membership = member.groupMemberships?.find(
+                        (m) => m.groupId === groupId
+                      );
+                      const descriptions = (membership?.tasks || []).map(
+                        (t) => t.description
+                      );
+                      return taskFilters.some((f) => descriptions.includes(f));
+                    })
+                    .flatMap((member) => {
+                      const membership = member.groupMemberships?.find(
+                        (m) => m.groupId === groupId
+                      );
+                      return (membership?.tasks || [])
+                        .filter((t) => taskFilters.includes(t.description))
+                        .map((t) => {
+                          const taskKey = `${member._id}_${t._id}`;
+                          const isEditing = editingTasks[taskKey] !== undefined;
+                          const isDeleting = pendingTaskChanges.deleted.some(
+                            (item) =>
+                              item.taskId === t._id &&
+                              item.userId === member._id
+                          );
+
+                          return (
+                            <tr
+                              key={taskKey}
+                              style={{
+                                backgroundColor: t.completed
+                                  ? "lightgreen"
+                                  : "#181c25",
+                                color: t.completed ? "black" : "white",
+                              }}
+                            >
+                              <td>{member.name}</td>
+                              <td>{t.description}</td>
+                              <td>
+                                {t.deadline
+                                  ? new Date(t.deadline).toLocaleString()
+                                  : "N/A"}
+                              </td>
+                              <td>
+                                {selectedGroup?.adminIds
+                                  ?.map((id) => id.toString())
+                                  .includes(t.assignedBy?.toString())
+                                  ? "admin"
+                                  : "user"}
+                              </td>
+                              {/* <td>
+                              {t.assignedAt
+                                ? new Date(t.assignedAt).toLocaleString()
+                                : "N/A"}
+                            </td> */}
+                              {isAdmin && (
+                                <td>
+                                  <div className={styles.tableButtonsDiv}>
+                                    {/* Complete/Incomplete Button */}
+                                    {isEditing ? (
+                                      <button
+                                        className={styles.tableEdit}
+                                        onClick={() => {
+                                          setEditingTasks((prev) => {
+                                            const updated = { ...prev };
+                                            delete updated[taskKey];
+                                            return updated;
+                                          });
+                                          setPendingTaskChanges((prev) => ({
+                                            ...prev,
+                                            edited: prev.edited.filter(
+                                              (item) =>
+                                                item.taskId !== t._id ||
+                                                item.userId !== member._id
+                                            ),
+                                          }));
+                                        }}
+                                      >
+                                        ❌
+                                      </button>
+                                    ) : t.completed ? (
+                                      <button
+                                        className={styles.tableEdit}
+                                        disabled={isDeleting}
+                                        onClick={() => {
+                                          setEditingTasks((prev) => ({
+                                            ...prev,
+                                            [taskKey]: false,
+                                          }));
+                                          setPendingTaskChanges((prev) => ({
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.taskId !== t._id ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                taskId: t._id,
+                                                completed: false,
+                                              },
+                                            ],
+                                          }));
+                                        }}
+                                      >
+                                        ⏳
+                                      </button>
+                                    ) : (
+                                      <button
+                                        className={styles.tableEdit}
+                                        disabled={isDeleting}
+                                        onClick={() => {
+                                          setEditingTasks((prev) => ({
+                                            ...prev,
+                                            [taskKey]: true,
+                                          }));
+                                          setPendingTaskChanges((prev) => ({
+                                            ...prev,
+                                            edited: [
+                                              ...prev.edited.filter(
+                                                (item) =>
+                                                  item.taskId !== t._id ||
+                                                  item.userId !== member._id
+                                              ),
+                                              {
+                                                userId: member._id,
+                                                taskId: t._id,
+                                                completed: true,
+                                              },
+                                            ],
+                                          }));
+                                        }}
+                                      >
+                                        ✔️
+                                      </button>
+                                    )}
+
+                                    {/* Delete Button */}
+                                    {isDeleting ? (
+                                      <button
+                                        className={styles.tableDelete}
+                                        onClick={() => {
+                                          setPendingTaskChanges((prev) => ({
+                                            ...prev,
+                                            deleted: prev.deleted.filter(
+                                              (item) =>
+                                                !(
+                                                  item.taskId === t._id &&
+                                                  item.userId === member._id
+                                                )
+                                            ),
+                                          }));
+                                        }}
+                                      >
+                                        ❌
+                                      </button>
+                                    ) : (
+                                      <button
+                                        className={styles.tableDelete}
+                                        disabled={isEditing}
+                                        onClick={() => {
+                                          setPendingTaskChanges((prev) => ({
+                                            ...prev,
+                                            deleted: [
+                                              ...prev.deleted,
+                                              {
+                                                userId: member._id,
+                                                taskId: t._id,
+                                              },
+                                            ],
+                                          }));
+                                        }}
+                                      >
+                                        🗑️
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        });
+                    })
+                )}
+              </tbody>
+            </table>
+
+            {/* table for certifications and filter by certification */}
             <div className={styles.filtersDiv}>
               <div>
                 {" "}
@@ -1361,7 +1614,7 @@ const GroupPage = () => {
                   })}
               </tbody>
             </table>
-
+            {/* table for attributes and filter by attributes */}
             <div className={styles.filtersDiv}>
               <div>
                 <label>Filter by Attributes:</label>
@@ -1808,256 +2061,6 @@ const GroupPage = () => {
                         );
                       });
                   })}
-              </tbody>
-            </table>
-            <div className={styles.filtersDiv}>
-              <div>
-                <label>Filter by Tasks:</label>
-                <Select
-                  isMulti
-                  options={taskOptions}
-                  value={taskOptions.filter((o) =>
-                    taskFilters.includes(o.value)
-                  )}
-                  onChange={(selected) =>
-                    setTaskFilters(selected.map((s) => s.value))
-                  }
-                  placeholder="Select task descriptions..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  styles={customStyles}
-                />
-              </div>
-            </div>
-            <div className={styles.tableButtonsDiv}>
-              {isAdmin && taskFilters.length !== 0 && (
-                <>
-                  <button
-                    className={styles.saveChangesButton}
-                    onClick={() =>
-                      handleSavePendingTaskChanges(pendingTaskChanges)
-                    }
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    className={styles.cancelChangesButton}
-                    onClick={() => {
-                      setPendingTaskChanges({ edited: [], deleted: [] });
-                      setEditingTasks({});
-                    }}
-                  >
-                    Cancel Changes
-                  </button>
-                </>
-              )}
-            </div>
-            <table className={styles.memberTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Task Description</th>
-                  <th>Deadline</th>
-                  <th>Assigned By</th>
-                  {/* <th>Assigned At</th> */}
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {taskFilters.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={isAdmin ? 6 : 5}
-                      style={{ textAlign: "center" }}
-                    >
-                      Select a task filter to view tasks.
-                    </td>
-                  </tr>
-                ) : (
-                  selectedMembers
-                    .filter((member) => {
-                      const membership = member.groupMemberships?.find(
-                        (m) => m.groupId === groupId
-                      );
-                      const descriptions = (membership?.tasks || []).map(
-                        (t) => t.description
-                      );
-                      return taskFilters.some((f) => descriptions.includes(f));
-                    })
-                    .flatMap((member) => {
-                      const membership = member.groupMemberships?.find(
-                        (m) => m.groupId === groupId
-                      );
-                      return (membership?.tasks || [])
-                        .filter((t) => taskFilters.includes(t.description))
-                        .map((t) => {
-                          const taskKey = `${member._id}_${t._id}`;
-                          const isEditing = editingTasks[taskKey] !== undefined;
-                          const isDeleting = pendingTaskChanges.deleted.some(
-                            (item) =>
-                              item.taskId === t._id &&
-                              item.userId === member._id
-                          );
-
-                          return (
-                            <tr
-                              key={taskKey}
-                              style={{
-                                backgroundColor: t.completed
-                                  ? "lightgreen"
-                                  : "#181c25",
-                                color: t.completed ? "black" : "white",
-                              }}
-                            >
-                              <td>{member.name}</td>
-                              <td>{t.description}</td>
-                              <td>
-                                {t.deadline
-                                  ? new Date(t.deadline).toLocaleString()
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {selectedGroup?.adminIds
-                                  ?.map((id) => id.toString())
-                                  .includes(t.assignedBy?.toString())
-                                  ? "admin"
-                                  : "user"}
-                              </td>
-                              {/* <td>
-                              {t.assignedAt
-                                ? new Date(t.assignedAt).toLocaleString()
-                                : "N/A"}
-                            </td> */}
-                              {isAdmin && (
-                                <td>
-                                  <div className={styles.tableButtonsDiv}>
-                                    {/* Complete/Incomplete Button */}
-                                    {isEditing ? (
-                                      <button
-                                        className={styles.tableEdit}
-                                        onClick={() => {
-                                          setEditingTasks((prev) => {
-                                            const updated = { ...prev };
-                                            delete updated[taskKey];
-                                            return updated;
-                                          });
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: prev.edited.filter(
-                                              (item) =>
-                                                item.taskId !== t._id ||
-                                                item.userId !== member._id
-                                            ),
-                                          }));
-                                        }}
-                                      >
-                                        ❌
-                                      </button>
-                                    ) : t.completed ? (
-                                      <button
-                                        className={styles.tableEdit}
-                                        disabled={isDeleting}
-                                        onClick={() => {
-                                          setEditingTasks((prev) => ({
-                                            ...prev,
-                                            [taskKey]: false,
-                                          }));
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.taskId !== t._id ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                                completed: false,
-                                              },
-                                            ],
-                                          }));
-                                        }}
-                                      >
-                                        ⏳
-                                      </button>
-                                    ) : (
-                                      <button
-                                        className={styles.tableEdit}
-                                        disabled={isDeleting}
-                                        onClick={() => {
-                                          setEditingTasks((prev) => ({
-                                            ...prev,
-                                            [taskKey]: true,
-                                          }));
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.taskId !== t._id ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                                completed: true,
-                                              },
-                                            ],
-                                          }));
-                                        }}
-                                      >
-                                        ✔️
-                                      </button>
-                                    )}
-
-                                    {/* Delete Button */}
-                                    {isDeleting ? (
-                                      <button
-                                        className={styles.tableDelete}
-                                        onClick={() => {
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            deleted: prev.deleted.filter(
-                                              (item) =>
-                                                !(
-                                                  item.taskId === t._id &&
-                                                  item.userId === member._id
-                                                )
-                                            ),
-                                          }));
-                                        }}
-                                      >
-                                        ❌
-                                      </button>
-                                    ) : (
-                                      <button
-                                        className={styles.tableDelete}
-                                        disabled={isEditing}
-                                        onClick={() => {
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            deleted: [
-                                              ...prev.deleted,
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                              },
-                                            ],
-                                          }));
-                                        }}
-                                      >
-                                        🗑️
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                              )}
-                            </tr>
-                          );
-                        });
-                    })
-                )}
               </tbody>
             </table>
           </div>

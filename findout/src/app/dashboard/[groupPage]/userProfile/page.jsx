@@ -974,7 +974,7 @@ const sessionUserProfile = () => {
               <th>Description</th>
               <th>Deadline</th>
               <th>Assigned By</th>
-              <th>Assigned At</th>
+              {/* <th>Assigned At</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -1001,11 +1001,11 @@ const sessionUserProfile = () => {
                       ? "admin"
                       : "user"}
                   </td>
-                  <td>
+                  {/* <td>
                     {task.assignedAt
                       ? new Date(task.assignedAt).toLocaleString()
                       : "N/A"}
-                  </td>
+                  </td> */}
                   <td>
                     {task.completed ? (
                       <button
@@ -1102,11 +1102,11 @@ const sessionUserProfile = () => {
         <table className={styles.memberTable}>
           <thead>
             <tr>
-              <th>Start Time</th>
-              <th>Start Location</th>
+              <th>ClockIn</th>
+              <th>Location</th>
               {/* <th>Estimated End</th> */}
-              <th>Actual End</th>
-              <th>End Location</th>
+              <th>ClockOut</th>
+              <th>Location</th>
               <th>Duration (hr)</th>
               {/* <th>Status</th> */}
               <th>Actions</th>
