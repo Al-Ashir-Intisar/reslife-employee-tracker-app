@@ -968,7 +968,7 @@ const sessionUserProfile = () => {
               <th>Estimated End</th>
               <th>Actual End</th>
               <th>End Location</th>
-              <th>Duration (min)</th>
+              <th>Duration (hr)</th>
               {/* <th>Status</th> */}
               <th>Actions</th>
             </tr>
@@ -1091,7 +1091,8 @@ const sessionUserProfile = () => {
                       )}
                     </td>
 
-                    <td>{duration}</td>
+                    <td>{(duration / 60).toFixed(1)}</td>
+
                     {/* <td>{status}</td> */}
                     <td>
                       <button

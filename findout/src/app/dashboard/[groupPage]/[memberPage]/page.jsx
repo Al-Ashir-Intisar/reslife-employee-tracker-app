@@ -1376,8 +1376,8 @@ const member = () => {
                         <th>Estimated End</th>
                         <th>Actual End</th>
                         <th>End Location</th>
-                        <th>Duration (min)</th>
-                        <th>Status</th>
+                        <th>Duration (hr)</th>
+                        {/* <th>Status</th> */}
                       </tr>
                     </thead>
                     <tbody>
@@ -1489,8 +1489,9 @@ const member = () => {
                                   ""
                                 )}
                               </td>
-                              <td>{duration}</td>
-                              <td>{status}</td>
+                              <td>{(duration / 60).toFixed(1)}</td>
+
+                              {/* <td>{status}</td> */}
                             </tr>
                           );
                         })
