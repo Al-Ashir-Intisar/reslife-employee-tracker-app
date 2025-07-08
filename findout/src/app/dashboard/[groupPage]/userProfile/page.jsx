@@ -1054,7 +1054,7 @@ const sessionUserProfile = () => {
           </tbody>
         </table>
 
-          {/* Work Shifts Table and Filter */}
+        {/* Work Shifts Table and Filter */}
         <div className={styles.rowWiseElementDiv}>
           <h2>Shifts</h2>
           <div>
@@ -1125,7 +1125,7 @@ const sessionUserProfile = () => {
                   ? new Date(shift.startTime)
                   : null;
                 let status = "Open";
-                if (shift.actualEndTime) status = "Closed";
+                if (shift.endLocation) status = "Closed";
                 else if (estEnd && new Date() > estEnd) status = "Timed Out";
 
                 let duration = "";
@@ -1138,7 +1138,8 @@ const sessionUserProfile = () => {
 
                 // Row coloring
                 let rowColor = "";
-                if (!shift.actualEndTime) rowColor = "lightgreen"; // light red/coral for open
+                if (status === "Open") rowColor = "lightgreen";
+                else if (status === "Timed Out") rowColor = "orange"; // light orange/yellow
                 // else leave as default (black)
 
                 return (
@@ -1468,8 +1469,6 @@ const sessionUserProfile = () => {
             )}
           </tbody>
         </table>
-
-      
       </div>
     );
   }

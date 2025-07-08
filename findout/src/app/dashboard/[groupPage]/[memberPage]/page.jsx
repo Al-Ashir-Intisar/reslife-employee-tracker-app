@@ -1081,9 +1081,14 @@ const member = () => {
                             : null;
 
                           let status = "Open";
-                          if (shift.actualEndTime) status = "Closed";
+                          if (shift.endLocation) status = "Closed";
                           else if (estEnd && new Date() > estEnd)
                             status = "Timed Out";
+
+                          // Row coloring
+                          let rowColor = "";
+                          if (status === "Open") rowColor = "lightgreen";
+                          else if (status === "Timed Out") rowColor = "orange"; // light orange
 
                           let duration = "";
                           if (start && (actualEnd || estEnd)) {
@@ -1096,7 +1101,13 @@ const member = () => {
                           }
 
                           return (
-                            <tr key={i}>
+                            <tr
+                              key={i}
+                              style={{
+                                backgroundColor: rowColor,
+                                color: status === "Closed" ? "white" : "black",
+                              }}
+                            >
                               <td>{start ? start.toLocaleString() : "N/A"}</td>
                               <td
                                 style={
