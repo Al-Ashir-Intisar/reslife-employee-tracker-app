@@ -6,6 +6,8 @@ import User from "@/models/User";
 import Group from "@/models/Group";
 import mongoose from "mongoose";
 
+
+// API route to start or end a work shift for a user in a group
 export const POST = async (req) => {
   const session = await getServerSession(authOptions);
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
@@ -22,6 +24,7 @@ export const POST = async (req) => {
       // End-shift fields:
       actualEndTime,
       endLocation,
+      taskIds, // Array of task IDs to associate with this shift
     } = await req.json();
 
     if (userId !== session.user._id?.toString()) {
@@ -154,6 +157,7 @@ export const POST = async (req) => {
       ),
       actualEndTime: null,
       endLocation: null,
+      taskIds: taskIds || [], // Initialize with empty array if not provided
       addedBy: new mongoose.Types.ObjectId(session.user._id),
       addedAt: new Date(),
     };
@@ -223,6 +227,64 @@ export const DELETE = async (req) => {
     return NextResponse.json({ message: "Shift removed!" }, { status: 200 });
   } catch (err) {
     console.error("Error deleting shift:", err);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+};
+
+// api for updating the shift tasks
+export const PATCH = async (req) => {
+  const session = await getServerSession(authOptions);
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const sessionUserId = session.user._id;
+
+  try {
+    const { groupId, userId, shiftId, taskIds } = await req.json();
+
+    if (!groupId || !userId || !shiftId || !Array.isArray(taskIds))
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    if (userId !== sessionUserId) {
+      return NextResponse.json(
+        { message: "Forbidden: user mismatch." },
+        { status: 403 }
+      );
+    }
+
+    await connect();
+    const user = await User.findById(userId);
+    if (!user)
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+
+    const membership = user.groupMemberships.find(
+      (m) => m.groupId.toString() === groupId
+    );
+    if (!membership)
+      return NextResponse.json(
+        { message: "Membership not found" },
+        { status: 404 }
+      );
+
+    const shift = membership.workShifts.find(
+      (shift) => shift._id && shift._id.toString() === shiftId
+    );
+    if (!shift)
+      return NextResponse.json(
+        { message: "Shift not found" },
+        { status: 404 }
+      );
+
+    shift.taskIds = taskIds;
+    user.markModified("groupMemberships");
+    await user.save();
+
+    return NextResponse.json({ message: "Shift tasks updated!" }, { status: 200 });
+  } catch (err) {
+    console.error("Error updating shift tasks:", err);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
