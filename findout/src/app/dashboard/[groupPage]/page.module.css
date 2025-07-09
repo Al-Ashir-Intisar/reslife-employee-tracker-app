@@ -141,6 +141,23 @@
   font-weight: bold;
 }
 
+.taskDescriptionBox {
+  padding: 10px;
+  width: 100%;
+  height: 180px;
+}
+
+.inputTaskDescription {
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  margin-bottom: 10px;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+}
+
 /* Members details table for group page styling */
 
 .memberTable {

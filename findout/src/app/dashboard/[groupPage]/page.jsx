@@ -1048,47 +1048,55 @@ const GroupPage = () => {
                 onSubmit={handleBulkAssignTask}
               >
                 <h3>Assign Task to Multiple Members</h3>
-
-                <label>Assign to:</label>
-                <Select
-                  isMulti
-                  options={selectedMembers.map((m) => ({
-                    value: m._id,
-                    label: m.name || m.email,
-                  }))}
-                  value={selectedMembers
-                    .filter((m) => taskFormUserIds.includes(m._id))
-                    .map((m) => ({
+                <div>
+                  {" "}
+                  <label>Assign to:</label>
+                  <Select
+                    isMulti
+                    options={selectedMembers.map((m) => ({
                       value: m._id,
                       label: m.name || m.email,
                     }))}
-                  onChange={(selected) =>
-                    setTaskFormUserIds(selected.map((opt) => opt.value))
-                  }
-                  placeholder="Select members..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  styles={customStyles}
-                />
+                    value={selectedMembers
+                      .filter((m) => taskFormUserIds.includes(m._id))
+                      .map((m) => ({
+                        value: m._id,
+                        label: m.name || m.email,
+                      }))}
+                    onChange={(selected) =>
+                      setTaskFormUserIds(selected.map((opt) => opt.value))
+                    }
+                    placeholder="Select members..."
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    styles={customStyles}
+                  />
+                </div>
 
-                <label>Description:</label>
-                <textarea
-                  className={styles.input}
-                  value={taskFormDescription}
-                  onChange={(e) => setTaskFormDescription(e.target.value)}
-                  required
-                  maxLength={280}
-                  placeholder="Describe the task (max 280 chars)"
-                />
+                <div className={styles.taskDescriptionBox}>
+                  {" "}
+                  <label>Description:</label>
+                  <textarea
+                    className={styles.inputTaskDescription}
+                    value={taskFormDescription}
+                    onChange={(e) => setTaskFormDescription(e.target.value)}
+                    required
+                    maxLength={150}
+                    placeholder="Describe the task (max 150 chars)"
+                  />
+                </div>
 
-                <label>Deadline:</label>
-                <input
-                  className={styles.input}
-                  type="datetime-local"
-                  value={taskFormDeadline}
-                  required
-                  onChange={(e) => setTaskFormDeadline(e.target.value)}
-                />
+                <div>
+                  {" "}
+                  <label>Deadline:</label>
+                  <input
+                    className={styles.input}
+                    type="datetime-local"
+                    value={taskFormDeadline}
+                    required
+                    onChange={(e) => setTaskFormDeadline(e.target.value)}
+                  />
+                </div>
 
                 <div className={styles.formButtonGroup}>
                   <button type="submit" className={styles.submitButton}>
