@@ -141,6 +141,24 @@
   font-weight: bold;
 }
 
+.inputEmailsDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.inputEmails {
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline: none;
+  font-weight: bold;
+  width: 100%;
+}
+
 .taskDescriptionBox {
   padding: 10px;
   width: 100%;

@@ -438,34 +438,38 @@ const GroupPage = () => {
 
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
-    const trimmed = newEmail.trim();
+    // Split on comma, whitespace (space/tab/newline), or both
+    const emails = newEmail
+      .split(/[\s,]+/)
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0);
 
-    if (!trimmed || memberEmails.includes(trimmed)) return;
+    if (!emails.length) return;
 
-    try {
-      const res = await fetch(`/api/users?email=${trimmed}`);
-      if (!res.ok) throw new Error("Request failed");
+    let addedAny = false;
+    for (const email of emails) {
+      // Basic format check (optional, but good idea)
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+      if (memberEmails.includes(email)) continue;
+      if (selectedGroup?.membersId?.includes?.(email)) continue;
 
-      const user = await res.json();
+      try {
+        const res = await fetch(`/api/users?email=${email}`);
+        if (!res.ok) continue;
 
-      if (!user || !user._id) {
-        alert("User with this email does not exist.");
-        return;
+        const user = await res.json();
+        if (!user || !user._id) continue;
+
+        setMemberEmails((prev) => [...prev, email]);
+        setMembersIds((prev) => [...prev, user._id]);
+        addedAny = true;
+      } catch (err) {
+        // skip silently
+        continue;
       }
-      // Check if already in the group
-      if (selectedGroup?.membersId.includes(user._id)) {
-        alert("This user is already a member of the group.");
-        return;
-      }
-
-      // Setting the new email, user ID, and updating member lists
-      setMemberEmails((prev) => [...prev, trimmed]);
-      setMembersIds((prev) => [...prev, user._id]);
-      setNewEmail("");
-    } catch (err) {
-      console.error("Error checking user:", err);
-      alert("Failed to verify user. Please try again.");
     }
+    setNewEmail("");
+    if (!addedAny) alert("No new valid emails were added.");
   };
 
   // Handler for removing an email from the member list
@@ -990,15 +994,25 @@ const GroupPage = () => {
           {showAddMemberForm && (
             <div className={styles.formDiv}>
               <form className={styles.addMemberForm}>
-                <div>
+                <div className={styles.inputEmailsDiv}>
                   <input
                     type="text"
-                    placeholder="Enter member email"
-                    className={styles.input}
+                    placeholder="Enter member emails (i.e. example@stolaf.edu,example1@stolaf.edu example2@stolaf.edu...)"
+                    className={styles.inputEmails}
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     required
                   />
+                  <small
+                    style={{
+                      color: "darkred",
+                      marginLeft: 8,
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    You can paste multiple emails separated by commas or spaces
+                  </small>
                   <ul className={styles.emailList}>
                     {memberEmails.map((email, index) => (
                       <li key={index}>
