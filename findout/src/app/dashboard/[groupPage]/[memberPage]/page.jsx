@@ -592,8 +592,6 @@ const member = () => {
     return selectedMember?.groupMemberships?.find((m) => m.groupId === groupId);
   }
 
-
-
   // Helper to normalize task descriptions
   function normalizeTaskDesc(desc) {
     return (desc || "")
@@ -611,7 +609,7 @@ const member = () => {
     id: t._id,
   }));
 
-    // Get recent work shifts for the member in this group
+  // Get recent work shifts for the member in this group
   function getRecentShifts() {
     const membership = getMembership();
     if (!membership?.workShifts?.length) return [];
@@ -917,24 +915,30 @@ const member = () => {
                 onSubmit={handleAssignTask}
               >
                 <h3>Assign Task</h3>
-                <label>Description (max 280 chars):</label>
-                <textarea
-                  className={styles.input}
-                  maxLength={280}
-                  value={taskDescription}
-                  required
-                  onChange={(e) => setTaskDescription(e.target.value)}
-                  placeholder="Describe the task"
-                  style={{ minHeight: 60, resize: "vertical" }}
-                />
-                <label>Deadline:</label>
-                <input
-                  className={styles.input}
-                  type="datetime-local"
-                  value={taskDeadline}
-                  required
-                  onChange={(e) => setTaskDeadline(e.target.value)}
-                />
+                <div className={styles.taskDescriptionBox}>
+                  <label>Description (max 150 chars):</label>
+                  <textarea
+                    className={styles.inputTaskDescription}
+                    maxLength={150}
+                    value={taskDescription}
+                    required
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                    placeholder="Describe the task"
+                    style={{ minHeight: 60, resize: "vertical" }}
+                  />
+                </div>
+                <div>
+                  {" "}
+                  <label>Deadline:</label>
+                  <input
+                    className={styles.input}
+                    type="datetime-local"
+                    value={taskDeadline}
+                    required
+                    onChange={(e) => setTaskDeadline(e.target.value)}
+                  />
+                </div>
+
                 <div className={styles.cancelButtonDiv}>
                   <button type="submit" className={styles.submitFormButton}>
                     Assign Task
