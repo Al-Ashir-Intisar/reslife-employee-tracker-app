@@ -623,9 +623,19 @@ const GroupPage = () => {
     });
     setAllTaskDescriptions([...allDescs].sort());
   }, [selectedMembers, groupId]);
+
+  // Normalize task descriptions for filtering
+  function normalizeTaskDesc(desc) {
+    return (desc || "")
+      .replace(/\s+/g, " ") // Collapse multiple spaces/newlines/tabs into a single space
+      .replace(/[\r\n]/g, "") // Remove newlines
+      .trim()
+      .toLowerCase(); // Optionally: compare case-insensitive
+  }
+
   // Convert to Select options:
   const taskOptions = allTaskDescriptions.map((desc) => ({
-    value: desc,
+    value: normalizeTaskDesc(desc),
     label: desc,
   }));
 
@@ -1291,9 +1301,10 @@ const GroupPage = () => {
                       const membership = member.groupMemberships?.find(
                         (m) => m.groupId === groupId
                       );
-                      const descriptions = (membership?.tasks || []).map(
-                        (t) => t.description
+                      const descriptions = (membership?.tasks || []).map((t) =>
+                        normalizeTaskDesc(t.description)
                       );
+                      console.log("Descriptions:", descriptions);
                       return taskFilters.some((f) => descriptions.includes(f));
                     })
                     .flatMap((member) => {
@@ -1301,8 +1312,11 @@ const GroupPage = () => {
                         (m) => m.groupId === groupId
                       );
                       return (membership?.tasks || [])
-                        .filter((t) => taskFilters.includes(t.description))
+                        .filter((t) =>
+                          taskFilters.includes(normalizeTaskDesc(t.description))
+                        )
                         .map((t) => {
+                          console.log("Task:", t);
                           const taskKey = `${member._id}_${t._id}`;
                           const isEditing = editingTasks[taskKey] !== undefined;
                           const isDeleting = pendingTaskChanges.deleted.some(

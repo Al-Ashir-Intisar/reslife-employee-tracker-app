@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import MapModal from "@/components/mapmodal/MapModal"; // adjust the path if necessary
+import Select from "react-select";
 
 // Fetch user details
 async function getUsers(memberId) {
@@ -27,6 +28,30 @@ async function getGroups(groupIds) {
 }
 
 const WEEK_OPTIONS = [1, 2, 3, 4];
+
+// custom styles for the select component
+const customStyles = {
+  control: (base) => ({
+    ...base,
+    backgroundColor: "#fff",
+    borderColor: "#ffa500",
+    color: "#000",
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: "#F5D389",
+    color: "#000",
+  }),
+  menu: (base) => ({
+    ...base,
+    zIndex: 100,
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+    color: "#000",
+  }),
+};
 
 const sessionUserProfile = () => {
   const session = useSession();
@@ -56,7 +81,7 @@ const sessionUserProfile = () => {
 
   // Shift table filter
   const [weeksFilter, setWeeksFilter] = useState(1);
-  const [taskFilter, setTaskFilter] = useState(""); // "" means all tasks
+  const [taskFilters, setTaskFilters] = useState([]);
 
   // Session, group, and membership
   const params = useParams();
@@ -122,6 +147,23 @@ const sessionUserProfile = () => {
       fetchUsers();
     }
   }, [sessionUserId, groupId]);
+
+  // Helper to normalize task descriptions
+  function normalizeTaskDesc(desc) {
+    return (desc || "")
+      .replace(/\s+/g, " ")
+      .replace(/[\r\n]/g, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  // Build options from all user's tasks
+  const allTasks = sessionUserGroupMembership?.tasks ?? [];
+  const taskOptions = allTasks.map((t) => ({
+    value: normalizeTaskDesc(t.description),
+    label: t.description,
+    id: t._id,
+  }));
 
   // state for tasks display table and filter
   const [deadlineFilter, setDeadlineFilter] = useState(""); // "" means show all
@@ -206,12 +248,20 @@ const sessionUserProfile = () => {
     return sessionUserGroupMembership.workShifts
       .filter((shift) => new Date(shift.startTime) >= cutoff)
       .filter((shift) => {
-        // If taskFilter is set, only include shifts linked to that task
-        if (!taskFilter) return true;
-        return (
-          Array.isArray(shift.taskIds) && shift.taskIds.includes(taskFilter)
-        );
+        // If no filters, show all
+        if (!taskFilters.length) return true;
+        if (!Array.isArray(shift.taskIds) || !shift.taskIds.length)
+          return false;
+        // For each taskId in shift, get the normalized description and check if in filter
+        return shift.taskIds.some((taskId) => {
+          // Find the task object
+          const task = allTasks.find((t) => t._id === taskId);
+          if (!task) return false;
+          const normalized = normalizeTaskDesc(task.description);
+          return taskFilters.includes(normalized);
+        });
       })
+
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
   }
 
@@ -1056,10 +1106,12 @@ const sessionUserProfile = () => {
 
         {/* Work Shifts Table and Filter */}
         <div className={styles.rowWiseElementDiv}>
-          <h2>Shifts</h2>
-          <div>
+          <div className={styles.filtersDiv}>
+            <h2> Shifts:</h2>
+          </div>
+          <div className={styles.filtersDiv}>
             <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-              (last{" "}
+              Filter by last{" "}
               <select
                 value={weeksFilter}
                 onChange={(e) => setWeeksFilter(Number(e.target.value))}
@@ -1071,29 +1123,25 @@ const sessionUserProfile = () => {
                   </option>
                 ))}
               </select>
-              {weeksFilter === 1 ? " week" : " weeks"})
+              {weeksFilter === 1 ? " week" : " weeks"}
             </span>
           </div>
-          <div>
-            <label
-              style={{ fontWeight: "normal", fontSize: "1rem", marginLeft: 4 }}
-            >
-              Filter by Task:{" "}
-              <select
-                value={taskFilter}
-                onChange={(e) => setTaskFilter(e.target.value)}
-                style={{ fontSize: "1rem" }}
-              >
-                <option value="">All Tasks</option>
-                {(sessionUserGroupMembership?.tasks ?? [])
-                  .filter((t) => !t.completed)
-                  .map((task) => (
-                    <option value={task._id} key={task._id}>
-                      {task.description}
-                    </option>
-                  ))}
-              </select>
-            </label>
+          <div className={styles.filtersDiv}>
+            <div>
+              <label>Filter by Tasks:</label>
+              <Select
+                isMulti
+                options={taskOptions}
+                value={taskOptions.filter((o) => taskFilters.includes(o.value))}
+                onChange={(selected) =>
+                  setTaskFilters(selected.map((s) => s.value))
+                }
+                placeholder="Select task descriptions..."
+                className="react-select-container"
+                classNamePrefix="react-select"
+                styles={customStyles}
+              />
+            </div>
           </div>
         </div>
 

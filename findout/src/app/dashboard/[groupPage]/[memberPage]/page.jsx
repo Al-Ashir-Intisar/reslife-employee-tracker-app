@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import MapModal from "@/components/mapmodal/MapModal"; // use the correct path
+import Select from "react-select"; // use the correct path
 
 // import { set } from "mongoose";
 // import { Salsa } from "next/font/google";
@@ -23,6 +24,33 @@ async function getUsers(memberId) {
   }
   return res.json();
 }
+
+// Options for the weeks filter dropdown
+const WEEK_OPTIONS = [1, 2, 3, 4];
+
+// custom styles for the select component
+const customStyles = {
+  control: (base) => ({
+    ...base,
+    backgroundColor: "#fff",
+    borderColor: "#ffa500",
+    color: "#000",
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: "#F5D389",
+    color: "#000",
+  }),
+  menu: (base) => ({
+    ...base,
+    zIndex: 100,
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+    color: "#000",
+  }),
+};
 
 async function getGroups(groupIds) {
   const res = await fetch("/api/groups/byids", {
@@ -556,6 +584,7 @@ const member = () => {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDeadline, setTaskDeadline] = useState("");
   const [taskFilter, setTaskFilter] = useState(""); // "" means show all
+  const [taskFilters, setTaskFilters] = useState([]);
 
   // Helpers for membership, shifts, tasks:
   function getMembership() {
@@ -563,7 +592,26 @@ const member = () => {
     return selectedMember?.groupMemberships?.find((m) => m.groupId === groupId);
   }
 
-  // Get recent work shifts for the member in this group
+
+
+  // Helper to normalize task descriptions
+  function normalizeTaskDesc(desc) {
+    return (desc || "")
+      .replace(/\s+/g, " ")
+      .replace(/[\r\n]/g, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  // Build options from all user's tasks
+  const allTasks = getMembership()?.tasks ?? [];
+  const taskOptions = allTasks.map((t) => ({
+    value: normalizeTaskDesc(t.description),
+    label: t.description,
+    id: t._id,
+  }));
+
+    // Get recent work shifts for the member in this group
   function getRecentShifts() {
     const membership = getMembership();
     if (!membership?.workShifts?.length) return [];
@@ -573,10 +621,18 @@ const member = () => {
     return membership.workShifts
       .filter((shift) => new Date(shift.startTime) >= cutoff)
       .filter((shift) => {
-        if (!taskFilter) return true;
-        return (
-          Array.isArray(shift.taskIds) && shift.taskIds.includes(taskFilter)
-        );
+        // If no filters, show all
+        if (!taskFilters.length) return true;
+        if (!Array.isArray(shift.taskIds) || !shift.taskIds.length)
+          return false;
+        // For each taskId in shift, get the normalized description and check if in filter
+        return shift.taskIds.some((taskId) => {
+          // Find the task object
+          const task = allTasks.find((t) => t._id === taskId);
+          if (!task) return false;
+          const normalized = normalizeTaskDesc(task.description);
+          return taskFilters.includes(normalized);
+        });
       })
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
   }
@@ -1004,14 +1060,13 @@ const member = () => {
               {isAdmin && (
                 <>
                   {/* Shifts Table & Filter */}
-                  <div
-                    className={styles.rowWiseElementDiv}
-                    style={{ marginTop: "2rem" }}
-                  >
-                    <h2>
-                      Shifts{" "}
+                  <div className={styles.rowWiseElementDiv}>
+                    <div className={styles.filtersDiv}>
+                      <h2>Shifts:</h2>
+                    </div>
+                    <div className={styles.filtersDiv}>
                       <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-                        (last{" "}
+                        Filter by last{" "}
                         <select
                           value={weeksFilter}
                           onChange={(e) =>
@@ -1019,39 +1074,33 @@ const member = () => {
                           }
                           style={{ fontSize: "1rem" }}
                         >
-                          {[1, 2, 3, 4].map((opt) => (
+                          {WEEK_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>
                               {opt}
                             </option>
                           ))}
                         </select>
-                        {weeksFilter === 1 ? " week" : " weeks"})
+                        {weeksFilter === 1 ? " week" : " weeks"}
                       </span>
-                    </h2>
-                    <div style={{ marginTop: 8 }}>
-                      <label
-                        style={{
-                          fontWeight: "normal",
-                          fontSize: "1rem",
-                          marginLeft: 4,
-                        }}
-                      >
-                        Filter by Task:{" "}
-                        <select
-                          value={taskFilter}
-                          onChange={(e) => setTaskFilter(e.target.value)}
-                          style={{ fontSize: "1rem" }}
-                        >
-                          <option value="">All Tasks</option>
-                          {(getMembership()?.tasks ?? [])
-                            .filter((t) => !t.completed)
-                            .map((task) => (
-                              <option value={task._id} key={task._id}>
-                                {task.description}
-                              </option>
-                            ))}
-                        </select>
-                      </label>
+                    </div>
+                    <div className={styles.filtersDiv}>
+                      <div>
+                        <label>Filter by Tasks:</label>
+                        <Select
+                          isMulti
+                          options={taskOptions}
+                          value={taskOptions.filter((o) =>
+                            taskFilters.includes(o.value)
+                          )}
+                          onChange={(selected) =>
+                            setTaskFilters(selected.map((s) => s.value))
+                          }
+                          placeholder="Select task descriptions..."
+                          className="react-select-container"
+                          classNamePrefix="react-select"
+                          styles={customStyles}
+                        />
+                      </div>
                     </div>
                   </div>
 

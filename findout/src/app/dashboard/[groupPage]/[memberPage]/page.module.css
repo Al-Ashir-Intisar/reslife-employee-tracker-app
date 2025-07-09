@@ -222,11 +222,23 @@
 }
 
 .rowWiseElementDiv {
+  width: 100%;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  align-items: left;
   justify-content: space-between;
   gap: 10px;
   margin: 20px;
+}
+
+.filtersDiv {
+  display: flex;
+  justify-content: space-between; /* ensures left alignment */
+  width: 100%; /* optional: ensures full-width container */
+  margin-top: 20px;
+  margin: 10px;
+  gap: 10px;
 }
 
 @media (max-width: 500px) {
@@ -312,5 +324,13 @@
 
   .mainTitle {
     font-size: 20 !important;
+  }
+
+  .filtersDiv {
+    font-size: 12;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width: 96vw !important;
+    margin: 0 auto 10px auto !important;
   }
 }
