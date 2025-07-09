@@ -326,6 +326,8 @@
 
   .memberTable th,
   .memberTable td {
+    min-width: 12vw !important;
+    max-width: 20vw !important;
     font-size: 12 !important;
     padding: 4px 2px !important;
     word-break: break-word;

@@ -35,6 +35,7 @@ const customStyles = {
     backgroundColor: "#fff",
     borderColor: "#ffa500",
     color: "#000",
+    maxWidth: "95vw", 
   }),
   multiValue: (base) => ({
     ...base,

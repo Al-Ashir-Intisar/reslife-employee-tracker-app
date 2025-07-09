@@ -271,6 +271,7 @@ const GroupPage = () => {
       backgroundColor: "#fff",
       borderColor: "#ffa500",
       color: "#000",
+      maxWidth: "95vw",
     }),
     multiValue: (base) => ({
       ...base,
@@ -1146,8 +1147,8 @@ const GroupPage = () => {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Group Role</th>
-                  <th>Team Role</th>
+                  <th>Access Level</th>
+                  <th>Position</th>
                   <th>Active Tasks</th>
                   <th>Hours</th>
                   <th>Variables</th>
