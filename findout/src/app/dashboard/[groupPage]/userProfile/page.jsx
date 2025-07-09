@@ -927,10 +927,10 @@ const sessionUserProfile = () => {
               onSubmit={handleAssignTask}
             >
               <h3>Assign Task</h3>
-              <label>Description (max 280 chars):</label>
+              <label>Description (max 150 chars):</label>
               <textarea
-                className={styles.input}
-                maxLength={280}
+                className={styles.inputTaskDescription}
+                maxLength={150}
                 value={taskDescription}
                 required
                 onChange={(e) => setTaskDescription(e.target.value)}
