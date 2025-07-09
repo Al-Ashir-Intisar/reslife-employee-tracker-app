@@ -79,40 +79,40 @@ const Dashboard = () => {
 
   // Handler for adding a new email and id to the member lists
   const handleAddEmail = async () => {
-    const trimmed = newEmail.trim();
+    // Split input by comma, space, or newline
+    const emails = newEmail
+      .split(/[\s,]+/) // split by space(s) or comma(s)
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0);
 
-    if (!trimmed) {
-      alert("Email cannot be empty.");
-      return;
-    }
-    if (memberEmails.includes(trimmed)) {
-      alert("This email is already in the list.");
-      return;
-    }
-    if (trimmed === sessionEmail) {
-      alert("You are already a member.");
-      return;
-    }
+    // No valid emails
+    if (!emails.length) return;
 
-    try {
-      const res = await fetch(`/api/users?email=${trimmed}`);
-      if (!res.ok) throw new Error("Request failed");
+    let anyAdded = false;
+    for (const email of emails) {
+      if (
+        memberEmails.includes(email) ||
+        email === sessionEmail // Already in list or current user
+      )
+        continue;
 
-      const user = await res.json();
+      try {
+        const res = await fetch(`/api/users?email=${email}`);
+        if (!res.ok) continue;
 
-      if (!user || !user._id) {
-        alert("User with this email does not exist.");
-        return;
+        const user = await res.json();
+        if (!user || !user._id) continue;
+
+        setMemberEmails((prev) => [...prev, email]);
+        setMembersIds((prev) => [...prev, user._id]);
+        anyAdded = true;
+      } catch (err) {
+        // silently skip invalid emails
+        continue;
       }
-
-      // Setting the new email, user ID, and updating member lists
-      setMemberEmails((prev) => [...prev, trimmed]);
-      setMembersIds((prev) => [...prev, user._id]);
-      setNewEmail("");
-    } catch (err) {
-      console.error("Error checking user:", err);
-      alert("Failed to verify user. Please try again.");
     }
+    setNewEmail(""); // Clear input after adding
+    if (!anyAdded) alert("No new valid emails were added.");
   };
 
   // Handler for removing an email from the member list
@@ -289,18 +289,24 @@ const Dashboard = () => {
                 <div className={styles.emailInputContainer}>
                   <input
                     className={styles.input}
-                    type="email"
-                    placeholder="Enter member email"
+                    type="text"
+                    placeholder="Enter member emails (i.e. example@stolaf.edu,example1@stolaf.edu example2@stolaf.edu...)"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                   />
+                  <small
+                    style={{ color: "darkred", marginLeft: 8, fontSize: "14px", fontWeight: "bold" }}
+                  >
+                    You can paste multiple emails separated by commas or spaces
+                  </small>
+
                   <button
                     className={styles.addEmailButton}
                     type="button"
                     onClick={handleAddEmail}
                     disabled={!newEmail.trim()}
                   >
-                    Add
+                    Add Emails
                   </button>
                 </div>
                 <div className={styles.formButtonGroup}>

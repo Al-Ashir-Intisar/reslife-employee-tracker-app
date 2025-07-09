@@ -50,7 +50,8 @@
 
 .formDiv {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -66,13 +67,17 @@
   background-color: #f5d389;
   color: black;
   border-radius: 8px;
-  width: 80%;
+  width: 100%;
 }
 
 .emailInputContainer {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 10px;
+  width: 100%;
 }
 
 .emailList {
@@ -96,6 +101,7 @@
   border: none;
   outline: none;
   font-weight: bold;
+  width: 100%;
 }
 
 .formButtonGroup {
@@ -216,7 +222,7 @@
   .emailInputContainer {
     flex-direction: column !important;
     gap: 6px !important;
-    width: 80% !important;
+    width: 100% !important;
   }
 
   .dashButtons,
