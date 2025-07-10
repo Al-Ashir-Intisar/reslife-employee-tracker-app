@@ -68,14 +68,24 @@ This system is especially useful in dynamic environments where quick access to d
   - Added the database check on render in member page. ✅
   - Add check on login page to see if the user is authenticated or not and send back to dashboard if authenticated. ✅
 - Added location view map option for shifts table in user profile and member page. Completed ✅: 7/4/2025
-- Add ability to add shifts to a task and show total hours for that task. 
+- Add ability to add shifts to a task and show total hours for that task.
   - Add task Id array to shifts schema in users model ✅
   - Edit shifts route to initiate taskid array while creating/modifying shifts ✅
   - Edit shift create form to enable task assignment option for new shift start case ✅
   - Allow exsiting shifts table edit option to add or remove tasks from the shift ✅
   - Modify filter by div to include filter by tasks for work shifts table in member page and user profile page ✅
-  - Add hours total in group page table with date enabled filter and automatic filter for last week starting saturday.
-  - Need to fix time zone issue if filter option enabled. meaning need time zone variable for all pages
+  - Add hours total in group page table with date enabled filter and automatic filter for last week starting saturday. ✅
+- Fixes after meeting on Tuesday: 7/8/2025
+  - "Fixed the filter by task issue by normalizing the task description before putting in options for drop down and before comparing the drop down value with task descriptions values to maintain consistency" ✅
+  - Improve the assign task box font and text box ✅
+  - Change team role to position ✅
+  - Add multiple emails (dashboard create group and add member function) to group with comma/spaces separated ✅
+  - Add edit group name option
+  - Add notifications email for assignment and group creation 
+  - Attribute value type name change 
+  - Create archive for groups 
+  - Add profile name circle like oracle 
+  - How many days left for a task
 - Form creation option by the admin to collect data about members.
 - Wrap the tables into a div that is scrollable both horizontally and vertically and only shows 5 rows at a time max.
 - Add page not found fallback page when group/member does not exist for group, member , profile page.
@@ -84,9 +94,11 @@ This system is especially useful in dynamic environments where quick access to d
 - add hours stats on group page for total group hours stats bar chart
 - Add group level stats on the dashboard page for each group: Completed:
 - Add button to assign a shift (time) to a task
-- convert shifts to a weekly barcharts 
+- convert shifts to a weekly barcharts
+  - Need to fix time zone issue if filter option enabled. meaning need time zone variable for all pages
 
 After 7/9/2025
+
 - Add login exporation limit while not in session or other secure logic. Completed :
   - Added browser close session expiration. But browsers stores user session even when closed. ✅
   - Need own data record of session use for proper implementation
