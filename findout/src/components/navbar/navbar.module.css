@@ -5,8 +5,7 @@
   margin: 0 auto;
   padding: 10px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   border-bottom: 1px solid #f5d389; /* <-- Only bottom border */
   border-radius: 2%;
