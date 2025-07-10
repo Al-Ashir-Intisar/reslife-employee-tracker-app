@@ -72,7 +72,6 @@
   position: relative;
   width: 100%;  /* adjust as you like */
   height: 100px;
-  border: 2px solid black;
   /* Remove any margin or gap here */
 }
 
@@ -87,6 +86,7 @@
   gap: 0; /* <--- No gap between logos */
   margin-right: 30px; /* optional: add space before links */
   align-items: center;
+  /* border-bottom: 2px solid black; */
 }
 
 @media (max-width: 500px) {
