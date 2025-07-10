@@ -1,14 +1,16 @@
 .container {
   background-color: #181c25;
   width: 100vw;
-  min-height: 8vh;
+  min-height: 10vh;
   margin: 0 auto;
   padding: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   border-bottom: 1px solid #f5d389; /* <-- Only bottom border */
   border-radius: 2%;
+  gap: 10px;
 }
 
 .links {
@@ -49,7 +51,7 @@
 .login {
   padding: 5px;
   border: none;
-  background-color:  #f5d389;
+  background-color: #f5d389;
   cursor: pointer;
   border-radius: 3px;
   font-size: 20;
@@ -66,6 +68,27 @@
   font-size: 20;
 }
 
+.logoWrapper {
+  position: relative;
+  width: 100%;  /* adjust as you like */
+  height: 100px;
+  border: 2px solid black;
+  /* Remove any margin or gap here */
+}
+
+.logo {
+  object-fit: contain; /* or 'cover' for cropping */
+}
+
+.logos {
+  width: 25%;
+  display: flex;
+  flex-direction: row;
+  gap: 0; /* <--- No gap between logos */
+  margin-right: 30px; /* optional: add space before links */
+  align-items: center;
+}
+
 @media (max-width: 500px) {
   .link {
     font-size: 22;
@@ -73,5 +96,10 @@
   .login,
   .logout {
     font-size: 18;
+  }
+  .logos {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0; /* Reset margin for smaller screens */
   }
 }

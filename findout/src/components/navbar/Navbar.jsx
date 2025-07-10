@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 import styles from "./navbar.module.css";
 import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
 const links = [
   {
@@ -26,6 +27,25 @@ const Navbar = () => {
   const session = useSession();
   return (
     <div className={styles.container}>
+      <div className={styles.logos}>
+        <div className={styles.logoWrapper}>
+          <Image
+            src="/stolafLogo.jpg"
+            alt="St. Olaf Logo"
+            fill
+            className={styles.logo}
+          />
+        </div>
+        <div className={styles.logoWrapper}>
+          <Image
+            src="/reslifeLogo.png"
+            alt="ResLife Logo"
+            fill
+            className={styles.logo}
+          />
+        </div>
+      </div>
+
       <div className={styles.links}>
         {links.map((link) => (
           <Link key={link.id} href={link.url} className={styles.link}>
@@ -45,9 +65,7 @@ const Navbar = () => {
         )}
         {session.status === "unauthenticated" && (
           <button className={styles.login}>
-            <Link href="/dashboard/login">
-              LogIn or SignUp
-            </Link>
+            <Link href="/dashboard/login">LogIn or SignUp</Link>
           </button>
         )}
       </div>
