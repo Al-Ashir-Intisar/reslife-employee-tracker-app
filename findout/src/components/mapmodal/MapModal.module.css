@@ -9,6 +9,7 @@
   justify-content: center;
 }
 .modal {
+  color: white;
   background: #222;
   padding: 1.2rem 1rem;
   border-radius: 18px;

@@ -311,13 +311,13 @@ const GroupPage = () => {
     control: (base) => ({
       ...base,
       backgroundColor: "#fff",
-      borderColor: "#ffa500",
+      borderColor: "#1d7e75",
       color: "#000",
       maxWidth: "95vw",
     }),
     multiValue: (base) => ({
       ...base,
-      backgroundColor: "#F5D389",
+      backgroundColor: "#a3d65c",
       color: "#000",
     }),
     menu: (base) => ({
@@ -326,7 +326,7 @@ const GroupPage = () => {
     }),
     option: (base, state) => ({
       ...base,
-      backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+      backgroundColor: state.isFocused ? "#a3d65c" : "#fff",
       color: "#000",
     }),
   };

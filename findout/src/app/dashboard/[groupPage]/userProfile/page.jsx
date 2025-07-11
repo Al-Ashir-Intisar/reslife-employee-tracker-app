@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import MapModal from "@/components/mapmodal/MapModal"; // adjust the path if necessary
 import Select from "react-select";
+import Image from "next/image";
 
 // Fetch user details
 async function getUsers(memberId) {
@@ -34,13 +35,13 @@ const customStyles = {
   control: (base) => ({
     ...base,
     backgroundColor: "#fff",
-    borderColor: "#ffa500",
+    borderColor: "#1d7e75",
     color: "#000",
     maxWidth: "95vw",
   }),
   multiValue: (base) => ({
     ...base,
-    backgroundColor: "#F5D389",
+    backgroundColor: "#a3d65c",
     color: "#000",
   }),
   menu: (base) => ({
@@ -49,7 +50,7 @@ const customStyles = {
   }),
   option: (base, state) => ({
     ...base,
-    backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+    backgroundColor: state.isFocused ? "#a3d65c" : "#fff",
     color: "#000",
   }),
 };
@@ -83,6 +84,18 @@ const sessionUserProfile = () => {
   // Shift table filter
   const [weeksFilter, setWeeksFilter] = useState(1);
   const [taskFilters, setTaskFilters] = useState([]);
+
+  // For the forms (only one open at a time)
+  const [openForm, setOpenForm] = useState(null);
+  // openForm can be 'details', 'shift', 'task', or null
+
+  // For the data cards/tables (can open any combo)
+  const [showCard, setShowCard] = useState({
+    tasks: false,
+    shifts: false,
+    certs: false,
+    attrs: false,
+  });
 
   // Session, group, and membership
   const params = useParams();
@@ -606,6 +619,7 @@ const sessionUserProfile = () => {
               setCertifications([]);
               setCustomAttributes([]);
               setShowEditDetailsForm(true);
+              setOpenForm("details");
             }}
           >
             Add Member Details
@@ -641,11 +655,14 @@ const sessionUserProfile = () => {
               }
             }}
           >
-            Remove yourself from this Group
+            Leave this Group
           </button>
           <button
             className={styles.editMember}
-            onClick={() => setShowShiftForm(true)}
+            onClick={() => {
+              setShowShiftForm(true);
+              setOpenForm("shift");
+            }}
             disabled={!!openShift}
             title={openShift ? "You already have an open shift." : ""}
           >
@@ -663,14 +680,17 @@ const sessionUserProfile = () => {
           )}
           <button
             className={styles.editMember}
-            onClick={() => setShowTaskForm(true)}
+            onClick={() => {
+              setShowTaskForm(true);
+              setOpenForm("task");
+            }}
           >
             Assign Task
           </button>
         </div>
 
         {/* Add member details form */}
-        {showEditDetailsForm && (
+        {openForm === "details" && (
           <form
             className={styles.editDetailsForm}
             onSubmit={handleMemberDetailsSubmit}
@@ -684,6 +704,7 @@ const sessionUserProfile = () => {
                   setRole("");
                   setCertifications([]);
                   setCustomAttributes([]);
+                  setOpenForm(null);
                 }}
               >
                 Cancel
@@ -828,7 +849,7 @@ const sessionUserProfile = () => {
         )}
 
         {/* Start Shift form */}
-        {showShiftForm && (
+        {openForm === "shift" && (
           <div className={styles.formDiv}>
             <form
               className={styles.editDetailsForm}
@@ -911,7 +932,10 @@ const sessionUserProfile = () => {
                 <button
                   type="button"
                   className={styles.cancelButton}
-                  onClick={() => setShowShiftForm(false)}
+                  onClick={() => {
+                    setShowShiftForm(false);
+                    setOpenForm(null);
+                  }}
                 >
                   Cancel
                 </button>
@@ -921,7 +945,7 @@ const sessionUserProfile = () => {
         )}
 
         {/* Assign task form */}
-        {showTaskForm && (
+        {openForm === "task" && (
           <div className={styles.formDiv}>
             <form
               className={styles.editDetailsForm}
@@ -957,6 +981,7 @@ const sessionUserProfile = () => {
                     setShowTaskForm(false);
                     setTaskDescription("");
                     setTaskDeadline("");
+                    setOpenForm(null);
                   }}
                 >
                   Cancel
@@ -967,8 +992,7 @@ const sessionUserProfile = () => {
         )}
 
         {/* Profile and tables */}
-        <h1>Your Profile for: {group?.name || "..."}</h1>
-        <h2>Primary Details</h2>
+        <h1>Your Profile for: {group?.name || "..."} Group</h1>
         <table className={styles.memberTable}>
           <tbody>
             <tr>
@@ -1001,334 +1025,459 @@ const sessionUserProfile = () => {
           </tbody>
         </table>
 
-        {/* Tasks Table and filter */}
-        <div className={styles.rowWiseElementDiv} style={{ marginTop: "2rem" }}>
-          <h2>
-            Tasks{" "}
-            <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-              <select
-                value={deadlineFilter}
-                onChange={(e) => setDeadlineFilter(e.target.value)}
-                style={{ fontSize: "1rem" }}
-              >
-                <option value="">All</option>
-                <option value="today">Due Today</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="past">Past Due</option>
-              </select>
+        {/* cards to show different parts of this page */}
+        <ul
+          className={styles.featureList}
+          style={{ marginTop: "2.3rem", marginBottom: "2.3rem" }}
+        >
+          <li
+            tabIndex={0}
+            className={showCard.tasks ? styles.cardActive : ""}
+            onClick={() =>
+              setShowCard((prev) => ({ ...prev, tasks: !prev.tasks }))
+            }
+          >
+            <span className={styles.featureIcon}>
+              <Image
+                src="/taskAssignments.png"
+                alt="Tasks"
+                width={56}
+                height={56}
+              />
             </span>
-          </h2>
-        </div>
-        <table className={styles.memberTable}>
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Deadline</th>
-              <th>Assigned By</th>
-              {/* <th>Assigned At</th> */}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getFilteredTasks().length > 0 ? (
-              getFilteredTasks().map((task) => (
-                <tr
-                  key={task._id}
-                  style={{
-                    backgroundColor: task.completed ? "lightgreen" : "#181c25",
-                    color: task.completed ? "black" : "white",
-                  }}
-                >
-                  <td>{task.description}</td>
-                  <td>
-                    {task.deadline
-                      ? new Date(task.deadline).toLocaleString()
-                      : "N/A"}
-                  </td>
-                  <td>
-                    {group?.adminIds
-                      ?.map((id) => id.toString())
-                      .includes(task.assignedBy?.toString())
-                      ? "admin"
-                      : "user"}
-                  </td>
-                  {/* <td>
+            <span className={styles.featureText}>Tasks</span>
+          </li>
+          <li
+            tabIndex={0}
+            className={showCard.shifts ? styles.cardActive : ""}
+            onClick={() =>
+              setShowCard((prev) => ({ ...prev, shifts: !prev.shifts }))
+            }
+          >
+            <span className={styles.featureIcon}>
+              <Image
+                src="/timeKeeping.png"
+                alt="Shifts"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Shifts</span>
+          </li>
+          <li
+            tabIndex={0}
+            className={showCard.certs ? styles.cardActive : ""}
+            onClick={() =>
+              setShowCard((prev) => ({ ...prev, certs: !prev.certs }))
+            }
+          >
+            <span className={styles.featureIcon}>
+              <Image
+                src="/certifications.png"
+                alt="Certifications"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Certifications</span>
+          </li>
+          <li
+            tabIndex={0}
+            className={showCard.attrs ? styles.cardActive : ""}
+            onClick={() =>
+              setShowCard((prev) => ({ ...prev, attrs: !prev.attrs }))
+            }
+          >
+            <span className={styles.featureIcon}>
+              <Image
+                src="/customMetadata.png"
+                alt="Attributes"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Custom Attributes</span>
+          </li>
+        </ul>
+
+        {/* Tasks Table and filter */}
+
+        {showCard.tasks && (
+          <>
+            <div
+              className={styles.rowWiseElementDiv}
+              style={{ marginTop: "2rem" }}
+            >
+              <h2>
+                Tasks{" "}
+                <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+                  <select
+                    value={deadlineFilter}
+                    onChange={(e) => setDeadlineFilter(e.target.value)}
+                    style={{ fontSize: "1rem" }}
+                  >
+                    <option value="">All</option>
+                    <option value="today">Due Today</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="past">Past Due</option>
+                  </select>
+                </span>
+              </h2>
+            </div>
+            <p>(Gray row = Marked Complete)</p>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Deadline</th>
+                  <th>Assigned By</th>
+                  {/* <th>Assigned At</th> */}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getFilteredTasks().length > 0 ? (
+                  getFilteredTasks().map((task) => (
+                    <tr
+                      key={task._id}
+                      style={{
+                        backgroundColor: task.completed ? "lightgray" : "white",
+                        color: task.completed ? "black" : "black",
+                      }}
+                    >
+                      <td>{task.description}</td>
+                      <td>
+                        {task.deadline
+                          ? new Date(task.deadline).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td>
+                        {group?.adminIds
+                          ?.map((id) => id.toString())
+                          .includes(task.assignedBy?.toString())
+                          ? "admin"
+                          : "user"}
+                      </td>
+                      {/* <td>
                     {task.assignedAt
                       ? new Date(task.assignedAt).toLocaleString()
                       : "N/A"}
                   </td> */}
-                  <td>
-                    {task.completed ? (
-                      <button
-                        title="Mark as Incomplete"
-                        className={styles.editButton}
-                        onClick={async () => {
-                          if (window.confirm("Mark task as incomplete?")) {
-                            await updateTaskStatus(task._id, false);
-                          }
-                        }}
-                      >
-                        ⏳
-                      </button>
-                    ) : (
-                      <button
-                        title="Mark as Completed"
-                        className={styles.editButton}
-                        onClick={async () => {
-                          if (window.confirm("Mark task as complete?")) {
-                            await updateTaskStatus(task._id, true);
-                          }
-                        }}
-                      >
-                        ✔️
-                      </button>
-                    )}
-                    <button
-                      title="Remove Task"
-                      className={styles.deleteButton}
-                      onClick={async () => {
-                        if (window.confirm("Remove this task?")) {
-                          await removeTask(task._id);
-                        }
-                      }}
-                    >
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">No tasks found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                      <td>
+                        {task.completed ? (
+                          <button
+                            title="Mark as Incomplete"
+                            className={styles.editButton}
+                            onClick={async () => {
+                              if (window.confirm("Mark task as incomplete?")) {
+                                await updateTaskStatus(task._id, false);
+                              }
+                            }}
+                          >
+                            ⏳
+                          </button>
+                        ) : (
+                          <button
+                            title="Mark as Completed"
+                            className={styles.editButton}
+                            onClick={async () => {
+                              if (window.confirm("Mark task as complete?")) {
+                                await updateTaskStatus(task._id, true);
+                              }
+                            }}
+                          >
+                            ✔️
+                          </button>
+                        )}
+                        <button
+                          title="Remove Task"
+                          className={styles.deleteButton}
+                          onClick={async () => {
+                            if (window.confirm("Remove this task?")) {
+                              await removeTask(task._id);
+                            }
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5">No tasks found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
 
         {/* Work Shifts Table and Filter */}
-        <div className={styles.rowWiseElementDiv}>
-          <div className={styles.filtersDiv}>
-            <h2> Shifts:</h2>
-          </div>
-          <div className={styles.filtersDiv}>
-            <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-              Filter by last{" "}
-              <select
-                value={weeksFilter}
-                onChange={(e) => setWeeksFilter(Number(e.target.value))}
-                style={{ fontSize: "1rem" }}
-              >
-                {WEEK_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              {weeksFilter === 1 ? " week" : " weeks"}
-            </span>
-          </div>
-          <div className={styles.filtersDiv}>
-            <div>
-              <label>Filter by Tasks:</label>
-              <Select
-                isMulti
-                options={taskOptions}
-                value={taskOptions.filter((o) => taskFilters.includes(o.value))}
-                onChange={(selected) =>
-                  setTaskFilters(selected.map((s) => s.value))
-                }
-                placeholder="Select task descriptions..."
-                className="react-select-container"
-                classNamePrefix="react-select"
-                styles={customStyles}
-              />
+        {showCard.shifts && (
+          <>
+            <div className={styles.rowWiseElementDiv}>
+              <div className={styles.filtersDiv}>
+                <h2> Shifts:</h2>
+              </div>
+              <div className={styles.filtersDiv}>
+                <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
+                  Filter by last{" "}
+                  <select
+                    value={weeksFilter}
+                    onChange={(e) => setWeeksFilter(Number(e.target.value))}
+                    style={{ fontSize: "1rem" }}
+                  >
+                    {WEEK_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                  {weeksFilter === 1 ? " week" : " weeks"}
+                </span>
+              </div>
+              <div className={styles.filtersDiv}>
+                <div>
+                  <label>Filter by Tasks:</label>
+                  <Select
+                    isMulti
+                    options={taskOptions}
+                    value={taskOptions.filter((o) =>
+                      taskFilters.includes(o.value)
+                    )}
+                    onChange={(selected) =>
+                      setTaskFilters(selected.map((s) => s.value))
+                    }
+                    placeholder="Select task descriptions..."
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    styles={customStyles}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* // Get all the filtered shifts to be shown in table: */}
-        {/* // Work Shifts Table */}
-        <table className={styles.memberTable}>
-          <thead>
-            <tr>
-              <th>ClockIn</th>
-              <th>Location</th>
-              {/* <th>Estimated End</th> */}
-              <th>ClockOut</th>
-              <th>Location</th>
-              <th>Duration (hr)</th>
-              {/* <th>Status</th> */}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getRecentShifts().length > 0 ? (
-              getRecentShifts().map((shift) => {
-                const estEnd = shift.estimatedEndTime
-                  ? new Date(shift.estimatedEndTime)
-                  : null;
-                const actualEnd = shift.actualEndTime
-                  ? new Date(shift.actualEndTime)
-                  : null;
-                const start = shift.startTime
-                  ? new Date(shift.startTime)
-                  : null;
-                let status = "Open";
-                if (shift.endLocation) status = "Closed";
-                else if (estEnd && new Date() > estEnd) status = "Timed Out";
+            {/* // Get all the filtered shifts to be shown in table: */}
+            {/* // Work Shifts Table */}
+            <p style={{ textAlign: "center" }}>
+              (Rows: Black = ClockedIn, White = ClockedIn+ClockedOut, Gray =
+              Timed Out; Cells: Drak-Gray = Click for Map Pop-Up)
+            </p>
 
-                let duration = "";
-                if (start && (actualEnd || estEnd)) {
-                  const endTime = shift.actualEndTime || shift.estimatedEndTime;
-                  duration =
-                    Math.round((new Date(endTime) - new Date(start)) / 60000) +
-                    "";
-                }
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>ClockIn</th>
+                  <th>Location</th>
+                  {/* <th>Estimated End</th> */}
+                  <th>ClockOut</th>
+                  <th>Location</th>
+                  <th>Tasks Linked</th>
+                  <th>Duration (hr)</th>
+                  {/* <th>Status</th> */}
 
-                // Row coloring
-                let rowColor = "";
-                if (status === "Open") rowColor = "lightgreen";
-                else if (status === "Timed Out") rowColor = "orange"; // light orange/yellow
-                // else leave as default (black)
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getRecentShifts().length > 0 ? (
+                  getRecentShifts().map((shift) => {
+                    const estEnd = shift.estimatedEndTime
+                      ? new Date(shift.estimatedEndTime)
+                      : null;
+                    const actualEnd = shift.actualEndTime
+                      ? new Date(shift.actualEndTime)
+                      : null;
+                    const start = shift.startTime
+                      ? new Date(shift.startTime)
+                      : null;
+                    let status = "Open";
+                    if (shift.endLocation) status = "Closed";
+                    else if (estEnd && new Date() > estEnd)
+                      status = "Timed Out";
 
-                return (
+                    let duration = "";
+                    if (start && (actualEnd || estEnd)) {
+                      const endTime =
+                        shift.actualEndTime || shift.estimatedEndTime;
+                      duration =
+                        Math.round(
+                          (new Date(endTime) - new Date(start)) / 60000
+                        ) + "";
+                    }
+
+                    // Row coloring
+                    let rowColor = "";
+                    if (status === "Open") rowColor = "black"; // clocked in
+                    else if (status === "Timed Out") rowColor = "lightgray"; // light orange/yellow
+                    // else leave as default (black)
+
+                    return (
+                      <tr
+                        key={shift._id}
+                        style={{
+                          backgroundColor:
+                            rowColor ||
+                            (shift.actualEndTime ? "white" : undefined),
+                          color: rowColor === "black" ? "white" : "black",
+                        }}
+                      >
+                        <td>
+                          {start
+                            ? start.toLocaleString(undefined, {
+                                year: "numeric",
+                                month: "numeric",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                            : "N/A"}
+                        </td>
+
+                        <td
+                          style={
+                            shift.startLocation
+                              ? {
+                                  background: "gray",
+                                  color: "black",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                  border: "2px solid #1d7e75",
+                                  padding: "8px",
+                                }
+                              : {}
+                          }
+                        >
+                          {shift.startLocation ? (
+                            <span
+                              style={{
+                                color: "black",
+                                textDecoration: "underline",
+                                cursor: "pointer",
+                              }}
+                              title="Show on Map"
+                              onClick={() => {
+                                setModalCoords(shift.startLocation);
+                                setModalTitle("Shift Start Location");
+                                setModalOpen(true);
+                              }}
+                            >
+                              {`${shift.startLocation.lat?.toFixed(
+                                5
+                              )}, ${shift.startLocation.lng?.toFixed(5)}`}
+                            </span>
+                          ) : (
+                            "N/A"
+                          )}
+                        </td>
+
+                        {/* <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td> */}
+                        <td>
+                          {actualEnd
+                            ? actualEnd.toLocaleString(undefined, {
+                                year: "numeric",
+                                month: "numeric",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                            : ""}
+                        </td>
+                        <td
+                          style={
+                            shift.endLocation
+                              ? {
+                                  background: "gray",
+                                  color: "black",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                  border: "2px solid #1d7e75",
+                                  padding: "8px",
+                                }
+                              : {}
+                          }
+                        >
+                          {shift.endLocation ? (
+                            <span
+                              style={{
+                                color: "black",
+                                textDecoration: "underline",
+                                cursor: "pointer",
+                              }}
+                              title="Show on Map"
+                              onClick={() => {
+                                setModalCoords(shift.endLocation);
+                                setModalTitle("Shift End Location");
+                                setModalOpen(true);
+                              }}
+                            >
+                              {`${shift.endLocation.lat?.toFixed(
+                                5
+                              )}, ${shift.endLocation.lng?.toFixed(5)}`}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </td>
+
+                        <td>{shift.taskIds.length}</td>
+                        <td>{(duration / 60).toFixed(2)}</td>
+
+                        {/* <td>{status}</td> */}
+
+                        <td>
+                          <button
+                            className={styles.editButton}
+                            title="Edit Tasks for Shift"
+                            onClick={() => {
+                              setEditingShiftId(shift._id);
+                              setEditingTaskIds(shift.taskIds || []);
+                              setShowEditShiftTasksModal(true);
+                            }}
+                          >
+                            🖊️
+                          </button>
+                          <button
+                            className={styles.deleteButton}
+                            title="Remove Shift"
+                            onClick={async () => {
+                              if (window.confirm("Remove this shift?")) {
+                                await removeShift(shift._id);
+                              }
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="8">No shift records found.</td>
+                  </tr>
+                )}
+                {/* TOTAL ROW */}
+                {getRecentShifts().length > 0 && (
                   <tr
-                    key={shift._id}
                     style={{
-                      backgroundColor:
-                        rowColor ||
-                        (shift.actualEndTime ? "#181c25" : undefined),
-                      color: rowColor ? "black" : "white",
+                      background: "#a3d65c",
+                      fontWeight: "bold",
+                      color: "black",
                     }}
                   >
-                    <td>{start ? start.toLocaleString() : "N/A"}</td>
-                    <td
-                      style={
-                        shift.startLocation
-                          ? {
-                              background: "#e0e0e0",
-                              color: "black",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              border: "2px solid #f5d389",
-                              padding: "8px",
-                            }
-                          : {}
-                      }
-                    >
-                      {shift.startLocation ? (
-                        <span
-                          style={{
-                            color: "black",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                          }}
-                          title="Show on Map"
-                          onClick={() => {
-                            setModalCoords(shift.startLocation);
-                            setModalTitle("Shift Start Location");
-                            setModalOpen(true);
-                          }}
-                        >
-                          {`${shift.startLocation.lat?.toFixed(
-                            5
-                          )}, ${shift.startLocation.lng?.toFixed(5)}`}
-                        </span>
-                      ) : (
-                        "N/A"
-                      )}
-                    </td>
-
-                    {/* <td>{estEnd ? estEnd.toLocaleString() : "N/A"}</td> */}
-                    <td>{actualEnd ? actualEnd.toLocaleString() : ""}</td>
-                    <td
-                      style={
-                        shift.endLocation
-                          ? {
-                              background: "#e0e0e0",
-                              color: "black",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              border: "2px solid #f5d389",
-                              padding: "8px",
-                            }
-                          : {}
-                      }
-                    >
-                      {shift.endLocation ? (
-                        <span
-                          style={{
-                            color: "black",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                          }}
-                          title="Show on Map"
-                          onClick={() => {
-                            setModalCoords(shift.endLocation);
-                            setModalTitle("Shift End Location");
-                            setModalOpen(true);
-                          }}
-                        >
-                          {`${shift.endLocation.lat?.toFixed(
-                            5
-                          )}, ${shift.endLocation.lng?.toFixed(5)}`}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </td>
-
-                    <td>{(duration / 60).toFixed(2)}</td>
-
-                    {/* <td>{status}</td> */}
-                    <td>
-                      <button
-                        className={styles.editButton}
-                        title="Edit Tasks for Shift"
-                        onClick={() => {
-                          setEditingShiftId(shift._id);
-                          setEditingTaskIds(shift.taskIds || []);
-                          setShowEditShiftTasksModal(true);
-                        }}
-                      >
-                        🖊️
-                      </button>
-                      <button
-                        className={styles.deleteButton}
-                        title="Remove Shift"
-                        onClick={async () => {
-                          if (window.confirm("Remove this shift?")) {
-                            await removeShift(shift._id);
-                          }
-                        }}
-                      >
-                        🗑️
-                      </button>
-                    </td>
+                    <td colSpan={5}>Total</td>
+                    <td>{getTotalHoursForRecentShifts().toFixed(2)}</td>
+                    <td colSpan={1}></td>
                   </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="8">No shift records found.</td>
-              </tr>
-            )}
-            {/* TOTAL ROW */}
-            {getRecentShifts().length > 0 && (
-              <tr
-                style={{
-                  background: "#f5d389",
-                  fontWeight: "bold",
-                  color: "black",
-                }}
-              >
-                <td colSpan={4}>Total</td>
-                <td>{getTotalHoursForRecentShifts().toFixed(2)}</td>
-                <td></td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
 
         {/* Edit Shift taskIds Modal */}
         {showEditShiftTasksModal && (
@@ -1414,110 +1563,118 @@ const sessionUserProfile = () => {
         />
 
         {/* Certifications Table */}
-        <div className={styles.rowWiseElementDiv}>
-          <h2>Certifications</h2>
-        </div>
-        <table className={styles.memberTable}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Expires At</th>
-              <th>Added By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessionUserGroupMembership?.certifications?.length > 0 ? (
-              sessionUserGroupMembership.certifications.map((cert, i) => (
-                <tr key={i}>
-                  <td>{cert.name}</td>
-                  <td>
-                    {cert.expiresAt
-                      ? new Date(cert.expiresAt).toLocaleDateString()
-                      : "N/A"}
-                  </td>
-                  <td>
-                    {group?.adminIds
-                      ?.map((id) => id.toString())
-                      .includes(cert.addedBy?.toString())
-                      ? "admin"
-                      : "user"}
-                  </td>
+        {showCard.certs && (
+          <>
+            <div className={styles.rowWiseElementDiv}>
+              <h2>Certifications</h2>
+            </div>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Expires At</th>
+                  <th>Added By</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3">No certifications found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {sessionUserGroupMembership?.certifications?.length > 0 ? (
+                  sessionUserGroupMembership.certifications.map((cert, i) => (
+                    <tr key={i}>
+                      <td>{cert.name}</td>
+                      <td>
+                        {cert.expiresAt
+                          ? new Date(cert.expiresAt).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                      <td>
+                        {group?.adminIds
+                          ?.map((id) => id.toString())
+                          .includes(cert.addedBy?.toString())
+                          ? "admin"
+                          : "user"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3">No certifications found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
 
         {/* Custom Attributes Table */}
-        <div className={styles.rowWiseElementDiv}>
-          <h2>Custom Attributes</h2>
-        </div>
-        <table className={styles.memberTable}>
-          <thead>
-            <tr>
-              <th>Key</th>
-              <th>Type</th>
-              <th>Value</th>
-              <th>Added By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessionUserGroupMembership?.customAttributes?.length > 0 ? (
-              sessionUserGroupMembership.customAttributes.map((attr, i) => {
-                let value;
-                switch (attr.type) {
-                  case "string":
-                    value = attr.valueString ?? "N/A";
-                    break;
-                  case "number":
-                    value = attr.valueNumber?.toString() ?? "N/A";
-                    break;
-                  case "boolean":
-                    value =
-                      typeof attr.valueBoolean === "boolean"
-                        ? attr.valueBoolean.toString()
-                        : "N/A";
-                    break;
-                  case "date":
-                    value = attr.valueDate
-                      ? new Date(attr.valueDate).toLocaleDateString()
-                      : "N/A";
-                    break;
-                  case "duration":
-                    value =
-                      attr.valueDurationMinutes != null
-                        ? `${attr.valueDurationMinutes} min`
-                        : "N/A";
-                    break;
-                  default:
-                    value = "N/A";
-                }
-                return (
-                  <tr key={i}>
-                    <td>{attr.key}</td>
-                    <td>{attr.type}</td>
-                    <td>{value}</td>
-                    <td>
-                      {group?.adminIds
-                        ?.map((id) => id.toString())
-                        .includes(attr.addedBy?.toString())
-                        ? "admin"
-                        : "user"}
-                    </td>
+        {showCard.attrs && (
+          <>
+            <div className={styles.rowWiseElementDiv}>
+              <h2>Custom Attributes</h2>
+            </div>
+            <table className={styles.memberTable}>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Added By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessionUserGroupMembership?.customAttributes?.length > 0 ? (
+                  sessionUserGroupMembership.customAttributes.map((attr, i) => {
+                    let value;
+                    switch (attr.type) {
+                      case "string":
+                        value = attr.valueString ?? "N/A";
+                        break;
+                      case "number":
+                        value = attr.valueNumber?.toString() ?? "N/A";
+                        break;
+                      case "boolean":
+                        value =
+                          typeof attr.valueBoolean === "boolean"
+                            ? attr.valueBoolean.toString()
+                            : "N/A";
+                        break;
+                      case "date":
+                        value = attr.valueDate
+                          ? new Date(attr.valueDate).toLocaleDateString()
+                          : "N/A";
+                        break;
+                      case "duration":
+                        value =
+                          attr.valueDurationMinutes != null
+                            ? `${attr.valueDurationMinutes} min`
+                            : "N/A";
+                        break;
+                      default:
+                        value = "N/A";
+                    }
+                    return (
+                      <tr key={i}>
+                        <td>{attr.key}</td>
+                        <td>{attr.type}</td>
+                        <td>{value}</td>
+                        <td>
+                          {group?.adminIds
+                            ?.map((id) => id.toString())
+                            .includes(attr.addedBy?.toString())
+                            ? "admin"
+                            : "user"}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="4">No attributes found.</td>
                   </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="4">No attributes found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     );
   }
