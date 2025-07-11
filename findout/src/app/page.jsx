@@ -6,35 +6,85 @@ export default function Home() {
     <div className="pageContent">
       <div className={styles.homeTexts}>
         <h1 className={styles.title}>FindOut: </h1>
+
+        <p className={styles.description}>
+          Fast and Easy info tracker for dynamic teams. Instantly reference and
+          manage team data, so you can focus on what matters.
+        </p>
         <h2>
           {" "}
           <span className={styles.subtitle}>
-            Effortless info tracker for dynamic teams.
+            Go to your "Dashboard" to get started.
           </span>
         </h2>
-        <p className={styles.description}>
-          Instantly reference and manage team data, so you can focus on what
-          matters.
-        </p>
         <ul className={styles.featureList}>
-          <li>
-            <span className={styles.featureIcon}>🎓</span> Certifications
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/timeKeeping.png"
+                alt="Time Keeping"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>
+              Time keeping for work hours
+            </span>
           </li>
-          <li>
-            <span className={styles.featureIcon}>🧑‍💼</span> Skills and expertise
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/taskAssignments.png"
+                alt="Task Assignments"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Task assignments</span>
           </li>
-          <li>
-            <span className={styles.featureIcon}>📝</span> Project history
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/projectHistory.png"
+                alt="Project History"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Project history</span>
           </li>
-          <li>
-            <span className={styles.featureIcon}>✅</span> Task assignments
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/skills&expertise.png"
+                alt="Skills and Expertise"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Skills and expertise</span>
           </li>
-          <li>
-            <span className={styles.featureIcon}>🔗</span> Custom team metadata
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/certifications.png"
+                alt="Certifications"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Certifications</span>
           </li>
-          <li>
-            <span className={styles.featureIcon}>⏱️</span> Time keeping for work
-            hours
+          <li tabIndex={0}>
+            <span className={styles.featureIcon}>
+              <Image
+                src="/customMetadata.png"
+                alt="Custom Metadata"
+                width={56}
+                height={56}
+              />
+            </span>
+            <span className={styles.featureText}>Custom team metadata</span>
           </li>
         </ul>
 
@@ -43,7 +93,7 @@ export default function Home() {
           smarter project planning.
         </p>
       </div>
-      <div className={styles.homePageLogo}>
+      {/* <div className={styles.homePageLogo}>
         <Image
           src="/findoutLogo.png"
           width={300}
@@ -52,7 +102,7 @@ export default function Home() {
           alt="FindOut app logo."
           className={styles.image}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

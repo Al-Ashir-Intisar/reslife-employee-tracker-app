@@ -28,17 +28,17 @@ const Navbar = () => {
   return (
     <div className={styles.container}>
       <div className={styles.logos}>
-        <div className={styles.logoWrapper}>
+        {/* <div className={styles.logoWrapper}>
           <Image
             src="/stolafLogo.jpg"
             alt="St. Olaf Logo"
             fill
             className={styles.logo}
           />
-        </div>
+        </div> */}
         <div className={styles.logoWrapper}>
           <Image
-            src="/reslifeLogo.png"
+            src="/reslifeLogoBlack.png"
             alt="ResLife Logo"
             fill
             className={styles.logo}
@@ -48,10 +48,11 @@ const Navbar = () => {
 
       <div className={styles.links}>
         {links.map((link) => (
-          <Link key={link.id} href={link.url} className={styles.link}>
+          <Link key={link.id} href={link.url} className={styles.navButton}>
             {link.title}
           </Link>
         ))}
+
         {session.status === "authenticated" && (
           <button
             className={styles.logout}

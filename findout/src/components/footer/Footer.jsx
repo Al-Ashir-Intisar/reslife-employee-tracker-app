@@ -8,9 +8,9 @@ const Footer = () => {
       <div className={styles.texts}>©2025 FindOut. All rights reserved.</div>
       <div>
         <Image
-          src="/igLogo.png"
-          height={25}
-          width={25}
+          src="/theLionBlack.png"
+          height={40}
+          width={40}
           className={styles.logo}
           alt="Social Media"
         />

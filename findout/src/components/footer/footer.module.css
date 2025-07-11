@@ -1,12 +1,12 @@
 .container {
-  background-color: #f5d389;
+  background-color: #a3d65c;
   width: 100vw;
   min-height: 8vh;
   margin: 0 auto;
   padding: 10px;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
 }

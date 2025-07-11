@@ -1,15 +1,37 @@
 .container {
-  background-color: #181c25;
+  background-color: #a3d65c;
   width: 100vw;
   min-height: 10vh;
   margin: 0 auto;
-  padding: 10px;
+  padding: 25px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
   border-bottom: 1px solid #f5d389; /* <-- Only bottom border */
   border-radius: 2%;
   gap: 10px;
+}
+
+.navButton {
+  padding: 7px 7px;
+  border: none;
+  background-color: white;
+  color: #181c25;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 20px;
+  font-weight: bold;
+  transition: background 0.18s, color 0.18s, box-shadow 0.16s;
+  box-shadow: 0 1px 4px rgba(245, 211, 137, 0.09);
+  text-decoration: none;
+  outline: none;
+  display: inline-block;
+}
+.navButton:hover,
+.navButton:focus {
+  background-color: #84ad4a;
+  color: #181c25;
+  border: 1px solid black;
 }
 
 .links {
@@ -17,7 +39,7 @@
   font-size: 20;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
   gap: 20px;
@@ -36,7 +58,7 @@
 .logout {
   padding: 5px;
   border: none;
-  background-color: #f5d389;
+  background-color: white;
   cursor: pointer;
   border-radius: 3px;
   font-size: 20;
@@ -44,13 +66,14 @@
 }
 
 .logout:hover {
-  background-color: rgb(236, 0, 0);
-  color: white;
+  background-color: #84ad4a;
+  border: 1px solid black;
 }
 .login {
   padding: 5px;
   border: none;
-  background-color: #f5d389;
+  background-color: white;
+  color: black;
   cursor: pointer;
   border-radius: 3px;
   font-size: 20;
@@ -58,8 +81,8 @@
 }
 
 .login:hover {
-  background-color: rgb(0, 72, 32);
-  color: white;
+  background-color: #84ad4a;
+  border: 1px solid black;
 }
 
 .texts {
@@ -69,8 +92,8 @@
 
 .logoWrapper {
   position: relative;
-  width: 100%;  /* adjust as you like */
-  height: 100px;
+  width: 100%; /* adjust as you like */
+  height: 60px;
   /* Remove any margin or gap here */
 }
 
