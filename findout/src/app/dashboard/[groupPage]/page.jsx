@@ -721,12 +721,12 @@ const GroupPage = () => {
       <>
         <div className="pageContent">
           <div className={styles.dashButtons}>
-            <button
+            {/* <button
               className={styles.profileButton}
               onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}
             >
               Your Profile
-            </button>
+            </button> */}
             {isAdmin && (
               <button
                 className={styles.createMember}
@@ -1192,6 +1192,28 @@ const GroupPage = () => {
             className={styles.featureList}
             style={{ marginTop: "2.3rem", marginBottom: "2.3rem" }}
           >
+            <li
+              tabIndex={0}
+              // className={styles.cardActive} // you can reuse .cardActive if you want, but this one does not toggle
+              onClick={() => router.push(`/dashboard/${groupId}/userProfile`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  router.push(`/dashboard/${groupId}/userProfile`);
+                }
+              }}
+              role="button"
+              aria-label="Go to your profile"
+            >
+              <span className={styles.featureIcon}>
+                <Image
+                  src="/profile.png" // use your desired profile icon/image
+                  alt="Your Profile"
+                  width={56}
+                  height={56}
+                />
+              </span>
+              <span className={styles.featureText}>Your Profile</span>
+            </li>
             <li
               tabIndex={0}
               className={showSection.members ? styles.cardActive : ""}
