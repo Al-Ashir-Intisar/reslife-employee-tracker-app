@@ -197,36 +197,6 @@ const Dashboard = () => {
     document.title = "Dashboard";
   }, []);
 
-  // useEffect(() => {
-  //   const fetchUserGroups = async () => {
-  //     if (session.status !== "authenticated") return;
-
-  //     try {
-  //       // 1. Get user info by email
-  //       const userRes = await fetch(
-  //         `/api/users?email=${session.data.user.email}`
-  //       );
-  //       const user = await userRes.json();
-  //       console.log("User fetched:", user);
-  //       console.log("Current User", currentUser);
-
-  //       // 2. Fetch groups based on groupIds
-  //       if (user?.groupIds?.length) {
-  //         console.log("User groupIds:", user.groupIds);
-  //         const grps = await getGroups(user.groupIds);
-  //         setGroups(grps);
-  //       } else {
-  //         setGroups([]);
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch user groups:", error);
-  //     }
-  //   };
-
-  //   fetchUserGroups();
-  // }, [session.status]);
-  // console.log("Groups fetched:", groups);
-
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/dashboard/login");
@@ -253,7 +223,7 @@ const Dashboard = () => {
             className={styles.createGroup}
             onClick={toggleCreateGroupForm}
           >
-            Create a new group
+            Create Group +
           </button>
           {/* <button className={styles.sendInvite}>Invite a new user</button> */}
         </div>
@@ -295,7 +265,12 @@ const Dashboard = () => {
                     onChange={(e) => setNewEmail(e.target.value)}
                   />
                   <small
-                    style={{ color: "darkred", marginLeft: 8, fontSize: "14px", fontWeight: "bold" }}
+                    style={{
+                      color: "#1d7e75",
+                      marginLeft: 8,
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                    }}
                   >
                     You can paste multiple emails separated by commas or spaces
                   </small>
@@ -342,70 +317,38 @@ const Dashboard = () => {
         )}
         {!showCreateGroupForm && (
           <div className="pageContent">
-            <table className={styles.groupsTable}>
-              <thead>
-                <tr>
-                  <th>Group Name</th>
-                  <th>Description</th>
-                  <th>members</th>
-                  {/* <th>Session User</th> */}
-                </tr>
-              </thead>
-              <tbody>
-                {groups && groups.length > 0 ? (
-                  groups.map((group) => (
-                    <tr
-                      key={group._id}
-                      onClick={() => router.push(`/dashboard/${group._id}`)}
-                      style={{ cursor: "pointer" }}
-                      className={styles.groupRow}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          router.push(`/dashboard/${group._id}`);
-                        }
-                      }}
-                    >
-                      <td
-                        style={
-                          group.name
-                            ? {
-                                background: "#e0e0e0",
-                                color: "black",
-                                cursor: "pointer",
-                                border: "1px solid brown",
-                                fontWeight: "bold",
-                                // padding: "10px 16px",
-                                transition: "background 0.2s, color 0.2s",
-                              }
-                            : {}
-                        }
-                        onMouseOver={(e) => {
-                          if (group.name)
-                            e.currentTarget.style.background = "#f5d389";
-                        }}
-                        onMouseOut={(e) => {
-                          if (group.name)
-                            e.currentTarget.style.background = "#e0e0e0";
-                        }}
-                      >
-                        {group.name}
-                      </td>
-
-                      <td>{group.description}</td>
-                      <td>{(group.membersId || []).length}</td>
-                      {/* <td>{currentUser.name}</td> */}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={3} style={{ textAlign: "center" }}>
-                      No groups found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <h1 className={styles.mainTitle}>Your Groups</h1>
+            <div className={styles.groupsGrid}>
+              {groups && groups.length > 0 ? (
+                groups.map((group) => (
+                  <div
+                    key={group._id}
+                    className={styles.groupCard}
+                    tabIndex={0}
+                    onClick={() => router.push(`/dashboard/${group._id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        router.push(`/dashboard/${group._id}`);
+                      }
+                    }}
+                  >
+                    <div className={styles.groupCardHeader}>
+                      <span className={styles.groupCardName}>{group.name}</span>
+                    </div>
+                    <span className={styles.groupCardBadge}>
+                      {(group.membersId || []).length} members
+                    </span>
+                    <div className={styles.groupCardDescription}>
+                      {group.description}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ textAlign: "center", width: "100%" }}>
+                  No groups found.
+                </div>
+              )}
+            </div>
           </div>
         )}
       </>
