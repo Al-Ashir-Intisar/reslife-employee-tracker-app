@@ -26,15 +26,7 @@ const DashboardLayout = ({ children }) => {
             display: "inline-flex",
             verticalAlign: "middle",
           }}
-        >
-          <Image
-            src="/refreshIcon.png"
-            alt="Refresh"
-            width={15}
-            height={15}
-            style={{ display: "block", filter: "brightness(0) invert(1)" }}
-          />
-        </span>
+        ></span>
       </span>
 
       {children}

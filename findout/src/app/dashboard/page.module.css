@@ -37,7 +37,7 @@
 }
 
 .createGroup:hover {
-  background-color: #84ad4a;
+  background-color: white;
   border: 1px solid black;
   cursor: pointer;
 }

@@ -70,7 +70,7 @@ const groupLayout = ({ children }) => {
     return (
       <div className="layoutContainer">
         <span className={styles.mainTitle} onClick={handleRefresh}>
-          Group: {groupName} <span style={{ marginLeft: "0.5rem" }}>🔄</span>
+          Group: {groupName}
         </span>
         {children}
       </div>

@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Select from "react-select";
 import { set } from "mongoose";
+import Image from "next/image";
 
 async function getGroups() {
   const res = await fetch("/api/groups", {
@@ -50,10 +51,47 @@ const GroupPage = () => {
   // states for adding attribute to members in bulk
   const [showAddAttributeForm, setShowAddAttributeForm] = useState(false);
 
+  const toggleAddAttributeForm = () => {
+    setShowAddAttributeForm(!showAddAttributeForm);
+  };
+
   const [attrFormUserIds, setAttrFormUserIds] = useState([]);
   const [attrFormKey, setAttrFormKey] = useState("");
   const [attrFormType, setAttrFormType] = useState("string");
   const [attrFormValue, setAttrFormValue] = useState("");
+
+  // State to control which form is open
+  const [openForm, setOpenForm] = useState(null);
+  // openForm can be one of: 'members', 'attribute', 'certification', 'task'
+
+  // Function to clear all forms
+  function clearAllForms() {
+    // Members form
+    setMemberEmails([]);
+    setNewEmail("");
+    setMembersIds([]);
+    // Attribute form
+    setAttrFormUserIds([]);
+    setAttrFormKey("");
+    setAttrFormType("string");
+    setAttrFormValue("");
+    // Certification form
+    setCertFormUserIds([]);
+    setCertFormName("");
+    setCertFormExpiresAt("");
+    // Task form
+    setTaskFormUserIds([]);
+    setTaskFormDescription("");
+    setTaskFormDeadline("");
+  }
+
+  // State to control which sections are shown
+  const [showSection, setShowSection] = useState({
+    members: false,
+    tasks: false,
+    certs: false,
+    attrs: false,
+  });
 
   // function for total hours worked filter
   function getLastSaturdayAndToday() {
@@ -163,6 +201,10 @@ const GroupPage = () => {
   // state variables for adding certification to members in bulk
   const [showAddCertificationForm, setShowAddCertificationForm] =
     useState(false);
+
+  const toggleAddCertificationForm = () => {
+    setShowAddCertificationForm(!showAddCertificationForm);
+  };
 
   const [certFormUserIds, setCertFormUserIds] = useState([]);
   const [certFormName, setCertFormName] = useState("");
@@ -555,6 +597,9 @@ const GroupPage = () => {
 
   // state for bulk task assignments
   const [showBulkAssignTaskForm, setShowBulkAssignTaskForm] = useState(false);
+  const toggleBulkAssignTaskForm = () => {
+    setShowBulkAssignTaskForm(!showBulkAssignTaskForm);
+  };
 
   const [taskFormUserIds, setTaskFormUserIds] = useState([]);
   const [taskFormDescription, setTaskFormDescription] = useState("");
@@ -685,7 +730,7 @@ const GroupPage = () => {
             {isAdmin && (
               <button
                 className={styles.createMember}
-                onClick={toggleAddMemberForm}
+                onClick={() => setOpenForm("members")}
                 disabled={!isAdmin}
               >
                 Add new Members
@@ -697,7 +742,10 @@ const GroupPage = () => {
               <button
                 className={styles.createMember}
                 disabled={!isAdmin}
-                onClick={() => setShowAddAttributeForm(true)}
+                onClick={() => {
+                  clearAllForms();
+                  setOpenForm("attribute");
+                }}
               >
                 Add an Attribute
               </button>
@@ -706,7 +754,10 @@ const GroupPage = () => {
               <button
                 className={styles.createMember}
                 disabled={!isAdmin}
-                onClick={() => setShowAddCertificationForm(true)}
+                onClick={() => {
+                  clearAllForms();
+                  setOpenForm("certification");
+                }}
               >
                 Add a Certification
               </button>
@@ -715,7 +766,10 @@ const GroupPage = () => {
               <button
                 className={styles.createMember}
                 disabled={!isAdmin}
-                onClick={() => setShowBulkAssignTaskForm(true)}
+                onClick={() => {
+                  clearAllForms();
+                  setOpenForm("task");
+                }}
               >
                 Assign Task
               </button>
@@ -730,89 +784,9 @@ const GroupPage = () => {
               </button>
             )}
           </div>
-          {/* div for announcement display */}
-          <div className={styles.announcementBlock}>
-            <h3 className={styles.announcementHeader}>Group Announcement:</h3>
-            {isAdmin && editAnnouncement ? (
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const res = await fetch("/api/groups/announcement", {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        groupId,
-                        announcement: {
-                          message: announcementDraft,
-                          updatedAt: new Date(),
-                          updatedBy: session?.data?.user?._id,
-                        },
-                      }),
-                    });
-                    if (!res.ok)
-                      throw new Error("Failed to update announcement");
-                    setEditAnnouncement(false);
-                    window.location.reload();
-                  } catch (err) {
-                    alert("Error: " + err.message);
-                  }
-                }}
-              >
-                <textarea
-                  value={announcementDraft}
-                  onChange={(e) => setAnnouncementDraft(e.target.value)}
-                  maxLength={400}
-                  rows={3}
-                  style={{ width: "100%" }}
-                />
-                <button type="submit" className={styles.editButton}>
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className={styles.deleteButton}
-                  onClick={() => {
-                    setEditAnnouncement(false);
-                    setAnnouncementDraft(
-                      selectedGroup?.announcement?.message || ""
-                    );
-                  }}
-                >
-                  Cancel
-                </button>
-              </form>
-            ) : (
-              <>
-                <div className={styles.announcementText}>
-                  {selectedGroup?.announcement?.message?.length > 0 ? (
-                    selectedGroup.announcement.message
-                  ) : (
-                    <span style={{ color: "#888" }}>No announcement yet.</span>
-                  )}
-                </div>
-                {isAdmin && (
-                  <button
-                    className={styles.editButton}
-                    style={{ marginTop: "0.5rem" }}
-                    onClick={() => {
-                      setEditAnnouncement(true);
-                      setAnnouncementDraft(
-                        selectedGroup?.announcement?.message || ""
-                      );
-                    }}
-                  >
-                    {selectedGroup?.announcement?.message?.length > 0
-                      ? "Edit"
-                      : "Add"}{" "}
-                    Announcement
-                  </button>
-                )}
-              </>
-            )}
-          </div>
 
-          {showAddAttributeForm && (
+          {/* Add attributes form */}
+          {openForm === "attribute" && (
             <div className={styles.formDiv}>
               <form
                 className={styles.addMemberForm}
@@ -842,7 +816,7 @@ const GroupPage = () => {
                   styles={customStyles}
                 />
 
-                <label>Key:</label>
+                <label>Variable Name:</label>
                 <input
                   type="text"
                   value={attrFormKey}
@@ -858,9 +832,9 @@ const GroupPage = () => {
                     setAttrFormValue(""); // reset value on type change
                   }}
                 >
-                  <option value="string">String</option>
+                  <option value="string">Text</option>
                   <option value="number">Number</option>
-                  <option value="boolean">Boolean</option>
+                  <option value="boolean">Yes/No</option>
                   <option value="date">Date</option>
                   <option value="duration">Duration</option>
                 </select>
@@ -890,8 +864,8 @@ const GroupPage = () => {
                     required
                   >
                     <option value="">Select</option>
-                    <option value="true">true</option>
-                    <option value="false">false</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
                   </select>
                 )}
                 {attrFormType === "date" && (
@@ -920,7 +894,7 @@ const GroupPage = () => {
                   <button
                     type="button"
                     className={styles.cancelButton}
-                    onClick={() => setShowAddAttributeForm(false)}
+                    onClick={() => setOpenForm(null)}
                   >
                     Cancel
                   </button>
@@ -929,7 +903,8 @@ const GroupPage = () => {
             </div>
           )}
 
-          {showAddCertificationForm && (
+          {/* Add certifications form */}
+          {openForm === "certification" && (
             <div className={styles.formDiv}>
               <form
                 className={styles.addMemberForm}
@@ -982,7 +957,7 @@ const GroupPage = () => {
                   <button
                     type="button"
                     className={styles.cancelButton}
-                    onClick={() => setShowAddCertificationForm(false)}
+                    onClick={() => setOpenForm(null)}
                   >
                     Cancel
                   </button>
@@ -991,7 +966,8 @@ const GroupPage = () => {
             </div>
           )}
 
-          {showAddMemberForm && (
+          {/* Add members form */}
+          {openForm === "members" && (
             <div className={styles.formDiv}>
               <form className={styles.addMemberForm}>
                 <div className={styles.inputEmailsDiv}>
@@ -1005,7 +981,7 @@ const GroupPage = () => {
                   />
                   <small
                     style={{
-                      color: "darkred",
+                      color: "#1d7e75",
                       marginLeft: 8,
                       fontSize: "14px",
                       fontWeight: "bold",
@@ -1048,7 +1024,8 @@ const GroupPage = () => {
                   <button
                     type="button"
                     className={styles.cancelButton}
-                    onClick={handleCancel}
+                    // onClick={handleCancel}
+                    onClick={() => setOpenForm(null)}
                   >
                     Cancel
                   </button>
@@ -1056,7 +1033,9 @@ const GroupPage = () => {
               </form>
             </div>
           )}
-          {showBulkAssignTaskForm && (
+
+          {/* Bulk Assign Task Form */}
+          {openForm === "task" && (
             <div className={styles.formDiv}>
               <form
                 className={styles.addMemberForm}
@@ -1120,12 +1099,7 @@ const GroupPage = () => {
                   <button
                     type="button"
                     className={styles.cancelButton}
-                    onClick={() => {
-                      setShowBulkAssignTaskForm(false);
-                      setTaskFormUserIds([]);
-                      setTaskFormDescription("");
-                      setTaskFormDeadline("");
-                    }}
+                    onClick={() => setOpenForm(null)}
                   >
                     Cancel
                   </button>
@@ -1133,344 +1107,769 @@ const GroupPage = () => {
               </form>
             </div>
           )}
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: "bold", marginRight: 8 }}>
-              Filter by Date Range:
-            </label>
-            <input
-              type="date"
-              value={customDateRange.start}
-              onChange={(e) =>
-                setCustomDateRange((r) => ({ ...r, start: e.target.value }))
-              }
-              style={{ marginRight: 8 }}
-            />
-            to
-            <input
-              type="date"
-              value={customDateRange.end}
-              onChange={(e) =>
-                setCustomDateRange((r) => ({ ...r, end: e.target.value }))
-              }
-              style={{ marginLeft: 8 }}
-            />
-          </div>
 
-          <div className={styles.memberDetails}>
-            <table className={styles.memberTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Access Level</th>
-                  <th>Position</th>
-                  <th>Active Tasks</th>
-                  <th>Hours</th>
-                  <th>Variables</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedMembers.map((member) => {
-                  const memberId = member._id;
-                  const isAdmin = selectedGroup?.adminIds?.includes(memberId);
-                  const isOwner = selectedGroup?.ownerId === memberId;
-
-                  const groupRole = isOwner
-                    ? "Owner"
-                    : isAdmin
-                    ? "Admin"
-                    : "Member";
-
-                  const membership = member.groupMemberships?.find(
-                    (m) => m.groupId === groupId
-                  );
-                  const role = membership?.role || "N/A";
-
-                  return (
-                    <tr key={memberId}>
-                      <td className={styles.memberPageLinkCell}>
-                        <Link
-                          href={`/dashboard/${groupId}/${memberId}`}
-                          className={styles.fullCellLink}
-                        >
-                          {member.name}
-                        </Link>
-                      </td>
-                      <td>{groupRole}</td>
-                      <td>{role}</td>
-                      <td>
-                        {membership?.tasks
-                          ? membership.tasks.filter((t) => !t.completed).length
-                          : 0}
-                      </td>
-                      <td>
-                        {(() => {
-                          if (
-                            !membership?.workShifts?.length ||
-                            !customDateRange.start ||
-                            !customDateRange.end
-                          )
-                            return "0.00";
-                          const startDate = new Date(
-                            customDateRange.start + "T00:00:00"
-                          );
-                          const endDate = new Date(
-                            customDateRange.end + "T23:59:59.999"
-                          );
-
-                          const filteredShifts = membership.workShifts.filter(
-                            (shift) => {
-                              const shiftStart = new Date(shift.startTime);
-                              return (
-                                shiftStart >= startDate && shiftStart <= endDate
-                              );
-                            }
-                          );
-                          const totalMinutes = filteredShifts.reduce(
-                            (sum, shift) => {
-                              const s = shift.startTime
-                                ? new Date(shift.startTime)
-                                : null;
-                              let e = null;
-                              if (shift.actualEndTime)
-                                e = new Date(shift.actualEndTime);
-                              else if (shift.estimatedEndTime)
-                                e = new Date(shift.estimatedEndTime);
-                              if (s && e)
-                                return sum + Math.round((e - s) / 60000);
-                              return sum;
-                            },
-                            0
-                          );
-                          return (totalMinutes / 60).toFixed(2);
-                        })()}
-                      </td>
-
-                      <td>
-                        {(membership?.certifications || []).length +
-                          (membership?.customAttributes || []).length}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {/* table for tasks and  filter by tasks */}
-            <div className={styles.filtersDiv}>
-              <div>
-                <label>Filter by Tasks:</label>
-                <Select
-                  isMulti
-                  options={taskOptions}
-                  value={taskOptions.filter((o) =>
-                    taskFilters.includes(o.value)
-                  )}
-                  onChange={(selected) =>
-                    setTaskFilters(selected.map((s) => s.value))
+          {/* div for announcement display */}
+          <div className={styles.announcementBlock}>
+            <h3 className={styles.announcementHeader}>Group Announcement:</h3>
+            {isAdmin && editAnnouncement ? (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const res = await fetch("/api/groups/announcement", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        groupId,
+                        announcement: {
+                          message: announcementDraft,
+                          updatedAt: new Date(),
+                          updatedBy: session?.data?.user?._id,
+                        },
+                      }),
+                    });
+                    if (!res.ok)
+                      throw new Error("Failed to update announcement");
+                    setEditAnnouncement(false);
+                    window.location.reload();
+                  } catch (err) {
+                    alert("Error: " + err.message);
                   }
-                  placeholder="Select task descriptions..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  styles={customStyles}
+                }}
+              >
+                <textarea
+                  value={announcementDraft}
+                  onChange={(e) => setAnnouncementDraft(e.target.value)}
+                  maxLength={400}
+                  rows={3}
+                  style={{ width: "100%" }}
                 />
-              </div>
-            </div>
-            <div className={styles.tableButtonsDiv}>
-              {isAdmin && taskFilters.length !== 0 && (
-                <>
+                <button type="submit" className={styles.editButton}>
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className={styles.deleteButton}
+                  onClick={() => {
+                    setEditAnnouncement(false);
+                    setAnnouncementDraft(
+                      selectedGroup?.announcement?.message || ""
+                    );
+                  }}
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <>
+                <div className={styles.announcementText}>
+                  {selectedGroup?.announcement?.message?.length > 0 ? (
+                    selectedGroup.announcement.message
+                  ) : (
+                    <span style={{ color: "white" }}>No announcement yet.</span>
+                  )}
+                </div>
+                {isAdmin && (
                   <button
-                    className={styles.saveChangesButton}
-                    onClick={() =>
-                      handleSavePendingTaskChanges(pendingTaskChanges)
-                    }
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    className={styles.cancelChangesButton}
+                    className={styles.editButton}
+                    style={{ marginTop: "0.5rem" }}
                     onClick={() => {
-                      setPendingTaskChanges({ edited: [], deleted: [] });
-                      setEditingTasks({});
+                      setEditAnnouncement(true);
+                      setAnnouncementDraft(
+                        selectedGroup?.announcement?.message || ""
+                      );
                     }}
                   >
-                    Cancel Changes
+                    Edit Announcement
                   </button>
-                </>
-              )}
-            </div>
-            <table className={styles.memberTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Task Description</th>
-                  <th>Deadline</th>
-                  <th>Assigned By</th>
-                  {/* <th>Assigned At</th> */}
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {taskFilters.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={isAdmin ? 6 : 5}
-                      style={{ textAlign: "center" }}
-                    >
-                      Select a task filter to view tasks.
-                    </td>
-                  </tr>
-                ) : (
-                  selectedMembers
-                    .filter((member) => {
-                      const membership = member.groupMemberships?.find(
-                        (m) => m.groupId === groupId
-                      );
-                      const descriptions = (membership?.tasks || []).map((t) =>
-                        normalizeTaskDesc(t.description)
-                      );
-                      console.log("Descriptions:", descriptions);
-                      return taskFilters.some((f) => descriptions.includes(f));
-                    })
-                    .flatMap((member) => {
-                      const membership = member.groupMemberships?.find(
-                        (m) => m.groupId === groupId
-                      );
-                      return (membership?.tasks || [])
-                        .filter((t) =>
-                          taskFilters.includes(normalizeTaskDesc(t.description))
-                        )
-                        .map((t) => {
-                          console.log("Task:", t);
-                          const taskKey = `${member._id}_${t._id}`;
-                          const isEditing = editingTasks[taskKey] !== undefined;
-                          const isDeleting = pendingTaskChanges.deleted.some(
-                            (item) =>
-                              item.taskId === t._id &&
-                              item.userId === member._id
-                          );
+                )}
+              </>
+            )}
+          </div>
 
-                          return (
-                            <tr
-                              key={taskKey}
-                              style={{
-                                backgroundColor: t.completed
-                                  ? "lightgreen"
-                                  : "#181c25",
-                                color: t.completed ? "black" : "white",
-                              }}
+          {/* Section Cards for different group sections */}
+          <ul
+            className={styles.featureList}
+            style={{ marginTop: "2.3rem", marginBottom: "2.3rem" }}
+          >
+            <li
+              tabIndex={0}
+              className={showSection.members ? styles.cardActive : ""}
+              onClick={() =>
+                setShowSection((prev) => ({ ...prev, members: !prev.members }))
+              }
+            >
+              <span className={styles.featureIcon}>
+                <Image
+                  src="/theLionBlack.png"
+                  alt="Group Members"
+                  width={56}
+                  height={56}
+                />
+              </span>
+              <span className={styles.featureText}>See Member Details</span>
+            </li>
+            <li
+              tabIndex={0}
+              className={showSection.tasks ? styles.cardActive : ""}
+              onClick={() =>
+                setShowSection((prev) => ({ ...prev, tasks: !prev.tasks }))
+              }
+            >
+              <span className={styles.featureIcon}>
+                <Image
+                  src="/taskAssignments.png"
+                  alt="Assigned Tasks"
+                  width={56}
+                  height={56}
+                />
+              </span>
+              <span className={styles.featureText}>See Assigned Tasks</span>
+            </li>
+            <li
+              tabIndex={0}
+              className={showSection.certs ? styles.cardActive : ""}
+              onClick={() =>
+                setShowSection((prev) => ({ ...prev, certs: !prev.certs }))
+              }
+            >
+              <span className={styles.featureIcon}>
+                <Image
+                  src="/certifications.png"
+                  alt="Certifications"
+                  width={56}
+                  height={56}
+                />
+              </span>
+              <span className={styles.featureText}>
+                See Members' Certifications
+              </span>
+            </li>
+            <li
+              tabIndex={0}
+              className={showSection.attrs ? styles.cardActive : ""}
+              onClick={() =>
+                setShowSection((prev) => ({ ...prev, attrs: !prev.attrs }))
+              }
+            >
+              <span className={styles.featureIcon}>
+                <Image
+                  src="/customMetadata.png"
+                  alt="Attributes"
+                  width={56}
+                  height={56}
+                />
+              </span>
+              <span className={styles.featureText}>See Other Attributes</span>
+            </li>
+          </ul>
+
+          {/* Conditional rendering based on selected section */}
+          <div className={styles.memberDetails}>
+            {/* Members Section */}
+
+            {showSection.members && (
+              <>
+                <div className={styles.dateRangeFilter}>
+                  <label className={styles.dateRangeLabel}>
+                    Filter Hours by Date Range:
+                  </label>
+                  <div className={styles.dateInputs}>
+                    <input
+                      type="date"
+                      value={customDateRange.start}
+                      onChange={(e) =>
+                        setCustomDateRange((r) => ({
+                          ...r,
+                          start: e.target.value,
+                        }))
+                      }
+                      className={styles.dateInput}
+                    />
+                    <span className={styles.toText}>to</span>
+                    <input
+                      type="date"
+                      value={customDateRange.end}
+                      onChange={(e) =>
+                        setCustomDateRange((r) => ({
+                          ...r,
+                          end: e.target.value,
+                        }))
+                      }
+                      className={styles.dateInput}
+                    />
+                  </div>
+                </div>
+                <table className={styles.memberTable}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Access Level</th>
+                      <th>Position</th>
+                      <th>Active Tasks</th>
+                      <th>Hours</th>
+                      <th>Variables</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMembers.map((member) => {
+                      const memberId = member._id;
+                      const isAdmin =
+                        selectedGroup?.adminIds?.includes(memberId);
+                      const isOwner = selectedGroup?.ownerId === memberId;
+
+                      const groupRole = isOwner
+                        ? "Owner"
+                        : isAdmin
+                        ? "Admin"
+                        : "Member";
+
+                      const membership = member.groupMemberships?.find(
+                        (m) => m.groupId === groupId
+                      );
+                      const role = membership?.role || "N/A";
+
+                      return (
+                        <tr key={memberId}>
+                          <td className={styles.memberPageLinkCell}>
+                            <Link
+                              href={`/dashboard/${groupId}/${memberId}`}
+                              className={styles.fullCellLink}
                             >
-                              <td>{member.name}</td>
-                              <td>{t.description}</td>
-                              <td>
-                                {t.deadline
-                                  ? new Date(t.deadline).toLocaleString()
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {selectedGroup?.adminIds
-                                  ?.map((id) => id.toString())
-                                  .includes(t.assignedBy?.toString())
-                                  ? "admin"
-                                  : "user"}
-                              </td>
-                              {/* <td>
+                              {member.name}
+                            </Link>
+                          </td>
+                          <td>{groupRole}</td>
+                          <td>{role}</td>
+                          <td>
+                            {membership?.tasks
+                              ? membership.tasks.filter((t) => !t.completed)
+                                  .length
+                              : 0}
+                          </td>
+                          <td>
+                            {(() => {
+                              if (
+                                !membership?.workShifts?.length ||
+                                !customDateRange.start ||
+                                !customDateRange.end
+                              )
+                                return "0.00";
+                              const startDate = new Date(
+                                customDateRange.start + "T00:00:00"
+                              );
+                              const endDate = new Date(
+                                customDateRange.end + "T23:59:59.999"
+                              );
+
+                              const filteredShifts =
+                                membership.workShifts.filter((shift) => {
+                                  const shiftStart = new Date(shift.startTime);
+                                  return (
+                                    shiftStart >= startDate &&
+                                    shiftStart <= endDate
+                                  );
+                                });
+                              const totalMinutes = filteredShifts.reduce(
+                                (sum, shift) => {
+                                  const s = shift.startTime
+                                    ? new Date(shift.startTime)
+                                    : null;
+                                  let e = null;
+                                  if (shift.actualEndTime)
+                                    e = new Date(shift.actualEndTime);
+                                  else if (shift.estimatedEndTime)
+                                    e = new Date(shift.estimatedEndTime);
+                                  if (s && e)
+                                    return sum + Math.round((e - s) / 60000);
+                                  return sum;
+                                },
+                                0
+                              );
+                              return (totalMinutes / 60).toFixed(2);
+                            })()}
+                          </td>
+
+                          <td>
+                            {(membership?.certifications || []).length +
+                              (membership?.customAttributes || []).length}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </>
+            )}
+
+            {/* table for tasks and  filter by tasks */}
+            {showSection.tasks && (
+              <>
+                <div className={styles.filtersDiv}>
+                  <div>
+                    <label>Filter by Tasks:</label>
+                    <Select
+                      isMulti
+                      options={taskOptions}
+                      value={taskOptions.filter((o) =>
+                        taskFilters.includes(o.value)
+                      )}
+                      onChange={(selected) =>
+                        setTaskFilters(selected.map((s) => s.value))
+                      }
+                      placeholder="Select task descriptions..."
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      styles={customStyles}
+                    />
+                  </div>
+                </div>
+                <div className={styles.tableButtonsDiv}>
+                  {isAdmin && taskFilters.length !== 0 && (
+                    <>
+                      <button
+                        className={styles.saveChangesButton}
+                        onClick={() =>
+                          handleSavePendingTaskChanges(pendingTaskChanges)
+                        }
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        className={styles.cancelChangesButton}
+                        onClick={() => {
+                          setPendingTaskChanges({ edited: [], deleted: [] });
+                          setEditingTasks({});
+                        }}
+                      >
+                        Cancel Changes
+                      </button>
+                    </>
+                  )}
+                </div>
+                <p>(Gray row = Marked Complete)</p>
+                <table className={styles.memberTable}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Task Description</th>
+                      <th>Deadline</th>
+                      <th>Assigned By</th>
+                      {/* <th>Assigned At</th> */}
+                      {isAdmin && <th>Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {taskFilters.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={isAdmin ? 6 : 5}
+                          style={{ textAlign: "center" }}
+                        >
+                          Select a task filter to view tasks.
+                        </td>
+                      </tr>
+                    ) : (
+                      selectedMembers
+                        .filter((member) => {
+                          const membership = member.groupMemberships?.find(
+                            (m) => m.groupId === groupId
+                          );
+                          const descriptions = (membership?.tasks || []).map(
+                            (t) => normalizeTaskDesc(t.description)
+                          );
+                          console.log("Descriptions:", descriptions);
+                          return taskFilters.some((f) =>
+                            descriptions.includes(f)
+                          );
+                        })
+                        .flatMap((member) => {
+                          const membership = member.groupMemberships?.find(
+                            (m) => m.groupId === groupId
+                          );
+                          return (membership?.tasks || [])
+                            .filter((t) =>
+                              taskFilters.includes(
+                                normalizeTaskDesc(t.description)
+                              )
+                            )
+                            .map((t) => {
+                              console.log("Task:", t);
+                              const taskKey = `${member._id}_${t._id}`;
+                              const isEditing =
+                                editingTasks[taskKey] !== undefined;
+                              const isDeleting =
+                                pendingTaskChanges.deleted.some(
+                                  (item) =>
+                                    item.taskId === t._id &&
+                                    item.userId === member._id
+                                );
+
+                              return (
+                                <tr
+                                  key={taskKey}
+                                  style={{
+                                    backgroundColor: t.completed
+                                      ? "lightgray"
+                                      : "white",
+                                    color: t.completed ? "black" : "black",
+                                  }}
+                                >
+                                  <td>{member.name}</td>
+                                  <td>{t.description}</td>
+                                  <td>
+                                    {t.deadline
+                                      ? new Date(t.deadline).toLocaleString()
+                                      : "N/A"}
+                                  </td>
+                                  <td>
+                                    {selectedGroup?.adminIds
+                                      ?.map((id) => id.toString())
+                                      .includes(t.assignedBy?.toString())
+                                      ? "admin"
+                                      : "user"}
+                                  </td>
+                                  {/* <td>
                               {t.assignedAt
                                 ? new Date(t.assignedAt).toLocaleString()
                                 : "N/A"}
                             </td> */}
+                                  {isAdmin && (
+                                    <td>
+                                      <div className={styles.tableButtonsDiv}>
+                                        {/* Complete/Incomplete Button */}
+                                        {isEditing ? (
+                                          <button
+                                            className={styles.tableEdit}
+                                            onClick={() => {
+                                              setEditingTasks((prev) => {
+                                                const updated = { ...prev };
+                                                delete updated[taskKey];
+                                                return updated;
+                                              });
+                                              setPendingTaskChanges((prev) => ({
+                                                ...prev,
+                                                edited: prev.edited.filter(
+                                                  (item) =>
+                                                    item.taskId !== t._id ||
+                                                    item.userId !== member._id
+                                                ),
+                                              }));
+                                            }}
+                                          >
+                                            ❌
+                                          </button>
+                                        ) : t.completed ? (
+                                          <button
+                                            className={styles.tableEdit}
+                                            disabled={isDeleting}
+                                            onClick={() => {
+                                              setEditingTasks((prev) => ({
+                                                ...prev,
+                                                [taskKey]: false,
+                                              }));
+                                              setPendingTaskChanges((prev) => ({
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.taskId !== t._id ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    taskId: t._id,
+                                                    completed: false,
+                                                  },
+                                                ],
+                                              }));
+                                            }}
+                                          >
+                                            ⏳
+                                          </button>
+                                        ) : (
+                                          <button
+                                            className={styles.tableEdit}
+                                            disabled={isDeleting}
+                                            onClick={() => {
+                                              setEditingTasks((prev) => ({
+                                                ...prev,
+                                                [taskKey]: true,
+                                              }));
+                                              setPendingTaskChanges((prev) => ({
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.taskId !== t._id ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    taskId: t._id,
+                                                    completed: true,
+                                                  },
+                                                ],
+                                              }));
+                                            }}
+                                          >
+                                            ✔️
+                                          </button>
+                                        )}
+
+                                        {/* Delete Button */}
+                                        {isDeleting ? (
+                                          <button
+                                            className={styles.tableDelete}
+                                            onClick={() => {
+                                              setPendingTaskChanges((prev) => ({
+                                                ...prev,
+                                                deleted: prev.deleted.filter(
+                                                  (item) =>
+                                                    !(
+                                                      item.taskId === t._id &&
+                                                      item.userId === member._id
+                                                    )
+                                                ),
+                                              }));
+                                            }}
+                                          >
+                                            ❌
+                                          </button>
+                                        ) : (
+                                          <button
+                                            className={styles.tableDelete}
+                                            disabled={isEditing}
+                                            onClick={() => {
+                                              setPendingTaskChanges((prev) => ({
+                                                ...prev,
+                                                deleted: [
+                                                  ...prev.deleted,
+                                                  {
+                                                    userId: member._id,
+                                                    taskId: t._id,
+                                                  },
+                                                ],
+                                              }));
+                                            }}
+                                          >
+                                            🗑️
+                                          </button>
+                                        )}
+                                      </div>
+                                    </td>
+                                  )}
+                                </tr>
+                              );
+                            });
+                        })
+                    )}
+                  </tbody>
+                </table>
+              </>
+            )}
+
+            {/* table for certifications and filter by certification */}
+            {showSection.certs && (
+              <>
+                <div className={styles.filtersDiv}>
+                  <div>
+                    {" "}
+                    <label>Filter by Certifications:</label>
+                    <Select
+                      isMulti
+                      options={certOptions}
+                      value={certOptions.filter((o) =>
+                        certFilters.includes(o.value)
+                      )}
+                      onChange={(selected) =>
+                        setCertFilters(selected.map((s) => s.value))
+                      }
+                      placeholder="Select certifications..."
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      styles={customStyles}
+                    />
+                  </div>
+                </div>
+                <div className={styles.tableButtonsDiv}>
+                  {isAdmin && certFilters.length !== 0 && (
+                    <button
+                      className={styles.saveChangesButton}
+                      onClick={() =>
+                        handleSavePendingCertChanges(pendingCertChanges)
+                      }
+                    >
+                      Save Changes
+                    </button>
+                  )}
+
+                  {isAdmin && certFilters.length != 0 && (
+                    <button
+                      className={styles.cancelChangesButton}
+                      onClick={() => {
+                        setPendingCertChanges({
+                          edited: [],
+                          deleted: [],
+                        });
+                        setEditingCerts({});
+                        // console.log(
+                        //   "Pending certs after cancel: ",
+                        //   pendingCertChanges
+                        // );
+                      }}
+                    >
+                      Cancel Changes
+                    </button>
+                  )}
+                </div>
+
+                <table className={styles.memberTable}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Certification</th>
+                      <th>Expires At</th>
+                      {isAdmin && <th>Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMembers
+                      .filter((member) => {
+                        if (certFilters.length === 0) return true;
+
+                        const membership = member.groupMemberships?.find(
+                          (m) => m.groupId === groupId
+                        );
+                        const certNames = (
+                          membership?.certifications || []
+                        ).map((c) => c.name);
+
+                        return certFilters.some((filter) =>
+                          certNames.includes(filter)
+                        );
+                      })
+                      .flatMap((member) => {
+                        const membership = member.groupMemberships?.find(
+                          (m) => m.groupId === groupId
+                        );
+
+                        return (membership?.certifications || [])
+                          .filter((c) => certFilters.includes(c.name))
+                          .map((c, i) => (
+                            <tr key={`${member._id}-${i}`}>
+                              <td>{member.name}</td>
+                              <td>{c.name}</td>
+                              <td>
+                                {editingCerts[`${member._id}_${c._id}`] ? (
+                                  <input
+                                    type="date"
+                                    value={
+                                      editingCerts[`${member._id}_${c._id}`]
+                                    }
+                                    onChange={(e) => {
+                                      const newDate = e.target.value;
+                                      setEditingCerts((prev) => ({
+                                        ...prev,
+                                        [`${member._id}_${c._id}`]: newDate,
+                                      }));
+
+                                      setPendingCertChanges((prev) => {
+                                        const updated = {
+                                          ...c,
+                                          expiresAt: new Date(
+                                            newDate
+                                          ).toISOString(),
+                                        };
+                                        return {
+                                          ...prev,
+                                          edited: [
+                                            ...prev.edited.filter(
+                                              (item) =>
+                                                item.cert._id !== c._id ||
+                                                item.userId !== member._id
+                                            ),
+                                            {
+                                              userId: member._id,
+                                              cert: updated,
+                                            },
+                                          ],
+                                        };
+                                      });
+                                    }}
+                                  />
+                                ) : (
+                                  new Date(c.expiresAt).toLocaleDateString()
+                                )}
+                              </td>
                               {isAdmin && (
                                 <td>
                                   <div className={styles.tableButtonsDiv}>
-                                    {/* Complete/Incomplete Button */}
-                                    {isEditing ? (
-                                      <button
-                                        className={styles.tableEdit}
-                                        onClick={() => {
-                                          setEditingTasks((prev) => {
-                                            const updated = { ...prev };
-                                            delete updated[taskKey];
-                                            return updated;
-                                          });
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: prev.edited.filter(
-                                              (item) =>
-                                                item.taskId !== t._id ||
-                                                item.userId !== member._id
-                                            ),
-                                          }));
-                                        }}
-                                      >
-                                        ❌
-                                      </button>
-                                    ) : t.completed ? (
-                                      <button
-                                        className={styles.tableEdit}
-                                        disabled={isDeleting}
-                                        onClick={() => {
-                                          setEditingTasks((prev) => ({
-                                            ...prev,
-                                            [taskKey]: false,
-                                          }));
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
+                                    {/* Edit Mode */}
+                                    {editingCerts[`${member._id}_${c._id}`] ? (
+                                      <>
+                                        <button
+                                          className={styles.tableEdit}
+                                          onClick={() => {
+                                            setEditingCerts((prev) => {
+                                              const updated = { ...prev };
+                                              delete updated[
+                                                `${member._id}_${c._id}`
+                                              ];
+                                              return updated;
+                                            });
+                                            setPendingCertChanges((prev) => ({
+                                              ...prev,
+                                              edited: prev.edited.filter(
                                                 (item) =>
-                                                  item.taskId !== t._id ||
+                                                  item.cert._id !== c._id ||
                                                   item.userId !== member._id
                                               ),
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                                completed: false,
-                                              },
-                                            ],
-                                          }));
-                                        }}
-                                      >
-                                        ⏳
-                                      </button>
+                                            }));
+                                          }}
+                                        >
+                                          ❌
+                                        </button>
+                                      </>
                                     ) : (
                                       <button
                                         className={styles.tableEdit}
-                                        disabled={isDeleting}
+                                        disabled={
+                                          // disable if this cert is marked for deletion
+                                          pendingCertChanges.deleted.some(
+                                            (item) =>
+                                              item.cert._id === c._id &&
+                                              item.userId === member._id
+                                          )
+                                        }
                                         onClick={() => {
-                                          setEditingTasks((prev) => ({
+                                          setEditingCerts((prev) => ({
                                             ...prev,
-                                            [taskKey]: true,
-                                          }));
-                                          setPendingTaskChanges((prev) => ({
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.taskId !== t._id ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                                completed: true,
-                                              },
-                                            ],
+                                            [`${member._id}_${c._id}`]:
+                                              c.expiresAt?.split("T")[0] || "",
                                           }));
                                         }}
                                       >
-                                        ✔️
+                                        🖊️
                                       </button>
                                     )}
 
-                                    {/* Delete Button */}
-                                    {isDeleting ? (
+                                    {/* Delete Mode */}
+                                    {pendingCertChanges.deleted.some(
+                                      (item) =>
+                                        item.cert._id === c._id &&
+                                        item.userId === member._id
+                                    ) ? (
                                       <button
                                         className={styles.tableDelete}
                                         onClick={() => {
-                                          setPendingTaskChanges((prev) => ({
+                                          // ❌ Cancel deletion
+                                          setPendingCertChanges((prev) => ({
                                             ...prev,
                                             deleted: prev.deleted.filter(
                                               (item) =>
                                                 !(
-                                                  item.taskId === t._id &&
+                                                  item.cert._id === c._id &&
                                                   item.userId === member._id
                                                 )
                                             ),
@@ -1482,16 +1881,19 @@ const GroupPage = () => {
                                     ) : (
                                       <button
                                         className={styles.tableDelete}
-                                        disabled={isEditing}
+                                        disabled={
+                                          // disable if this cert is being edited
+                                          !!editingCerts[
+                                            `${member._id}_${c._id}`
+                                          ]
+                                        }
                                         onClick={() => {
-                                          setPendingTaskChanges((prev) => ({
+                                          // 🗑️ Mark for deletion
+                                          setPendingCertChanges((prev) => ({
                                             ...prev,
                                             deleted: [
                                               ...prev.deleted,
-                                              {
-                                                userId: member._id,
-                                                taskId: t._id,
-                                              },
+                                              { userId: member._id, cert: c },
                                             ],
                                           }));
                                         }}
@@ -1503,693 +1905,480 @@ const GroupPage = () => {
                                 </td>
                               )}
                             </tr>
-                          );
-                        });
-                    })
-                )}
-              </tbody>
-            </table>
+                          ));
+                      })}
+                  </tbody>
+                </table>
+              </>
+            )}
 
-            {/* table for certifications and filter by certification */}
-            <div className={styles.filtersDiv}>
-              <div>
-                {" "}
-                <label>Filter by Certifications:</label>
-                <Select
-                  isMulti
-                  options={certOptions}
-                  value={certOptions.filter((o) =>
-                    certFilters.includes(o.value)
-                  )}
-                  onChange={(selected) =>
-                    setCertFilters(selected.map((s) => s.value))
-                  }
-                  placeholder="Select certifications..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  styles={customStyles}
-                />
-              </div>
-            </div>
-            <div className={styles.tableButtonsDiv}>
-              {isAdmin && certFilters.length !== 0 && (
-                <button
-                  className={styles.saveChangesButton}
-                  onClick={() =>
-                    handleSavePendingCertChanges(pendingCertChanges)
-                  }
-                >
-                  Save Changes
-                </button>
-              )}
-
-              {isAdmin && certFilters.length != 0 && (
-                <button
-                  className={styles.cancelChangesButton}
-                  onClick={() => {
-                    setPendingCertChanges({
-                      edited: [],
-                      deleted: [],
-                    });
-                    setEditingCerts({});
-                    // console.log(
-                    //   "Pending certs after cancel: ",
-                    //   pendingCertChanges
-                    // );
-                  }}
-                >
-                  Cancel Changes
-                </button>
-              )}
-            </div>
-
-            <table className={styles.memberTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Certification</th>
-                  <th>Expires At</th>
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {selectedMembers
-                  .filter((member) => {
-                    if (certFilters.length === 0) return true;
-
-                    const membership = member.groupMemberships?.find(
-                      (m) => m.groupId === groupId
-                    );
-                    const certNames = (membership?.certifications || []).map(
-                      (c) => c.name
-                    );
-
-                    return certFilters.some((filter) =>
-                      certNames.includes(filter)
-                    );
-                  })
-                  .flatMap((member) => {
-                    const membership = member.groupMemberships?.find(
-                      (m) => m.groupId === groupId
-                    );
-
-                    return (membership?.certifications || [])
-                      .filter((c) => certFilters.includes(c.name))
-                      .map((c, i) => (
-                        <tr key={`${member._id}-${i}`}>
-                          <td>{member.name}</td>
-                          <td>{c.name}</td>
-                          <td>
-                            {editingCerts[`${member._id}_${c._id}`] ? (
-                              <input
-                                type="date"
-                                value={editingCerts[`${member._id}_${c._id}`]}
-                                onChange={(e) => {
-                                  const newDate = e.target.value;
-                                  setEditingCerts((prev) => ({
-                                    ...prev,
-                                    [`${member._id}_${c._id}`]: newDate,
-                                  }));
-
-                                  setPendingCertChanges((prev) => {
-                                    const updated = {
-                                      ...c,
-                                      expiresAt: new Date(
-                                        newDate
-                                      ).toISOString(),
-                                    };
-                                    return {
-                                      ...prev,
-                                      edited: [
-                                        ...prev.edited.filter(
-                                          (item) =>
-                                            item.cert._id !== c._id ||
-                                            item.userId !== member._id
-                                        ),
-                                        { userId: member._id, cert: updated },
-                                      ],
-                                    };
-                                  });
-                                }}
-                              />
-                            ) : (
-                              new Date(c.expiresAt).toLocaleDateString()
-                            )}
-                          </td>
-                          {isAdmin && (
-                            <td>
-                              <div className={styles.tableButtonsDiv}>
-                                {/* Edit Mode */}
-                                {editingCerts[`${member._id}_${c._id}`] ? (
-                                  <>
-                                    <button
-                                      className={styles.tableEdit}
-                                      onClick={() => {
-                                        setEditingCerts((prev) => {
-                                          const updated = { ...prev };
-                                          delete updated[
-                                            `${member._id}_${c._id}`
-                                          ];
-                                          return updated;
-                                        });
-                                        setPendingCertChanges((prev) => ({
-                                          ...prev,
-                                          edited: prev.edited.filter(
-                                            (item) =>
-                                              item.cert._id !== c._id ||
-                                              item.userId !== member._id
-                                          ),
-                                        }));
-                                      }}
-                                    >
-                                      ❌
-                                    </button>
-                                  </>
-                                ) : (
-                                  <button
-                                    className={styles.tableEdit}
-                                    disabled={
-                                      // disable if this cert is marked for deletion
-                                      pendingCertChanges.deleted.some(
-                                        (item) =>
-                                          item.cert._id === c._id &&
-                                          item.userId === member._id
-                                      )
-                                    }
-                                    onClick={() => {
-                                      setEditingCerts((prev) => ({
-                                        ...prev,
-                                        [`${member._id}_${c._id}`]:
-                                          c.expiresAt?.split("T")[0] || "",
-                                      }));
-                                    }}
-                                  >
-                                    🖊️
-                                  </button>
-                                )}
-
-                                {/* Delete Mode */}
-                                {pendingCertChanges.deleted.some(
-                                  (item) =>
-                                    item.cert._id === c._id &&
-                                    item.userId === member._id
-                                ) ? (
-                                  <button
-                                    className={styles.tableDelete}
-                                    onClick={() => {
-                                      // ❌ Cancel deletion
-                                      setPendingCertChanges((prev) => ({
-                                        ...prev,
-                                        deleted: prev.deleted.filter(
-                                          (item) =>
-                                            !(
-                                              item.cert._id === c._id &&
-                                              item.userId === member._id
-                                            )
-                                        ),
-                                      }));
-                                    }}
-                                  >
-                                    ❌
-                                  </button>
-                                ) : (
-                                  <button
-                                    className={styles.tableDelete}
-                                    disabled={
-                                      // disable if this cert is being edited
-                                      !!editingCerts[`${member._id}_${c._id}`]
-                                    }
-                                    onClick={() => {
-                                      // 🗑️ Mark for deletion
-                                      setPendingCertChanges((prev) => ({
-                                        ...prev,
-                                        deleted: [
-                                          ...prev.deleted,
-                                          { userId: member._id, cert: c },
-                                        ],
-                                      }));
-                                    }}
-                                  >
-                                    🗑️
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          )}
-                        </tr>
-                      ));
-                  })}
-              </tbody>
-            </table>
             {/* table for attributes and filter by attributes */}
-            <div className={styles.filtersDiv}>
-              <div>
-                <label>Filter by Attributes:</label>
-                <Select
-                  isMulti
-                  options={attrOptions}
-                  value={attrOptions.filter((o) =>
-                    attrFilters.includes(o.value)
+            {showSection.attrs && (
+              <>
+                <div className={styles.filtersDiv}>
+                  <div>
+                    <label>Filter by Attributes:</label>
+                    <Select
+                      isMulti
+                      options={attrOptions}
+                      value={attrOptions.filter((o) =>
+                        attrFilters.includes(o.value)
+                      )}
+                      onChange={(selected) =>
+                        setAttrFilters(selected.map((s) => s.value))
+                      }
+                      placeholder="Select attributes..."
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      styles={customStyles}
+                    />
+                  </div>
+                </div>
+                <div className={styles.tableButtonsDiv}>
+                  {isAdmin && attrFilters.length !== 0 && (
+                    <button
+                      className={styles.saveChangesButton}
+                      onClick={() =>
+                        handleSavePendingAttrChanges(pendingAttrChanges)
+                      }
+                    >
+                      Save Changes
+                    </button>
                   )}
-                  onChange={(selected) =>
-                    setAttrFilters(selected.map((s) => s.value))
-                  }
-                  placeholder="Select attributes..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  styles={customStyles}
-                />
-              </div>
-            </div>
-            <div className={styles.tableButtonsDiv}>
-              {isAdmin && attrFilters.length !== 0 && (
-                <button
-                  className={styles.saveChangesButton}
-                  onClick={() =>
-                    handleSavePendingAttrChanges(pendingAttrChanges)
-                  }
-                >
-                  Save Changes
-                </button>
-              )}
-              {isAdmin && attrFilters.length !== 0 && (
-                <button
-                  className={styles.cancelChangesButton}
-                  onClick={() => {
-                    setPendingAttrChanges({ edited: [], deleted: [] });
-                    setEditingAttrs({});
-                  }}
-                >
-                  Cancel Changes
-                </button>
-              )}
-            </div>
-            <table className={styles.memberTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Attribute Key</th>
-                  <th>Value</th>
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {selectedMembers
-                  .filter((member) => {
-                    if (attrFilters.length === 0) return true;
-                    const membership = member.groupMemberships?.find(
-                      (m) => m.groupId === groupId
-                    );
-                    const keys = (membership?.customAttributes || []).map(
-                      (a) => a.key
-                    );
-                    return attrFilters.some((f) => keys.includes(f));
-                  })
-                  .flatMap((member) => {
-                    const membership = member.groupMemberships?.find(
-                      (m) => m.groupId === groupId
-                    );
-                    return (membership?.customAttributes || [])
-                      .filter((attr) => attrFilters.includes(attr.key))
-                      .map((attr, i) => {
-                        const attrKey = `${member._id}_${attr.key}`;
-
-                        // Get value for display
-                        let value = "N/A";
-                        switch (attr.type) {
-                          case "string":
-                            value = attr.valueString ?? "";
-                            break;
-                          case "number":
-                            value = attr.valueNumber?.toString() ?? "";
-                            break;
-                          case "boolean":
-                            value =
-                              typeof attr.valueBoolean === "boolean"
-                                ? attr.valueBoolean.toString()
-                                : "N/A";
-                            break;
-                          case "date":
-                            value = attr.valueDate
-                              ? new Date(attr.valueDate)
-                                  .toISOString()
-                                  .slice(0, 10)
-                              : "";
-                            break;
-                          case "duration":
-                            value =
-                              attr.valueDurationMinutes != null
-                                ? `${attr.valueDurationMinutes} min`
-                                : "N/A";
-                            break;
-                        }
-
-                        const isEditing = editingAttrs[attrKey] !== undefined;
-                        const isDeleting = pendingAttrChanges.deleted.some(
-                          (item) =>
-                            item.attr.key === attr.key &&
-                            item.userId === member._id
+                  {isAdmin && attrFilters.length !== 0 && (
+                    <button
+                      className={styles.cancelChangesButton}
+                      onClick={() => {
+                        setPendingAttrChanges({ edited: [], deleted: [] });
+                        setEditingAttrs({});
+                      }}
+                    >
+                      Cancel Changes
+                    </button>
+                  )}
+                </div>
+                <table className={styles.memberTable}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Attribute Key</th>
+                      <th>Value</th>
+                      {isAdmin && <th>Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMembers
+                      .filter((member) => {
+                        if (attrFilters.length === 0) return true;
+                        const membership = member.groupMemberships?.find(
+                          (m) => m.groupId === groupId
                         );
+                        const keys = (membership?.customAttributes || []).map(
+                          (a) => a.key
+                        );
+                        return attrFilters.some((f) => keys.includes(f));
+                      })
+                      .flatMap((member) => {
+                        const membership = member.groupMemberships?.find(
+                          (m) => m.groupId === groupId
+                        );
+                        return (membership?.customAttributes || [])
+                          .filter((attr) => attrFilters.includes(attr.key))
+                          .map((attr, i) => {
+                            const attrKey = `${member._id}_${attr.key}`;
 
-                        return (
-                          <tr key={attrKey}>
-                            <td>{member.name}</td>
-                            <td>{attr.key}</td>
-                            <td>
-                              {isEditing ? (
-                                <>
-                                  {/* String input */}
-                                  {attr.type === "string" && (
-                                    <input
-                                      type="text"
-                                      value={editingAttrs[attrKey] ?? ""}
-                                      onChange={(e) => {
-                                        setEditingAttrs((prev) => ({
-                                          ...prev,
-                                          [attrKey]: e.target.value,
-                                        }));
-                                        setPendingAttrChanges((prev) => {
-                                          const updated = {
-                                            ...attr,
-                                            valueString: e.target.value,
-                                          };
-                                          return {
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.attr.key !== attr.key ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                attr: updated,
-                                              },
-                                            ],
-                                          };
-                                        });
-                                      }}
-                                    />
-                                  )}
+                            // Get value for display
+                            let value = "N/A";
+                            switch (attr.type) {
+                              case "string":
+                                value = attr.valueString ?? "";
+                                break;
+                              case "number":
+                                value = attr.valueNumber?.toString() ?? "";
+                                break;
+                              case "boolean":
+                                value =
+                                  typeof attr.valueBoolean === "boolean"
+                                    ? attr.valueBoolean.toString()
+                                    : "N/A";
+                                break;
+                              case "date":
+                                value = attr.valueDate
+                                  ? new Date(attr.valueDate)
+                                      .toISOString()
+                                      .slice(0, 10)
+                                  : "";
+                                break;
+                              case "duration":
+                                value =
+                                  attr.valueDurationMinutes != null
+                                    ? `${attr.valueDurationMinutes} min`
+                                    : "N/A";
+                                break;
+                            }
 
-                                  {/* Number input */}
-                                  {attr.type === "number" && (
-                                    <input
-                                      type="number"
-                                      value={editingAttrs[attrKey] ?? ""}
-                                      step="any"
-                                      onChange={(e) => {
-                                        setEditingAttrs((prev) => ({
-                                          ...prev,
-                                          [attrKey]: e.target.value,
-                                        }));
-                                        setPendingAttrChanges((prev) => {
-                                          const num =
-                                            e.target.value === ""
-                                              ? ""
-                                              : Number(e.target.value);
-                                          const updated = {
-                                            ...attr,
-                                            valueNumber: num,
-                                          };
-                                          return {
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.attr.key !== attr.key ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                attr: updated,
-                                              },
-                                            ],
-                                          };
-                                        });
-                                      }}
-                                    />
-                                  )}
+                            const isEditing =
+                              editingAttrs[attrKey] !== undefined;
+                            const isDeleting = pendingAttrChanges.deleted.some(
+                              (item) =>
+                                item.attr.key === attr.key &&
+                                item.userId === member._id
+                            );
 
-                                  {/* Boolean select */}
-                                  {attr.type === "boolean" && (
-                                    <select
-                                      value={
-                                        editingAttrs[attrKey] === undefined
-                                          ? attr.valueBoolean === true
-                                            ? "true"
-                                            : attr.valueBoolean === false
-                                            ? "false"
-                                            : ""
-                                          : editingAttrs[attrKey]
-                                      }
-                                      onChange={(e) => {
-                                        setEditingAttrs((prev) => ({
-                                          ...prev,
-                                          [attrKey]: e.target.value,
-                                        }));
-                                        setPendingAttrChanges((prev) => {
-                                          const updated = {
-                                            ...attr,
-                                            valueBoolean:
-                                              e.target.value === "true",
-                                          };
-                                          return {
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.attr.key !== attr.key ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                attr: updated,
-                                              },
-                                            ],
-                                          };
-                                        });
-                                      }}
-                                    >
-                                      <option value="">Select...</option>
-                                      <option value="true">true</option>
-                                      <option value="false">false</option>
-                                    </select>
-                                  )}
-
-                                  {/* Date input */}
-                                  {attr.type === "date" && (
-                                    <input
-                                      type="date"
-                                      value={editingAttrs[attrKey] ?? ""}
-                                      onChange={(e) => {
-                                        setEditingAttrs((prev) => ({
-                                          ...prev,
-                                          [attrKey]: e.target.value,
-                                        }));
-                                        setPendingAttrChanges((prev) => {
-                                          const updated = {
-                                            ...attr,
-                                            valueDate: e.target.value,
-                                          };
-                                          return {
-                                            ...prev,
-                                            edited: [
-                                              ...prev.edited.filter(
-                                                (item) =>
-                                                  item.attr.key !== attr.key ||
-                                                  item.userId !== member._id
-                                              ),
-                                              {
-                                                userId: member._id,
-                                                attr: updated,
-                                              },
-                                            ],
-                                          };
-                                        });
-                                      }}
-                                    />
-                                  )}
-
-                                  {/* Duration (minutes) */}
-                                  {attr.type === "duration" && (
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        value={
-                                          editingAttrs[attrKey]?.replace?.(
-                                            /\D/g,
-                                            ""
-                                          ) ?? ""
-                                        }
-                                        onChange={(e) => {
-                                          const val = e.target.value.replace(
-                                            /\D/g,
-                                            ""
-                                          );
-                                          setEditingAttrs((prev) => ({
-                                            ...prev,
-                                            [attrKey]: val,
-                                          }));
-                                          setPendingAttrChanges((prev) => {
-                                            const updated = {
-                                              ...attr,
-                                              valueDurationMinutes: Number(val),
-                                            };
-                                            return {
-                                              ...prev,
-                                              edited: [
-                                                ...prev.edited.filter(
-                                                  (item) =>
-                                                    item.attr.key !==
-                                                      attr.key ||
-                                                    item.userId !== member._id
-                                                ),
-                                                {
-                                                  userId: member._id,
-                                                  attr: updated,
-                                                },
-                                              ],
-                                            };
-                                          });
-                                        }}
-                                        style={{ width: "60px" }}
-                                      />
-                                      <span style={{ marginLeft: "0.25em" }}>
-                                        min
-                                      </span>
-                                    </div>
-                                  )}
-                                </>
-                              ) : (
-                                value
-                              )}
-                            </td>
-                            {isAdmin && (
-                              <td>
-                                <div className={styles.tableButtonsDiv}>
-                                  {/* Edit Button */}
+                            return (
+                              <tr key={attrKey}>
+                                <td>{member.name}</td>
+                                <td>{attr.key}</td>
+                                <td>
                                   {isEditing ? (
-                                    <button
-                                      className={styles.tableEdit}
-                                      onClick={() => {
-                                        setEditingAttrs((prev) => {
-                                          const updated = { ...prev };
-                                          delete updated[attrKey];
-                                          return updated;
-                                        });
-                                        setPendingAttrChanges((prev) => ({
-                                          ...prev,
-                                          edited: prev.edited.filter(
-                                            (item) =>
-                                              item.attr.key !== attr.key ||
-                                              item.userId !== member._id
-                                          ),
-                                        }));
-                                      }}
-                                    >
-                                      ❌
-                                    </button>
-                                  ) : (
-                                    <button
-                                      className={styles.tableEdit}
-                                      disabled={isDeleting}
-                                      onClick={() => {
-                                        // Initial edit value per type
-                                        let initialEditValue = "";
-                                        switch (attr.type) {
-                                          case "string":
-                                            initialEditValue =
-                                              attr.valueString ?? "";
-                                            break;
-                                          case "number":
-                                            initialEditValue =
-                                              attr.valueNumber?.toString() ??
-                                              "";
-                                            break;
-                                          case "boolean":
-                                            initialEditValue =
-                                              attr.valueBoolean === true
+                                    <>
+                                      {/* String input */}
+                                      {attr.type === "string" && (
+                                        <input
+                                          type="text"
+                                          value={editingAttrs[attrKey] ?? ""}
+                                          onChange={(e) => {
+                                            setEditingAttrs((prev) => ({
+                                              ...prev,
+                                              [attrKey]: e.target.value,
+                                            }));
+                                            setPendingAttrChanges((prev) => {
+                                              const updated = {
+                                                ...attr,
+                                                valueString: e.target.value,
+                                              };
+                                              return {
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.attr.key !==
+                                                        attr.key ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    attr: updated,
+                                                  },
+                                                ],
+                                              };
+                                            });
+                                          }}
+                                        />
+                                      )}
+
+                                      {/* Number input */}
+                                      {attr.type === "number" && (
+                                        <input
+                                          type="number"
+                                          value={editingAttrs[attrKey] ?? ""}
+                                          step="any"
+                                          onChange={(e) => {
+                                            setEditingAttrs((prev) => ({
+                                              ...prev,
+                                              [attrKey]: e.target.value,
+                                            }));
+                                            setPendingAttrChanges((prev) => {
+                                              const num =
+                                                e.target.value === ""
+                                                  ? ""
+                                                  : Number(e.target.value);
+                                              const updated = {
+                                                ...attr,
+                                                valueNumber: num,
+                                              };
+                                              return {
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.attr.key !==
+                                                        attr.key ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    attr: updated,
+                                                  },
+                                                ],
+                                              };
+                                            });
+                                          }}
+                                        />
+                                      )}
+
+                                      {/* Boolean select */}
+                                      {attr.type === "boolean" && (
+                                        <select
+                                          value={
+                                            editingAttrs[attrKey] === undefined
+                                              ? attr.valueBoolean === true
                                                 ? "true"
                                                 : attr.valueBoolean === false
                                                 ? "false"
-                                                : "";
-                                            break;
-                                          case "date":
-                                            initialEditValue = attr.valueDate
-                                              ? new Date(attr.valueDate)
-                                                  .toISOString()
-                                                  .slice(0, 10)
-                                              : "";
-                                            break;
-                                          case "duration":
-                                            initialEditValue =
-                                              attr.valueDurationMinutes != null
-                                                ? attr.valueDurationMinutes.toString()
-                                                : "";
-                                            break;
-                                        }
-                                        setEditingAttrs((prev) => ({
-                                          ...prev,
-                                          [attrKey]: initialEditValue,
-                                        }));
-                                      }}
-                                    >
-                                      🖊️
-                                    </button>
-                                  )}
+                                                : ""
+                                              : editingAttrs[attrKey]
+                                          }
+                                          onChange={(e) => {
+                                            setEditingAttrs((prev) => ({
+                                              ...prev,
+                                              [attrKey]: e.target.value,
+                                            }));
+                                            setPendingAttrChanges((prev) => {
+                                              const updated = {
+                                                ...attr,
+                                                valueBoolean:
+                                                  e.target.value === "true",
+                                              };
+                                              return {
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.attr.key !==
+                                                        attr.key ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    attr: updated,
+                                                  },
+                                                ],
+                                              };
+                                            });
+                                          }}
+                                        >
+                                          <option value="">Select...</option>
+                                          <option value="true">true</option>
+                                          <option value="false">false</option>
+                                        </select>
+                                      )}
 
-                                  {/* Delete Button */}
-                                  {isDeleting ? (
-                                    <button
-                                      className={styles.tableDelete}
-                                      onClick={() => {
-                                        setPendingAttrChanges((prev) => ({
-                                          ...prev,
-                                          deleted: prev.deleted.filter(
-                                            (item) =>
-                                              !(
-                                                item.attr.key === attr.key &&
-                                                item.userId === member._id
-                                              )
-                                          ),
-                                        }));
-                                      }}
-                                    >
-                                      ❌
-                                    </button>
+                                      {/* Date input */}
+                                      {attr.type === "date" && (
+                                        <input
+                                          type="date"
+                                          value={editingAttrs[attrKey] ?? ""}
+                                          onChange={(e) => {
+                                            setEditingAttrs((prev) => ({
+                                              ...prev,
+                                              [attrKey]: e.target.value,
+                                            }));
+                                            setPendingAttrChanges((prev) => {
+                                              const updated = {
+                                                ...attr,
+                                                valueDate: e.target.value,
+                                              };
+                                              return {
+                                                ...prev,
+                                                edited: [
+                                                  ...prev.edited.filter(
+                                                    (item) =>
+                                                      item.attr.key !==
+                                                        attr.key ||
+                                                      item.userId !== member._id
+                                                  ),
+                                                  {
+                                                    userId: member._id,
+                                                    attr: updated,
+                                                  },
+                                                ],
+                                              };
+                                            });
+                                          }}
+                                        />
+                                      )}
+
+                                      {/* Duration (minutes) */}
+                                      {attr.type === "duration" && (
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            value={
+                                              editingAttrs[attrKey]?.replace?.(
+                                                /\D/g,
+                                                ""
+                                              ) ?? ""
+                                            }
+                                            onChange={(e) => {
+                                              const val =
+                                                e.target.value.replace(
+                                                  /\D/g,
+                                                  ""
+                                                );
+                                              setEditingAttrs((prev) => ({
+                                                ...prev,
+                                                [attrKey]: val,
+                                              }));
+                                              setPendingAttrChanges((prev) => {
+                                                const updated = {
+                                                  ...attr,
+                                                  valueDurationMinutes:
+                                                    Number(val),
+                                                };
+                                                return {
+                                                  ...prev,
+                                                  edited: [
+                                                    ...prev.edited.filter(
+                                                      (item) =>
+                                                        item.attr.key !==
+                                                          attr.key ||
+                                                        item.userId !==
+                                                          member._id
+                                                    ),
+                                                    {
+                                                      userId: member._id,
+                                                      attr: updated,
+                                                    },
+                                                  ],
+                                                };
+                                              });
+                                            }}
+                                            style={{ width: "60px" }}
+                                          />
+                                          <span
+                                            style={{ marginLeft: "0.25em" }}
+                                          >
+                                            min
+                                          </span>
+                                        </div>
+                                      )}
+                                    </>
                                   ) : (
-                                    <button
-                                      className={styles.tableDelete}
-                                      disabled={isEditing}
-                                      onClick={() => {
-                                        setPendingAttrChanges((prev) => ({
-                                          ...prev,
-                                          deleted: [
-                                            ...prev.deleted,
-                                            { userId: member._id, attr },
-                                          ],
-                                        }));
-                                      }}
-                                    >
-                                      🗑️
-                                    </button>
+                                    value
                                   )}
-                                </div>
-                              </td>
-                            )}
-                          </tr>
-                        );
-                      });
-                  })}
-              </tbody>
-            </table>
+                                </td>
+                                {isAdmin && (
+                                  <td>
+                                    <div className={styles.tableButtonsDiv}>
+                                      {/* Edit Button */}
+                                      {isEditing ? (
+                                        <button
+                                          className={styles.tableEdit}
+                                          onClick={() => {
+                                            setEditingAttrs((prev) => {
+                                              const updated = { ...prev };
+                                              delete updated[attrKey];
+                                              return updated;
+                                            });
+                                            setPendingAttrChanges((prev) => ({
+                                              ...prev,
+                                              edited: prev.edited.filter(
+                                                (item) =>
+                                                  item.attr.key !== attr.key ||
+                                                  item.userId !== member._id
+                                              ),
+                                            }));
+                                          }}
+                                        >
+                                          ❌
+                                        </button>
+                                      ) : (
+                                        <button
+                                          className={styles.tableEdit}
+                                          disabled={isDeleting}
+                                          onClick={() => {
+                                            // Initial edit value per type
+                                            let initialEditValue = "";
+                                            switch (attr.type) {
+                                              case "string":
+                                                initialEditValue =
+                                                  attr.valueString ?? "";
+                                                break;
+                                              case "number":
+                                                initialEditValue =
+                                                  attr.valueNumber?.toString() ??
+                                                  "";
+                                                break;
+                                              case "boolean":
+                                                initialEditValue =
+                                                  attr.valueBoolean === true
+                                                    ? "true"
+                                                    : attr.valueBoolean ===
+                                                      false
+                                                    ? "false"
+                                                    : "";
+                                                break;
+                                              case "date":
+                                                initialEditValue =
+                                                  attr.valueDate
+                                                    ? new Date(attr.valueDate)
+                                                        .toISOString()
+                                                        .slice(0, 10)
+                                                    : "";
+                                                break;
+                                              case "duration":
+                                                initialEditValue =
+                                                  attr.valueDurationMinutes !=
+                                                  null
+                                                    ? attr.valueDurationMinutes.toString()
+                                                    : "";
+                                                break;
+                                            }
+                                            setEditingAttrs((prev) => ({
+                                              ...prev,
+                                              [attrKey]: initialEditValue,
+                                            }));
+                                          }}
+                                        >
+                                          🖊️
+                                        </button>
+                                      )}
+
+                                      {/* Delete Button */}
+                                      {isDeleting ? (
+                                        <button
+                                          className={styles.tableDelete}
+                                          onClick={() => {
+                                            setPendingAttrChanges((prev) => ({
+                                              ...prev,
+                                              deleted: prev.deleted.filter(
+                                                (item) =>
+                                                  !(
+                                                    item.attr.key ===
+                                                      attr.key &&
+                                                    item.userId === member._id
+                                                  )
+                                              ),
+                                            }));
+                                          }}
+                                        >
+                                          ❌
+                                        </button>
+                                      ) : (
+                                        <button
+                                          className={styles.tableDelete}
+                                          disabled={isEditing}
+                                          onClick={() => {
+                                            setPendingAttrChanges((prev) => ({
+                                              ...prev,
+                                              deleted: [
+                                                ...prev.deleted,
+                                                { userId: member._id, attr },
+                                              ],
+                                            }));
+                                          }}
+                                        >
+                                          🗑️
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          });
+                      })}
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
         </div>
       </>

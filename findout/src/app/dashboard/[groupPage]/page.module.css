@@ -4,15 +4,15 @@
   font-weight: bold;
   text-align: left;
   padding: 0px;
-  background: linear-gradient(to right, black 0%, #181c25 50%, black 100%);
-  color: #f5d389;
+  background: black;
+  color: white;
   padding: 0.5rem 1rem;
   display: inline-block;
-  border-bottom: #f5d389 1px solid;
+  border-bottom: #1d7e75 1px solid;
 }
 
 .mainTitle:hover {
-  color: white;
+  color: #a3d65c;
   cursor: pointer;
 }
 
@@ -33,7 +33,7 @@
 .submitButton,
 .cancelButton,
 .profileButton {
-  background-color: #f5d389;
+  background-color: #a3d65c;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
@@ -41,22 +41,25 @@
 }
 
 .profileButton:hover {
-  background-color: white;
+  border: 1px solid black;
   cursor: pointer;
 }
 
 .createMember:hover {
   background-color: white;
+  border: 1px solid black;
   cursor: pointer;
 }
 
 .sendInvite:hover {
   background-color: white;
+  border: 1px solid black;
   cursor: pointer;
 }
 
 .deleteGroup:hover {
   background-color: white;
+  border: 1px solid black;
   cursor: pointer;
 }
 
@@ -73,18 +76,21 @@
 
 .addToListButton:hover {
   background-color: white;
+  border: 1px solid #1d7e75;
   color: black;
   cursor: pointer;
 }
 
 .submitButton:hover {
   background-color: white;
+  border: 1px solid #1d7e75;
   color: black;
   cursor: pointer;
 }
 
 .cancelButton:hover {
   background-color: white;
+  border: 1px solid #1d7e75;
   color: black;
   cursor: pointer;
 }
@@ -101,6 +107,7 @@
 
 .removeEmailButton:hover {
   background-color: red;
+  border: 1px solid #1d7e75;
   color: black;
   cursor: pointer;
 }
@@ -121,7 +128,8 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 20px;
-  background-color: #f5d389;
+  background-color: white;
+  border: 3px solid #1d7e75;
   color: black;
   border-radius: 8px;
   width: 100%;
@@ -134,9 +142,8 @@
 
 .input {
   padding: 10px;
-  background-color: rgb(255, 255, 255);
-  border: none;
-  outline: none;
+  background-color: white;
+  border: 2px solid #1d7e75;
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -152,8 +159,8 @@
 
 .inputEmails {
   padding: 10px;
-  background-color: rgb(255, 255, 255);
-  border: none;
+  background-color: white;
+  border: 2px solid #1d7e75;
   outline: none;
   font-weight: bold;
   width: 100%;
@@ -168,8 +175,7 @@
 .inputTaskDescription {
   padding: 10px;
   background-color: rgb(255, 255, 255);
-  border: none;
-  outline: none;
+  border: 2px solid #1d7e75;
   margin-bottom: 10px;
   font-weight: bold;
   width: 100%;
@@ -182,24 +188,25 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background-color: #181c25;
+  background-color: white;
 }
 
 .memberTable th,
 .memberTable td {
-  border: 1px solid #f5d389;
+  border: 1px solid #1d7e75;
   padding: 10px;
   text-align: left;
 }
 
 .memberTable th {
-  background-color: #f5d389;
+  background-color: #a3d65c;
   color: black;
   font-weight: bold;
 }
 
 .memberDetails {
-  background-color: #181c25;
+  background-color: white;
+  color: black;
   width: 90vw;
   min-height: 80vh;
   margin-bottom: 20px;
@@ -208,7 +215,6 @@
   flex-direction: column;
   justify-content: top;
   align-items: center;
-  overflow-x: auto;
 }
 
 .filtersDiv {
@@ -222,9 +228,9 @@
 }
 
 .memberPageLinkCell {
-  background-color: #181c25;
+  background-color: white;
   color: black;
-  border-color: white;
+  border-color: #1d7e75;
 }
 
 .fullCellLink {
@@ -234,13 +240,14 @@
   padding: 8px 12px;
   text-decoration: none;
   color: inherit;
-  background-color: #f5d389;
-  border: 2px solid white;
+  background-color: #a3d65c;
+  border: 2px solid #1d7e75;
   box-sizing: border-box;
 }
 
 .fullCellLink:hover {
   background-color: white;
+  border: 2px solid #1d7e75;
 }
 
 /* table edit and delete button */
@@ -254,12 +261,12 @@
 
 .tableEdit,
 .tableDelete {
-  background-color: white;
+  background-color: #a3d65c;
 }
 
 .tableEdit:hover {
   cursor: pointer;
-  background-color: #f5d389;
+  background-color: white;
 }
 
 .tableDelete:hover {
@@ -271,9 +278,9 @@
 .cancelChangesButton,
 .editButton,
 .deleteButton {
-  background-color: #f5d389;
+  background-color: #a3d65c;
   padding: 5px;
-  border: white 1px solid;
+  border: 1px solid #1d7e75;
 }
 
 .editButton:hover {
@@ -297,11 +304,11 @@
 }
 
 .announcementBlock {
-  background: #181c25;
-  border-bottom: white 1px solid;
-  border-top: white 1px solid;
-  border-left: black 2px solid;
-  border-right: black 2px solid;
+  background: black;
+  border-bottom: #a3d65c 2px solid;
+  border-top: #a3d65c 2px solid;
+  border-left: #a3d65c 3px solid;
+  border-right: #a3d65c 3px solid;
   padding: 1rem;
   margin: 1.5rem 0;
   /* box-shadow: 8px 8px black; */
@@ -316,9 +323,167 @@
 
 .announcementHeader {
   font-family: "Montserrat", sans-serif;
-  color: #f5d389;
+  color: #1d7e75;
   font-weight: bold;
   font-size: 24;
+}
+
+.dateRangeFilter {
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.dateRangeLabel {
+  font-weight: bold;
+  color: black;
+  margin-bottom: 3px;
+}
+
+.dateInputs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.dateInput {
+  border: 2px solid #1d7e75;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 1rem;
+}
+
+.toText {
+  margin: 0 2px;
+  color: black;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* group page sections cards' styles */
+.featureList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem 1.1rem;
+  margin: 0.5rem 0 0.8rem 0;
+  padding-left: 0;
+  list-style: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.featureList li {
+  background: white;
+  color: #222;
+  max-width: 250px;
+  min-width: 150px;
+  width: 28%;
+  height: 15vh;
+  border: 2px solid #1d7e75;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 2px 10px rgba(24, 28, 37, 0.13);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  transition: box-shadow 0.2s, transform 0.18s, background 0.17s, border 0.17s;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+}
+
+.featureList li:hover,
+.featureList li:focus {
+  box-shadow: 0 6px 24px rgba(24, 28, 37, 0.18);
+  transform: scale(1.07);
+}
+
+.featureIcon {
+  height: 48%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 12px;
+  margin-bottom: auto;
+}
+
+.featureText {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 54%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  background: rgba(24, 28, 37, 0.06);
+  color: #1d7e75;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.19s, color 0.19s;
+  z-index: 2;
+}
+
+.featureList li:hover .featureText,
+.featureList li:focus .featureText {
+  background: rgba(24, 28, 37, 0.88);
+  color: #fff8ec;
+}
+
+/* ACTIVE (selected) look for dashboard cards */
+.cardActive,
+.featureList li.cardActive {
+  box-shadow: 0 6px 24px rgba(24, 28, 37, 0.18);
+  transform: scale(1.07);
+  border: 2.5px solid #1d7e75;
+  background: #1d7e75;
+}
+.cardActive .featureText,
+.featureList li.cardActive .featureText {
+  background: rgba(24, 28, 37, 0.88) !important;
+  color: #fff8ec !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 700px) {
+  .featureList {
+    gap: 0.6rem 0.6rem;
+  }
+  .featureList li {
+    min-width: 100px;
+    width: 40vw;
+    height: 100px;
+    font-size: 12;
+  }
+  .featureIcon {
+    height: 30%;
+    margin-top: 0px;
+  }
+  .featureText {
+    font-size: 12;
+    padding: 2px;
+    height: 40%;
+  }
+  .announcementText {
+    font-size: 13;
+  }
+  .announcementHeader {
+    font-size: 16;
+  }
+  .saveChangesButton,
+  .cancelChangesButton,
+  .editButton,
+  .deleteButton {
+    font-size: 10;
+  }
 }
 
 @media (max-width: 500px) {
@@ -381,5 +546,15 @@
 
   .mainTitle {
     font-size: 20;
+  }
+
+  .dateInputs {
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+  }
+  .dateInput {
+    width: 100%;
+    max-width: 220px;
   }
 }
