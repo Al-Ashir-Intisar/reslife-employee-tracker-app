@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  border-bottom: 1px solid #f5d389; /* <-- Only bottom border */
+  border-bottom: 1px solid #1d7e75; /* <-- Only bottom border */
   border-radius: 2%;
   gap: 10px;
 }
@@ -35,7 +35,7 @@
 }
 
 .links {
-  color: #f5d389;
+  color: #a3d65c;
   font-size: 20;
   display: flex;
   flex-direction: row;
@@ -46,7 +46,7 @@
 }
 
 .link {
-  color: #f5d389;
+  color: #a3d65c;
   font-size: 28;
   font-weight: bold;
 }
