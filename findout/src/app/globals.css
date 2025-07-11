@@ -28,6 +28,7 @@ a {
 
 .pageContent {
   background-color: white;
+  color: black;
   width: 95vw;
   min-height: 80vh;
   margin: 0 auto;

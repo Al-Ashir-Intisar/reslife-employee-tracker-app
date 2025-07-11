@@ -36,14 +36,20 @@ const Navbar = () => {
             className={styles.logo}
           />
         </div> */}
-        <div className={styles.logoWrapper}>
+        <a
+          href="https://wp.stolaf.edu/residencelife/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.logoWrapper}
+        >
           <Image
             src="/reslifeLogoBlack.png"
             alt="ResLife Logo"
             fill
             className={styles.logo}
+            // (remove 'link' prop, not needed)
           />
-        </div>
+        </a>
       </div>
 
       <div className={styles.links}>
