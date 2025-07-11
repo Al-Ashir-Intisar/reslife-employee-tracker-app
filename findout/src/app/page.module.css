@@ -302,6 +302,28 @@ a.secondary {
   color: #fff8ec;
 }
 
+/* Mobile responsiveness */
+@media (max-width: 700px) {
+  .featureList {
+    gap: 0.6rem 0.6rem;
+  }
+  .featureList li {
+    min-width: 100px;
+    width: 40vw;
+    height: 100px;
+    font-size: 12;
+  }
+  .featureIcon {
+    height: 30%;
+    margin-top: 0px;
+  }
+  .featureText {
+    font-size: 12;
+    padding: 2px;
+    height: 40%;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
