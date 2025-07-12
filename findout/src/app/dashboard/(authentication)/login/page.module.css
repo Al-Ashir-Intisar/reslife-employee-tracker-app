@@ -1,8 +1,9 @@
 .login {
+  font-size: 16;
   padding: 5px;
   min-width: 70px;
   border: none;
-  background-color: #f5d389;
+  background-color: #a3d65c;
   cursor: pointer;
   border-radius: 3px;
 }
@@ -12,7 +13,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: orange;
+  background-color: white;
+  color: black;
   padding: 10px;
 }
 
@@ -36,10 +38,11 @@
 .login:hover {
   color: black;
   background-color: white;
+  border: 1px solid #1d7e75
 }
 
 .link:hover {
-  color: rgb(21, 253, 176);
+  color: #a3d65c;
   cursor: pointer;
 }
 
