@@ -875,9 +875,9 @@ const member = () => {
                       setCustomAttributes(updated);
                     }}
                   >
-                    <option value="string">String</option>
+                    <option value="string">Text</option>
                     <option value="number">Number</option>
-                    <option value="boolean">Boolean</option>
+                    <option value="boolean">Trure/False</option>
                     <option value="date">Date</option>
                     <option value="duration">Duration</option>
                   </select>
