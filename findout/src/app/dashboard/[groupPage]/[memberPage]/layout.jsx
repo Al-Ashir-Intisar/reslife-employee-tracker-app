@@ -68,8 +68,7 @@ const memberLayout = ({ children }) => {
     return (
       <div className="layoutContainer">
         <span className={styles.mainTitle} onClick={handleRefresh}>
-          Member: {selectedMember?.name}{" "}
-          <span style={{ marginLeft: "0.5rem" }}>🔄</span>
+          Member: {selectedMember?.name}
         </span>
         {children}
       </div>

@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import MapModal from "@/components/mapmodal/MapModal"; // use the correct path
 import Select from "react-select"; // use the correct path
+import Image from "next/image";
 
 // import { set } from "mongoose";
 // import { Salsa } from "next/font/google";
@@ -33,13 +34,13 @@ const customStyles = {
   control: (base) => ({
     ...base,
     backgroundColor: "#fff",
-    borderColor: "#ffa500",
+    borderColor: "#1d7e75",
     color: "#000",
-    maxWidth: "95vw", 
+    maxWidth: "95vw",
   }),
   multiValue: (base) => ({
     ...base,
-    backgroundColor: "#F5D389",
+    backgroundColor: "#a3d65c",
     color: "#000",
   }),
   menu: (base) => ({
@@ -48,7 +49,7 @@ const customStyles = {
   }),
   option: (base, state) => ({
     ...base,
-    backgroundColor: state.isFocused ? "#ffe0b3" : "#fff",
+    backgroundColor: state.isFocused ? "#a3d65c" : "#fff",
     color: "#000",
   }),
 };
@@ -103,6 +104,18 @@ const member = () => {
   const [editedAttrs, setEditedAttrs] = useState([]);
   const [removedCertIds, setRemovedCertIds] = useState([]);
   const [removedAttrIds, setRemovedAttrIds] = useState([]);
+
+  // state for showing the form to edit member details
+  const [openForm, setOpenForm] = useState(null);
+  // openForm can be 'details', 'task', or null
+
+  // state for showing/hiding data tables
+  const [showCard, setShowCard] = useState({
+    tasks: false,
+    shifts: false,
+    certs: false,
+    attrs: false,
+  });
 
   // Handler update member role
   const updateMemberField = async (payload) => {
@@ -734,7 +747,7 @@ const member = () => {
           <button
             className={styles.editMember}
             disabled={!isAdmin}
-            onClick={toggleEditDetailsForm}
+            onClick={() => setOpenForm("details")}
           >
             Add Member Details
           </button>
@@ -751,7 +764,7 @@ const member = () => {
           <button
             className={styles.editMember}
             disabled={!isAdmin}
-            onClick={() => setShowTaskForm(true)}
+            onClick={() => setOpenForm("task")}
           >
             Assign Task
           </button>
@@ -759,13 +772,16 @@ const member = () => {
 
         {/* Add member details form */}
         <div className={styles.formDiv}>
-          {showEditDetailsForm && (
+          {openForm === "details" && (
             <form className={styles.editDetailsForm} onSubmit={handleSubmit}>
               <div className={styles.cancelButtonDiv}>
                 <button
                   type="button"
                   className={styles.cancelButton}
-                  onClick={cancelEditting}
+                  onClick={() => {
+                    setOpenForm(null);
+                    cancelEditting();
+                  }}
                 >
                   Cancel
                 </button>
@@ -908,8 +924,9 @@ const member = () => {
               </button>
             </form>
           )}
+
           {/* Assign Task Modal */}
-          {showTaskForm && isAdmin && (
+          {openForm === "task" && isAdmin && (
             <div className={styles.formDiv}>
               <form
                 className={styles.editDetailsForm}
@@ -951,6 +968,7 @@ const member = () => {
                       setShowTaskForm(false);
                       setTaskDescription("");
                       setTaskDeadline("");
+                      setOpenForm(null);
                     }}
                   >
                     Cancel
@@ -1012,7 +1030,7 @@ const member = () => {
                   <tr>
                     <th>ID</th>
                     <td>{selectedMember._id}</td>
-                    <th>Team Role</th>
+                    <th>Position</th>
                     <td>
                       {editRoleMode ? (
                         <>
@@ -1061,722 +1079,887 @@ const member = () => {
                 </tbody>
               </table>
 
+              {/* cards for displayimg different sections of the page */}
+              <ul className={styles.featureList} style={{ margin: "2.3rem 0" }}>
+                {/* Tasks Card */}
+                <li
+                  tabIndex={0}
+                  className={showCard.tasks ? styles.cardActive : ""}
+                  onClick={() =>
+                    setShowCard((prev) => ({ ...prev, tasks: !prev.tasks }))
+                  }
+                  role="button"
+                  aria-label="Toggle Tasks"
+                >
+                  <span className={styles.featureIcon}>
+                    <Image
+                      src="/taskAssignments.png"
+                      alt="Tasks"
+                      width={56}
+                      height={56}
+                    />
+                  </span>
+                  <span className={styles.featureText}>Tasks</span>
+                </li>
+                {/* Shifts Card */}
+                <li
+                  tabIndex={0}
+                  className={showCard.shifts ? styles.cardActive : ""}
+                  onClick={() =>
+                    setShowCard((prev) => ({ ...prev, shifts: !prev.shifts }))
+                  }
+                  role="button"
+                  aria-label="Toggle Shifts"
+                >
+                  <span className={styles.featureIcon}>
+                    <Image
+                      src="/timeKeeping.png"
+                      alt="Shifts"
+                      width={56}
+                      height={56}
+                    />
+                  </span>
+                  <span className={styles.featureText}>Shifts</span>
+                </li>
+                {/* Certifications Card */}
+                <li
+                  tabIndex={0}
+                  className={showCard.certs ? styles.cardActive : ""}
+                  onClick={() =>
+                    setShowCard((prev) => ({ ...prev, certs: !prev.certs }))
+                  }
+                  role="button"
+                  aria-label="Toggle Certifications"
+                >
+                  <span className={styles.featureIcon}>
+                    <Image
+                      src="/certifications.png"
+                      alt="Certifications"
+                      width={56}
+                      height={56}
+                    />
+                  </span>
+                  <span className={styles.featureText}>Certifications</span>
+                </li>
+                {/* Custom Attributes Card */}
+                <li
+                  tabIndex={0}
+                  className={showCard.attrs ? styles.cardActive : ""}
+                  onClick={() =>
+                    setShowCard((prev) => ({ ...prev, attrs: !prev.attrs }))
+                  }
+                  role="button"
+                  aria-label="Toggle Custom Attributes"
+                >
+                  <span className={styles.featureIcon}>
+                    <Image
+                      src="/customMetadata.png"
+                      alt="Custom Attributes"
+                      width={56}
+                      height={56}
+                    />
+                  </span>
+                  <span className={styles.featureText}>Custom Attributes</span>
+                </li>
+              </ul>
+
               {/* table for tasks and shifts with filters */}
               {isAdmin && (
                 <>
-                  {/* Shifts Table & Filter */}
-                  <div className={styles.rowWiseElementDiv}>
-                    <div className={styles.filtersDiv}>
-                      <h2>Shifts:</h2>
-                    </div>
-                    <div className={styles.filtersDiv}>
-                      <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-                        Filter by last{" "}
-                        <select
-                          value={weeksFilter}
-                          onChange={(e) =>
-                            setWeeksFilter(Number(e.target.value))
-                          }
-                          style={{ fontSize: "1rem" }}
-                        >
-                          {WEEK_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
-                        {weeksFilter === 1 ? " week" : " weeks"}
-                      </span>
-                    </div>
-                    <div className={styles.filtersDiv}>
-                      <div>
-                        <label>Filter by Tasks:</label>
-                        <Select
-                          isMulti
-                          options={taskOptions}
-                          value={taskOptions.filter((o) =>
-                            taskFilters.includes(o.value)
-                          )}
-                          onChange={(selected) =>
-                            setTaskFilters(selected.map((s) => s.value))
-                          }
-                          placeholder="Select task descriptions..."
-                          className="react-select-container"
-                          classNamePrefix="react-select"
-                          styles={customStyles}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <table className={styles.memberTable}>
-                    <thead>
-                      <tr>
-                        <th>ClockIn</th>
-                        <th>Location</th>
-                        {/* <th>Estimated End</th> */}
-                        <th>ClockOut</th>
-                        <th>Location</th>
-                        <th>Duration (hr)</th>
-                        {/* <th>Status</th> */}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getRecentShifts().length > 0 ? (
-                        getRecentShifts().map((shift, i) => {
-                          const estEnd = shift.estimatedEndTime
-                            ? new Date(shift.estimatedEndTime)
-                            : null;
-                          const actualEnd = shift.actualEndTime
-                            ? new Date(shift.actualEndTime)
-                            : null;
-                          const start = shift.startTime
-                            ? new Date(shift.startTime)
-                            : null;
-
-                          let status = "Open";
-                          if (shift.endLocation) status = "Closed";
-                          else if (estEnd && new Date() > estEnd)
-                            status = "Timed Out";
-
-                          // Row coloring
-                          let rowColor = "";
-                          if (status === "Open") rowColor = "lightgreen";
-                          else if (status === "Timed Out") rowColor = "orange"; // light orange
-
-                          let duration = "";
-                          if (start && (actualEnd || estEnd)) {
-                            const endTime =
-                              shift.actualEndTime || shift.estimatedEndTime;
-                            duration =
-                              Math.round(
-                                (new Date(endTime) - new Date(start)) / 60000
-                              ) + "";
-                          }
-
-                          return (
-                            <tr
-                              key={i}
-                              style={{
-                                backgroundColor: rowColor,
-                                color: status === "Closed" ? "white" : "black",
-                              }}
-                            >
-                              <td>{start ? start.toLocaleString() : "N/A"}</td>
-                              <td
-                                style={
-                                  shift.startLocation
-                                    ? {
-                                        background: "#e0e0e0",
-                                        color: "black",
-                                        cursor: "pointer",
-                                        fontWeight: "bold",
-                                        border: "2px solid #f5d389",
-                                        padding: "8px",
-                                      }
-                                    : {}
-                                }
-                              >
-                                {shift.startLocation ? (
-                                  <span
-                                    style={{
-                                      color: "black",
-                                      textDecoration: "underline",
-                                      cursor: "pointer",
-                                    }}
-                                    title="Show on Map"
-                                    onClick={() => {
-                                      setModalCoords(shift.startLocation);
-                                      setModalTitle("Shift Start Location");
-                                      setModalOpen(true);
-                                    }}
-                                  >
-                                    {`${shift.startLocation.lat?.toFixed(
-                                      5
-                                    )}, ${shift.startLocation.lng?.toFixed(5)}`}
-                                  </span>
-                                ) : (
-                                  "N/A"
-                                )}
-                              </td>
-                              {/* <td>
-                                {estEnd ? estEnd.toLocaleString() : "N/A"}
-                              </td> */}
-                              <td>
-                                {actualEnd ? actualEnd.toLocaleString() : ""}
-                              </td>
-                              <td
-                                style={
-                                  shift.endLocation
-                                    ? {
-                                        background: "#e0e0e0",
-                                        color: "black",
-                                        cursor: "pointer",
-                                        fontWeight: "bold",
-                                        border: "2px solid #f5d389",
-                                        padding: "8px",
-                                      }
-                                    : {}
-                                }
-                              >
-                                {shift.endLocation ? (
-                                  <span
-                                    style={{
-                                      color: "black",
-                                      textDecoration: "underline",
-                                      cursor: "pointer",
-                                    }}
-                                    title="Show on Map"
-                                    onClick={() => {
-                                      setModalCoords(shift.endLocation);
-                                      setModalTitle("Shift End Location");
-                                      setModalOpen(true);
-                                    }}
-                                  >
-                                    {`${shift.endLocation.lat?.toFixed(
-                                      5
-                                    )}, ${shift.endLocation.lng?.toFixed(5)}`}
-                                  </span>
-                                ) : (
-                                  ""
-                                )}
-                              </td>
-                              <td>{(duration / 60).toFixed(2)}</td>
-
-                              {/* <td>{status}</td> */}
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan="7">No shift records found.</td>
-                        </tr>
-                      )}
-                      {getRecentShifts().length > 0 && (
-                        <tr
-                          style={{
-                            background: "#f5d389",
-                            fontWeight: "bold",
-                            color: "black",
-                          }}
-                        >
-                          <td colSpan={4}>Total</td>
-                          <td>
-                            {(() => {
-                              // Calculate total hours for filtered shifts
-                              const shifts = getRecentShifts();
-                              const totalMinutes = shifts.reduce(
-                                (sum, shift) => {
-                                  const start = shift.startTime
-                                    ? new Date(shift.startTime)
-                                    : null;
-                                  let end = null;
-                                  if (shift.actualEndTime)
-                                    end = new Date(shift.actualEndTime);
-                                  else if (shift.estimatedEndTime)
-                                    end = new Date(shift.estimatedEndTime);
-                                  if (start && end) {
-                                    return (
-                                      sum + Math.round((end - start) / 60000)
-                                    );
-                                  }
-                                  return sum;
-                                },
-                                0
-                              );
-                              return (totalMinutes / 60).toFixed(2);
-                            })()}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                  <MapModal
-                    open={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    coords={modalCoords}
-                    title={modalTitle}
-                  />
-
                   {/* TASKS SECTION */}
-                  <div
-                    className={styles.rowWiseElementDiv}
-                    style={{ marginTop: "2rem" }}
-                  >
-                    <h2>
-                      Tasks{" "}
-                      <span style={{ fontWeight: "normal", fontSize: "1rem" }}>
-                        <select
-                          value={deadlineFilter}
-                          onChange={(e) => setDeadlineFilter(e.target.value)}
-                          style={{ fontSize: "1rem" }}
-                        >
-                          <option value="">All</option>
-                          <option value="today">Due Today</option>
-                          <option value="upcoming">Upcoming</option>
-                          <option value="past">Past Due</option>
-                        </select>
-                      </span>
-                    </h2>
-                  </div>
-                  <table className={styles.memberTable}>
-                    <thead>
-                      <tr>
-                        <th>Description</th>
-                        <th>Deadline</th>
-                        <th>Assigned By</th>
-                        {/* <th>Assigned At</th> */}
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getFilteredTasks().length > 0 ? (
-                        getFilteredTasks().map((task) => (
-                          <tr
-                            key={task._id}
-                            style={{
-                              backgroundColor: task.completed
-                                ? "lightgreen"
-                                : "#181c25",
-                              color: task.completed ? "black" : "white",
-                            }}
+                  {showCard.tasks && (
+                    <>
+                      <div
+                        className={styles.rowWiseElementDiv}
+                        style={{ marginTop: "2rem" }}
+                      >
+                        <h2>
+                          Tasks{" "}
+                          <span
+                            style={{ fontWeight: "normal", fontSize: "1rem" }}
                           >
-                            <td>{task.description}</td>
-                            <td>
-                              {task.deadline
-                                ? new Date(task.deadline).toLocaleString()
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {selectedGroup?.adminIds
-                                ?.map((id) => id.toString())
-                                .includes(task.assignedBy?.toString())
-                                ? "admin"
-                                : "user"}
-                            </td>
-                            {/* <td>
+                            <select
+                              value={deadlineFilter}
+                              onChange={(e) =>
+                                setDeadlineFilter(e.target.value)
+                              }
+                              style={{ fontSize: "1rem" }}
+                            >
+                              <option value="">All</option>
+                              <option value="today">Due Today</option>
+                              <option value="upcoming">Upcoming</option>
+                              <option value="past">Past Due</option>
+                            </select>
+                          </span>
+                        </h2>
+                      </div>
+                      <p>(Gray row = Marked Complete)</p>
+                      <table className={styles.memberTable}>
+                        <thead>
+                          <tr>
+                            <th>Description</th>
+                            <th>Deadline</th>
+                            <th>Assigned By</th>
+                            {/* <th>Assigned At</th> */}
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getFilteredTasks().length > 0 ? (
+                            getFilteredTasks().map((task) => (
+                              <tr
+                                key={task._id}
+                                style={{
+                                  backgroundColor: task.completed
+                                    ? "lightgray"
+                                    : "white",
+                                  color: task.completed ? "black" : "black",
+                                }}
+                              >
+                                <td>{task.description}</td>
+                                <td>
+                                  {task.deadline
+                                    ? new Date(task.deadline).toLocaleString()
+                                    : "N/A"}
+                                </td>
+                                <td>
+                                  {selectedGroup?.adminIds
+                                    ?.map((id) => id.toString())
+                                    .includes(task.assignedBy?.toString())
+                                    ? "admin"
+                                    : "user"}
+                                </td>
+                                {/* <td>
                               {task.assignedAt
                                 ? new Date(task.assignedAt).toLocaleString()
                                 : "N/A"}
                             </td> */}
-                            <td>
-                              {task.completed ? (
-                                <button
-                                  title="Mark as Incomplete"
-                                  className={styles.actionsEdit}
-                                  onClick={async () => {
-                                    if (
-                                      window.confirm("Mark task as incomplete?")
-                                    ) {
-                                      await updateTaskStatus(task._id, false);
-                                    }
-                                  }}
-                                >
-                                  ⏳
-                                </button>
-                              ) : (
-                                <button
-                                  title="Mark as Completed"
-                                  className={styles.actionsEdit}
-                                  onClick={async () => {
-                                    if (
-                                      window.confirm("Mark task as complete?")
-                                    ) {
-                                      await updateTaskStatus(task._id, true);
-                                    }
-                                  }}
-                                >
-                                  ✔️
-                                </button>
+                                <td>
+                                  {task.completed ? (
+                                    <button
+                                      title="Mark as Incomplete"
+                                      className={styles.actionsEdit}
+                                      onClick={async () => {
+                                        if (
+                                          window.confirm(
+                                            "Mark task as incomplete?"
+                                          )
+                                        ) {
+                                          await updateTaskStatus(
+                                            task._id,
+                                            false
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      ⏳
+                                    </button>
+                                  ) : (
+                                    <button
+                                      title="Mark as Completed"
+                                      className={styles.actionsEdit}
+                                      onClick={async () => {
+                                        if (
+                                          window.confirm(
+                                            "Mark task as complete?"
+                                          )
+                                        ) {
+                                          await updateTaskStatus(
+                                            task._id,
+                                            true
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      ✔️
+                                    </button>
+                                  )}
+                                  <button
+                                    title="Remove Task"
+                                    className={styles.deleteButton}
+                                    onClick={async () => {
+                                      if (window.confirm("Remove this task?")) {
+                                        await removeTask(task._id);
+                                      }
+                                    }}
+                                  >
+                                    🗑️
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="5">No tasks found.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </>
+                  )}
+
+                  {/* Shifts Table & Filter */}
+                  {showCard.shifts && (
+                    <>
+                      <div className={styles.rowWiseElementDiv}>
+                        <div className={styles.filtersDiv}>
+                          <h2>Shifts:</h2>
+                        </div>
+                        <div className={styles.filtersDiv}>
+                          <span
+                            style={{ fontWeight: "normal", fontSize: "1rem" }}
+                          >
+                            Filter by last{" "}
+                            <select
+                              value={weeksFilter}
+                              onChange={(e) =>
+                                setWeeksFilter(Number(e.target.value))
+                              }
+                              style={{ fontSize: "1rem" }}
+                            >
+                              {WEEK_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
+                            {weeksFilter === 1 ? " week" : " weeks"}
+                          </span>
+                        </div>
+                        <div className={styles.filtersDiv}>
+                          <div>
+                            <label>Filter by Tasks:</label>
+                            <Select
+                              isMulti
+                              options={taskOptions}
+                              value={taskOptions.filter((o) =>
+                                taskFilters.includes(o.value)
                               )}
-                              <button
-                                title="Remove Task"
-                                className={styles.deleteButton}
-                                onClick={async () => {
-                                  if (window.confirm("Remove this task?")) {
-                                    await removeTask(task._id);
-                                  }
-                                }}
-                              >
-                                🗑️
-                              </button>
-                            </td>
+                              onChange={(selected) =>
+                                setTaskFilters(selected.map((s) => s.value))
+                              }
+                              placeholder="Select task descriptions..."
+                              className="react-select-container"
+                              classNamePrefix="react-select"
+                              styles={customStyles}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <p style={{ textAlign: "center" }}>
+                        (Rows: Black = ClockedIn, White = ClockedIn+ClockedOut,
+                        Gray = Timed Out; Cells: Drak-Gray = Click for Map
+                        Pop-Up)
+                      </p>
+                      <table className={styles.memberTable}>
+                        <thead>
+                          <tr>
+                            <th>ClockIn</th>
+                            <th>Location</th>
+                            {/* <th>Estimated End</th> */}
+                            <th>ClockOut</th>
+                            <th>Location</th>
+                            <th>Tasks Linked</th>
+                            <th>Duration (hr)</th>
+                            {/* <th>Status</th> */}
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5">No tasks found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody>
+                          {getRecentShifts().length > 0 ? (
+                            getRecentShifts().map((shift, i) => {
+                              const estEnd = shift.estimatedEndTime
+                                ? new Date(shift.estimatedEndTime)
+                                : null;
+                              const actualEnd = shift.actualEndTime
+                                ? new Date(shift.actualEndTime)
+                                : null;
+                              const start = shift.startTime
+                                ? new Date(shift.startTime)
+                                : null;
+
+                              let status = "Open";
+                              if (shift.endLocation) status = "Closed";
+                              else if (estEnd && new Date() > estEnd)
+                                status = "Timed Out";
+
+                              // Row coloring
+                              let rowColor = "";
+                              if (status === "Open") rowColor = "black";
+                              else if (status === "Timed Out")
+                                rowColor = "lightgray"; // light orange
+
+                              let duration = "";
+                              if (start && (actualEnd || estEnd)) {
+                                const endTime =
+                                  shift.actualEndTime || shift.estimatedEndTime;
+                                duration =
+                                  Math.round(
+                                    (new Date(endTime) - new Date(start)) /
+                                      60000
+                                  ) + "";
+                              }
+
+                              return (
+                                <tr
+                                  key={i}
+                                  style={{
+                                    backgroundColor: rowColor,
+                                    color:
+                                      rowColor === "black" ? "white" : "black",
+                                  }}
+                                >
+                                  <td>
+                                    {start
+                                      ? start.toLocaleString(undefined, {
+                                          year: "numeric",
+                                          month: "numeric",
+                                          day: "numeric",
+                                          hour: "numeric",
+                                          minute: "2-digit",
+                                          hour12: true, // remove if you prefer 24-hour format
+                                        })
+                                      : "N/A"}
+                                  </td>
+
+                                  <td
+                                    style={
+                                      shift.startLocation
+                                        ? {
+                                            background: "gray",
+                                            color: "black",
+                                            cursor: "pointer",
+                                            fontWeight: "bold",
+                                            border: "2px solid #1d7e75",
+                                            padding: "8px",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {shift.startLocation ? (
+                                      <span
+                                        style={{
+                                          color: "black",
+                                          textDecoration: "underline",
+                                          cursor: "pointer",
+                                        }}
+                                        title="Show on Map"
+                                        onClick={() => {
+                                          setModalCoords(shift.startLocation);
+                                          setModalTitle("Shift Start Location");
+                                          setModalOpen(true);
+                                        }}
+                                      >
+                                        {`${shift.startLocation.lat?.toFixed(
+                                          5
+                                        )}, ${shift.startLocation.lng?.toFixed(
+                                          5
+                                        )}`}
+                                      </span>
+                                    ) : (
+                                      "N/A"
+                                    )}
+                                  </td>
+                                  {/* <td>
+                                {estEnd ? estEnd.toLocaleString() : "N/A"}
+                              </td> */}
+                                  <td>
+                                    {actualEnd
+                                      ? actualEnd.toLocaleString(undefined, {
+                                          year: "numeric",
+                                          month: "numeric",
+                                          day: "numeric",
+                                          hour: "numeric",
+                                          minute: "2-digit",
+                                          hour12: true, // optional: remove for 24-hour
+                                        })
+                                      : ""}
+                                  </td>
+
+                                  <td
+                                    style={
+                                      shift.endLocation
+                                        ? {
+                                            background: "gray",
+                                            color: "black",
+                                            cursor: "pointer",
+                                            fontWeight: "bold",
+                                            border: "2px solid #1d7e75",
+                                            padding: "8px",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {shift.endLocation ? (
+                                      <span
+                                        style={{
+                                          color: "black",
+                                          textDecoration: "underline",
+                                          cursor: "pointer",
+                                        }}
+                                        title="Show on Map"
+                                        onClick={() => {
+                                          setModalCoords(shift.endLocation);
+                                          setModalTitle("Shift End Location");
+                                          setModalOpen(true);
+                                        }}
+                                      >
+                                        {`${shift.endLocation.lat?.toFixed(
+                                          5
+                                        )}, ${shift.endLocation.lng?.toFixed(
+                                          5
+                                        )}`}
+                                      </span>
+                                    ) : (
+                                      ""
+                                    )}
+                                  </td>
+                                  <td>{shift.taskIds.length}</td>
+                                  <td>{(duration / 60).toFixed(2)}</td>
+
+                                  {/* <td>{status}</td> */}
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan="7">No shift records found.</td>
+                            </tr>
+                          )}
+                          {getRecentShifts().length > 0 && (
+                            <tr
+                              style={{
+                                background: "#a3d65c",
+                                fontWeight: "bold",
+                                color: "black",
+                              }}
+                            >
+                              <td colSpan={5}>Total</td>
+                              <td>
+                                {(() => {
+                                  // Calculate total hours for filtered shifts
+                                  const shifts = getRecentShifts();
+                                  const totalMinutes = shifts.reduce(
+                                    (sum, shift) => {
+                                      const start = shift.startTime
+                                        ? new Date(shift.startTime)
+                                        : null;
+                                      let end = null;
+                                      if (shift.actualEndTime)
+                                        end = new Date(shift.actualEndTime);
+                                      else if (shift.estimatedEndTime)
+                                        end = new Date(shift.estimatedEndTime);
+                                      if (start && end) {
+                                        return (
+                                          sum +
+                                          Math.round((end - start) / 60000)
+                                        );
+                                      }
+                                      return sum;
+                                    },
+                                    0
+                                  );
+                                  return (totalMinutes / 60).toFixed(2);
+                                })()}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                      <MapModal
+                        open={modalOpen}
+                        onClose={() => setModalOpen(false)}
+                        coords={modalCoords}
+                        title={modalTitle}
+                      />
+                    </>
+                  )}
                 </>
               )}
 
-              <div className={styles.rowWiseElementDiv}>
-                <h2>Certifications</h2>
-                {isAdmin && !editCertsMode && (
-                  <button
-                    type="button"
-                    className={styles.editButton}
-                    onClick={() => {
-                      const found = selectedMember.groupMemberships.find(
-                        (m) =>
-                          m.groupId === groupId || m.groupId?._id === groupId
-                      );
-                      setEditedCerts(
-                        (found?.certifications || []).map((c) => ({
-                          _id: c._id,
-                          name: c.name,
-                          expiresAt: c.expiresAt,
-                        }))
-                      );
-
-                      setEditCertsMode(true);
-                    }}
-                  >
-                    🖊️ Edit Table
-                  </button>
-                )}
-              </div>
-
-              {/* custom certifications  */}
-              {editCertsMode ? (
+              {/* Certifications Table */}
+              {showCard.certs && (
                 <>
-                  {editedCerts.map((cert, i) => (
-                    <div key={i} className={styles.editRow}>
-                      <input
-                        className={styles.input}
-                        value={cert.name}
-                        onChange={(e) => {
-                          const copy = [...editedCerts];
-                          copy[i].name = e.target.value;
-                          setEditedCerts(copy);
-                        }}
-                      />
-                      <input
-                        type="date"
-                        className={styles.input}
-                        value={cert.expiresAt?.split("T")[0] || ""}
-                        onChange={(e) => {
-                          const copy = [...editedCerts];
-                          copy[i].expiresAt = e.target.value;
-                          setEditedCerts(copy);
-                        }}
-                      />
+                  <div className={styles.rowWiseElementDiv}>
+                    <h2>Certifications</h2>
+                    {isAdmin && !editCertsMode && (
                       <button
                         type="button"
-                        className={styles.removeFieldButton}
+                        className={styles.editButton}
                         onClick={() => {
-                          const toRemove = editedCerts[i]?._id;
-                          // console.log(editedCerts[i]);
-                          if (toRemove) {
-                            setRemovedCertIds((prev) => [...prev, toRemove]);
-                          }
-                          setEditedCerts(
-                            editedCerts.filter((_, idx) => idx !== i)
+                          const found = selectedMember.groupMemberships.find(
+                            (m) =>
+                              m.groupId === groupId ||
+                              m.groupId?._id === groupId
                           );
+                          setEditedCerts(
+                            (found?.certifications || []).map((c) => ({
+                              _id: c._id,
+                              name: c.name,
+                              expiresAt: c.expiresAt,
+                            }))
+                          );
+
+                          setEditCertsMode(true);
                         }}
                       >
-                        Remove
+                        🖊️ Edit Table
                       </button>
-                    </div>
-                  ))}
-                  <div className={styles.rowWiseElementDiv}>
-                    <button
-                      type="button"
-                      className={styles.saveButton}
-                      onClick={async () => {
-                        try {
-                          await removeMarkedCertifications(removedCertIds);
-                          // console.log(removedCertIds);
-                          await updateMemberField({
-                            certifications: editedCerts,
-                          });
-                          setEditCertsMode(false);
-                          setEditedCerts([]);
-                          setRemovedCertIds([]);
-                        } catch (err) {
-                          alert(err.message);
-                        }
-                      }}
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.cancelEditButton}
-                      onClick={() => {
-                        setEditCertsMode(false);
-                        setEditedCerts([]);
-                        setRemovedCertIds([]);
-                      }}
-                    >
-                      Cancel
-                    </button>
+                    )}
                   </div>
-                </>
-              ) : (
-                <>
-                  <table className={styles.memberTable}>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Expires At</th>
-                        <th>Added By</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedMember.groupMemberships
-                        .find(
-                          (m) =>
-                            m.groupId === groupId || m.groupId?._id === groupId
-                        )
-                        ?.certifications?.map((cert, i) => (
-                          <tr key={i}>
-                            <td>{cert.name}</td>
-                            <td>
-                              {cert.expiresAt
-                                ? new Date(cert.expiresAt).toLocaleDateString()
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {selectedGroup?.adminIds
-                                ?.map((id) => id.toString())
-                                .includes(cert.addedBy?.toString())
-                                ? "admin"
-                                : "user"}
-                            </td>
+
+                  {/* custom certifications  */}
+                  {editCertsMode ? (
+                    <>
+                      {editedCerts.map((cert, i) => (
+                        <div key={i} className={styles.editRow}>
+                          <input
+                            className={styles.input}
+                            value={cert.name}
+                            onChange={(e) => {
+                              const copy = [...editedCerts];
+                              copy[i].name = e.target.value;
+                              setEditedCerts(copy);
+                            }}
+                          />
+                          <input
+                            type="date"
+                            className={styles.input}
+                            value={cert.expiresAt?.split("T")[0] || ""}
+                            onChange={(e) => {
+                              const copy = [...editedCerts];
+                              copy[i].expiresAt = e.target.value;
+                              setEditedCerts(copy);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className={styles.removeFieldButton}
+                            onClick={() => {
+                              const toRemove = editedCerts[i]?._id;
+                              // console.log(editedCerts[i]);
+                              if (toRemove) {
+                                setRemovedCertIds((prev) => [
+                                  ...prev,
+                                  toRemove,
+                                ]);
+                              }
+                              setEditedCerts(
+                                editedCerts.filter((_, idx) => idx !== i)
+                              );
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      <div className={styles.rowWiseElementDiv}>
+                        <button
+                          type="button"
+                          className={styles.saveButton}
+                          onClick={async () => {
+                            try {
+                              await removeMarkedCertifications(removedCertIds);
+                              // console.log(removedCertIds);
+                              await updateMemberField({
+                                certifications: editedCerts,
+                              });
+                              setEditCertsMode(false);
+                              setEditedCerts([]);
+                              setRemovedCertIds([]);
+                            } catch (err) {
+                              alert(err.message);
+                            }
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.cancelEditButton}
+                          onClick={() => {
+                            setEditCertsMode(false);
+                            setEditedCerts([]);
+                            setRemovedCertIds([]);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <table className={styles.memberTable}>
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Expires At</th>
+                            <th>Added By</th>
                           </tr>
-                        )) ?? (
-                        <tr>
-                          <td colSpan="3">No certifications found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody>
+                          {selectedMember.groupMemberships
+                            .find(
+                              (m) =>
+                                m.groupId === groupId ||
+                                m.groupId?._id === groupId
+                            )
+                            ?.certifications?.map((cert, i) => (
+                              <tr key={i}>
+                                <td>{cert.name}</td>
+                                <td>
+                                  {cert.expiresAt
+                                    ? new Date(
+                                        cert.expiresAt
+                                      ).toLocaleDateString()
+                                    : "N/A"}
+                                </td>
+                                <td>
+                                  {selectedGroup?.adminIds
+                                    ?.map((id) => id.toString())
+                                    .includes(cert.addedBy?.toString())
+                                    ? "admin"
+                                    : "user"}
+                                </td>
+                              </tr>
+                            )) ?? (
+                            <tr>
+                              <td colSpan="3">No certifications found.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </>
+                  )}
                 </>
               )}
 
               {/* Custom Attributes */}
-              <div className={styles.rowWiseElementDiv}>
-                <h2>Custom Attributes</h2>
-                {isAdmin && !editAttrsMode && (
-                  <button
-                    type="button"
-                    className={styles.editButton}
-                    onClick={() => {
-                      const found = selectedMember.groupMemberships.find(
-                        (m) =>
-                          m.groupId === groupId || m.groupId?._id === groupId
-                      );
-
-                      const formatted =
-                        found?.customAttributes?.map((attr) => {
-                          let value = "";
-                          switch (attr.type) {
-                            case "string":
-                              value = attr.valueString ?? "";
-                              break;
-                            case "number":
-                              value = attr.valueNumber?.toString() ?? "";
-                              break;
-                            case "boolean":
-                              value =
-                                typeof attr.valueBoolean === "boolean"
-                                  ? attr.valueBoolean.toString()
-                                  : "";
-                              break;
-                            case "date":
-                              value = attr.valueDate?.split("T")[0] ?? "";
-                              break;
-                            case "duration":
-                              value =
-                                attr.valueDurationMinutes?.toString() ?? "";
-                              break;
-                            default:
-                              value = "";
-                          }
-
-                          return {
-                            _id: attr._id,
-                            key: attr.key,
-                            type: attr.type,
-                            value,
-                          };
-                        }) || [];
-
-                      setEditedAttrs(formatted);
-                      setEditAttrsMode(true);
-                    }}
-                  >
-                    🖊️ Edit Table
-                  </button>
-                )}
-              </div>
-              {editAttrsMode ? (
+              {showCard.attrs && (
                 <>
-                  {editedAttrs.map((attr, i) => (
-                    <div key={i} className={styles.editRow}>
-                      <input
-                        className={styles.input}
-                        value={attr.key}
-                        onChange={(e) => {
-                          const copy = [...editedAttrs];
-                          copy[i].key = e.target.value;
-                          setEditedAttrs(copy);
-                        }}
-                        placeholder="Key"
-                      />
-                      <select
-                        className={styles.input}
-                        value={attr.type}
-                        onChange={(e) => {
-                          const copy = [...editedAttrs];
-                          copy[i].type = e.target.value;
-                          setEditedAttrs(copy);
-                        }}
-                      >
-                        <option value="string">String</option>
-                        <option value="number">Number</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="date">Date</option>
-                        <option value="duration">Duration</option>
-                      </select>
-                      <input
-                        className={styles.input}
-                        type="text"
-                        value={attr.value || ""}
-                        placeholder="Value"
-                        onChange={(e) => {
-                          const copy = [...editedAttrs];
-                          copy[i].value = e.target.value;
-                          setEditedAttrs(copy);
-                        }}
-                      />
+                  <div className={styles.rowWiseElementDiv}>
+                    <h2>Custom Attributes</h2>
+                    {isAdmin && !editAttrsMode && (
                       <button
                         type="button"
-                        className={styles.removeFieldButton}
+                        className={styles.editButton}
                         onClick={() => {
-                          const toRemoveAttr = editedAttrs[i]?._id;
-                          // console.log(toRemoveAttr);
-                          if (toRemoveAttr) {
-                            setRemovedAttrIds((prev) => [
-                              ...prev,
-                              toRemoveAttr,
-                            ]);
-                          }
-                          setEditedAttrs((prev) =>
-                            prev.filter((_, idx) => idx !== i)
+                          const found = selectedMember.groupMemberships.find(
+                            (m) =>
+                              m.groupId === groupId ||
+                              m.groupId?._id === groupId
                           );
+
+                          const formatted =
+                            found?.customAttributes?.map((attr) => {
+                              let value = "";
+                              switch (attr.type) {
+                                case "string":
+                                  value = attr.valueString ?? "";
+                                  break;
+                                case "number":
+                                  value = attr.valueNumber?.toString() ?? "";
+                                  break;
+                                case "boolean":
+                                  value =
+                                    typeof attr.valueBoolean === "boolean"
+                                      ? attr.valueBoolean.toString()
+                                      : "";
+                                  break;
+                                case "date":
+                                  value = attr.valueDate?.split("T")[0] ?? "";
+                                  break;
+                                case "duration":
+                                  value =
+                                    attr.valueDurationMinutes?.toString() ?? "";
+                                  break;
+                                default:
+                                  value = "";
+                              }
+
+                              return {
+                                _id: attr._id,
+                                key: attr.key,
+                                type: attr.type,
+                                value,
+                              };
+                            }) || [];
+
+                          setEditedAttrs(formatted);
+                          setEditAttrsMode(true);
                         }}
                       >
-                        Remove
+                        🖊️ Edit Table
                       </button>
-                    </div>
-                  ))}
-                  <div className={styles.rowWiseElementDiv}>
-                    <button
-                      type="button"
-                      className={styles.saveButton}
-                      onClick={async () => {
-                        try {
-                          await removeMarkedAttributes(removedAttrIds);
-                          await updateMemberField({
-                            customAttributes: editedAttrs,
-                          }); // update
-                          setEditAttrsMode(false);
-                          setEditedAttrs([]);
-                          setRemovedAttrIds([]);
-                        } catch (err) {
-                          alert(err.message);
-                        }
-                      }}
-                    >
-                      Save
-                    </button>
-
-                    <button
-                      type="button"
-                      className={styles.cancelEditButton}
-                      onClick={() => {
-                        setEditAttrsMode(false);
-                        setEditedAttrs([]);
-                        setRemovedAttrIds([]);
-                      }}
-                    >
-                      Cancel
-                    </button>
+                    )}
                   </div>
-                </>
-              ) : (
-                <>
-                  <table className={styles.memberTable}>
-                    <thead>
-                      <tr>
-                        <th>Key</th>
-                        <th>Type</th>
-                        <th>Value</th>
-                        <th>Added By</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedMember.groupMemberships
-                        .find(
-                          (m) =>
-                            m.groupId === groupId || m.groupId?._id === groupId
-                        )
-                        ?.customAttributes?.map((attr, i) => {
-                          let value;
-                          switch (attr.type) {
-                            case "string":
-                              value = attr.valueString ?? "N/A";
-                              break;
-                            case "number":
-                              value = attr.valueNumber?.toString() ?? "N/A";
-                              break;
-                            case "boolean":
-                              value =
-                                typeof attr.valueBoolean === "boolean"
-                                  ? attr.valueBoolean.toString()
-                                  : "N/A";
-                              break;
-                            case "date":
-                              value = attr.valueDate
-                                ? new Date(attr.valueDate).toLocaleDateString()
-                                : "N/A";
-                              break;
-                            case "duration":
-                              value =
-                                attr.valueDurationMinutes != null
-                                  ? `${attr.valueDurationMinutes} min`
-                                  : "N/A";
-                              break;
-                            default:
-                              value = "N/A";
-                          }
+                  {editAttrsMode ? (
+                    <>
+                      {editedAttrs.map((attr, i) => (
+                        <div key={i} className={styles.editRow}>
+                          <input
+                            className={styles.input}
+                            value={attr.key}
+                            onChange={(e) => {
+                              const copy = [...editedAttrs];
+                              copy[i].key = e.target.value;
+                              setEditedAttrs(copy);
+                            }}
+                            placeholder="Key"
+                          />
+                          <select
+                            className={styles.input}
+                            value={attr.type}
+                            onChange={(e) => {
+                              const copy = [...editedAttrs];
+                              copy[i].type = e.target.value;
+                              setEditedAttrs(copy);
+                            }}
+                          >
+                            <option value="string">String</option>
+                            <option value="number">Number</option>
+                            <option value="boolean">Boolean</option>
+                            <option value="date">Date</option>
+                            <option value="duration">Duration</option>
+                          </select>
+                          <input
+                            className={styles.input}
+                            type="text"
+                            value={attr.value || ""}
+                            placeholder="Value"
+                            onChange={(e) => {
+                              const copy = [...editedAttrs];
+                              copy[i].value = e.target.value;
+                              setEditedAttrs(copy);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className={styles.removeFieldButton}
+                            onClick={() => {
+                              const toRemoveAttr = editedAttrs[i]?._id;
+                              // console.log(toRemoveAttr);
+                              if (toRemoveAttr) {
+                                setRemovedAttrIds((prev) => [
+                                  ...prev,
+                                  toRemoveAttr,
+                                ]);
+                              }
+                              setEditedAttrs((prev) =>
+                                prev.filter((_, idx) => idx !== i)
+                              );
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      <div className={styles.rowWiseElementDiv}>
+                        <button
+                          type="button"
+                          className={styles.saveButton}
+                          onClick={async () => {
+                            try {
+                              await removeMarkedAttributes(removedAttrIds);
+                              await updateMemberField({
+                                customAttributes: editedAttrs,
+                              }); // update
+                              setEditAttrsMode(false);
+                              setEditedAttrs([]);
+                              setRemovedAttrIds([]);
+                            } catch (err) {
+                              alert(err.message);
+                            }
+                          }}
+                        >
+                          Save
+                        </button>
 
-                          return (
-                            <tr key={i}>
-                              <td>{attr.key}</td>
-                              <td>{attr.type}</td>
-                              <td>{value}</td>
-                              <td>
-                                {selectedGroup?.adminIds
-                                  ?.map((id) => id.toString())
-                                  .includes(attr.addedBy?.toString())
-                                  ? "admin"
-                                  : "user"}
-                              </td>
+                        <button
+                          type="button"
+                          className={styles.cancelEditButton}
+                          onClick={() => {
+                            setEditAttrsMode(false);
+                            setEditedAttrs([]);
+                            setRemovedAttrIds([]);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <table className={styles.memberTable}>
+                        <thead>
+                          <tr>
+                            <th>Key</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Added By</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedMember.groupMemberships
+                            .find(
+                              (m) =>
+                                m.groupId === groupId ||
+                                m.groupId?._id === groupId
+                            )
+                            ?.customAttributes?.map((attr, i) => {
+                              let value;
+                              switch (attr.type) {
+                                case "string":
+                                  value = attr.valueString ?? "N/A";
+                                  break;
+                                case "number":
+                                  value = attr.valueNumber?.toString() ?? "N/A";
+                                  break;
+                                case "boolean":
+                                  value =
+                                    typeof attr.valueBoolean === "boolean"
+                                      ? attr.valueBoolean.toString()
+                                      : "N/A";
+                                  break;
+                                case "date":
+                                  value = attr.valueDate
+                                    ? new Date(
+                                        attr.valueDate
+                                      ).toLocaleDateString()
+                                    : "N/A";
+                                  break;
+                                case "duration":
+                                  value =
+                                    attr.valueDurationMinutes != null
+                                      ? `${attr.valueDurationMinutes} min`
+                                      : "N/A";
+                                  break;
+                                default:
+                                  value = "N/A";
+                              }
+
+                              return (
+                                <tr key={i}>
+                                  <td>{attr.key}</td>
+                                  <td>{attr.type}</td>
+                                  <td>{value}</td>
+                                  <td>
+                                    {selectedGroup?.adminIds
+                                      ?.map((id) => id.toString())
+                                      .includes(attr.addedBy?.toString())
+                                      ? "admin"
+                                      : "user"}
+                                  </td>
+                                </tr>
+                              );
+                            }) ?? (
+                            <tr>
+                              <td colSpan="4">No attributes found.</td>
                             </tr>
-                          );
-                        }) ?? (
-                        <tr>
-                          <td colSpan="4">No attributes found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                          )}
+                        </tbody>
+                      </table>
+                    </>
+                  )}
                 </>
               )}
             </>

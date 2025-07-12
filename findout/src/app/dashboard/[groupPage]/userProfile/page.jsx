@@ -1004,7 +1004,7 @@ const sessionUserProfile = () => {
               <td>{sessionUserData?.email || "N/A"}</td>
             </tr>
             <tr>
-              <th>Group Role</th>
+              <th>Access Level</th>
               <td>
                 {group?.ownerId?.toString() === sessionUserData?._id
                   ? "Owner"
